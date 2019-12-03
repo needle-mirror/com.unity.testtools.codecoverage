@@ -4,6 +4,8 @@ With Coverage Recording you can capture coverage data on demand and generate an 
 
 To start recording coverage data, select the **Start Recording** button. While recording, use the editor as usual, for example to enter Play Mode. To stop recording coverage data, select the **Stop Recording** button. If **Auto Generate Report** is checked, then an HTML report is generated and a file viewer window opens. It contains the coverage results and the report. Otherwise, select the **Generate from Last** button to generate the report. The results are based on the assemblies specified in **Included Assemblies**.
 
+You can also control Coverage Recording via the [CodeCoverage ScriptingAPI](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@0.2/api/UnityEditor.TestTools.CodeCoverage.CodeCoverage.html).
+
 ## Steps
 
 1. Make sure Code Coverage is enabled (see [Enable Code Coverage](UsingCodeCoverage.md#enable-code-coverage)).

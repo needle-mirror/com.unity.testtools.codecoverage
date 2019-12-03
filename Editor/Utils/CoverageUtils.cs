@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -145,7 +146,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
                         }
                         catch (Exception)
                         {
-                            Debug.LogWarning("[Code Coverage] Failed to delete file: " + file.FullName);
+                            Debug.LogWarning($"[{CoverageSettings.PackageName}] Failed to delete file: {file.FullName}");
                         }
                     }
                     foreach (DirectoryInfo dir in dirInfo.GetDirectories())
@@ -156,7 +157,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
                         }
                         catch (Exception)
                         {
-                            Debug.LogWarning("[Code Coverage] Failed to delete directory: " + dir.FullName);
+                            Debug.LogWarning($"[{CoverageSettings.PackageName}] Failed to delete directory: {dir.FullName}");
                         }
                     }
                 }
@@ -180,6 +181,49 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
         public static bool IsValidFolder(string folderPath)
         {
             return folderPath != null && !string.IsNullOrEmpty(folderPath) && Directory.Exists(folderPath);
+        }
+
+        private static HashSet<char> regexSpecialChars = new HashSet<char>(new[] { '[', '\\', '^', '$', '.', '|', '?', '*', '+', '(', ')' });
+
+        public static string GlobToRegex(string glob)
+        {
+            var regex = new StringBuilder();
+            var characterClass = false;
+            regex.Append("^");
+            foreach (var c in glob)
+            {
+                if (characterClass)
+                {
+                    if (c == ']')
+                    {
+                        characterClass = false;
+                    }
+                    regex.Append(c);
+                    continue;
+                }
+                switch (c)
+                {
+                    case '*':
+                        regex.Append(".*");
+                        break;
+                    case '?':
+                        regex.Append(".");
+                        break;
+                    case '[':
+                        characterClass = true;
+                        regex.Append(c);
+                        break;
+                    default:
+                        if (regexSpecialChars.Contains(c))
+                        {
+                            regex.Append('\\');
+                        }
+                        regex.Append(c);
+                        break;
+                }
+            }
+            regex.Append("$");
+            return regex.ToString();
         }
     }
 }

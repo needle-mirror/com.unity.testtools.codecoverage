@@ -6,6 +6,7 @@ namespace UnityEditor.TestTools.CodeCoverage
     {
         public const string ReportFolderName = "Report";
         public const string ReportHistoryFolderName = "Report-history";
+        public const string PackageName = "Code Coverage";
 
         public string projectPath = Application.dataPath;
         public string rootFolderPath;

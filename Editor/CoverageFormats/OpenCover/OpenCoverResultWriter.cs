@@ -21,7 +21,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                 serializer.Serialize(writer, CoverageSession);
             }
 
-            Debug.Log("[Code Coverage] Code Coverage Results were saved in " + fileFullPath);
+            Debug.Log($"[{CoverageSettings.PackageName}] Code Coverage Results were saved in {fileFullPath}");
 
             base.WriteCoverageSession();
         }

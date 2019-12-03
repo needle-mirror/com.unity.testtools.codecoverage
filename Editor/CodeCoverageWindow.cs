@@ -23,6 +23,11 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         private CoverageSettings m_CoverageSettings;
 
+        private bool m_DoRepaint;
+        private bool m_IncludeWarnings;
+        private static readonly Vector2 m_WindowMinSizeNormal = new Vector2(430, 210);
+        private static readonly Vector2 m_WindowMinSizeWithWarnings = new Vector2(430, 280);
+
         public string AssembliesToInclude
         {
             set
@@ -37,6 +42,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             static bool s_Initialized;
 
             public static readonly GUIContent OpenPreferencesButton = EditorGUIUtility.TrTextContent("Open Preferences");
+            public static readonly GUIContent SwitchToDebugCodeOptimizationButton = EditorGUIUtility.TrTextContent("Switch to debug mode");
             public static readonly GUIContent CodeCoverageResultsLocationLabel = EditorGUIUtility.TrTextContent("Destination", "Click the Browse button to specify the folder where the coverage results and report will be saved to. The default location is the Project's folder.");
             public static readonly GUIContent CoverageOptionsLabel = EditorGUIUtility.TrTextContent("Settings");
             public static readonly GUIContent CodeCoverageFormat = EditorGUIUtility.TrTextContent("Coverage Format", "The Code Coverage format used when saving the results.");
@@ -57,8 +63,6 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             public static GUIStyle settings;
 
-            public const int ButtonMargin = 5;
-
             public static void Init()
             {
                 if (s_Initialized)
@@ -78,7 +82,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             TestRunnerWindow.ShowPlaymodeTestsRunnerWindowCodeBased();
             CodeCoverageWindow window = GetWindow<CodeCoverageWindow>("Code Coverage", typeof(TestRunnerWindow));
-            window.minSize = new Vector2(430, 210);
+            window.minSize = m_WindowMinSizeNormal;
             window.Show();
         }
 
@@ -100,8 +104,25 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_AutoGenerateReport = EditorPrefs.GetBool("CodeCoverageSettings.AutoGenerateReport." + m_ProjectPathHash, true);
 
             UpdateCoverageSettings();
+            RefreshCodeCoverageWindow();
+        }
 
+        private void RefreshCodeCoverageWindow()
+        {
+            UpdateWindowSize();
             Repaint();
+        }
+
+        private void UpdateWindowSize()
+        {
+            if (m_IncludeWarnings)
+            {
+                minSize = m_WindowMinSizeWithWarnings;
+            }
+            else
+            {
+                minSize = m_WindowMinSizeNormal;
+            }
         }
 
         private void UpdateCoverageSettings()
@@ -126,6 +147,11 @@ namespace UnityEditor.TestTools.CodeCoverage
         private void OnEnable()
         {
             InitCodeCoverageWindow();
+        }
+
+        private void OnFocus()
+        {
+            RefreshCodeCoverageWindow();
         }
 
         public void OnGUI()
@@ -166,7 +192,45 @@ namespace UnityEditor.TestTools.CodeCoverage
                 }
             }
 
+            DrawCodeOptimizationWarning();
+
             GUILayout.EndVertical();
+
+            if (m_DoRepaint)
+            {
+                RefreshCodeCoverageWindow();
+                m_DoRepaint = false;
+            } 
+        }
+
+        void DrawCodeOptimizationWarning()
+        {
+#if UNITY_2020_1_OR_NEWER
+            if (Compilation.CompilationPipeline.codeOptimization == Compilation.CodeOptimization.Release)
+            {
+                GUILayout.Space(5);
+
+                EditorGUILayout.HelpBox("Code Coverage requires Code Optimization to be set to Debug mode.", MessageType.Warning);
+
+                if (!m_IncludeWarnings)
+                {
+                    m_IncludeWarnings = true;
+                    m_DoRepaint = true;
+                }
+
+                if (GUILayout.Button(Styles.SwitchToDebugCodeOptimizationButton))
+                {
+                    Compilation.CompilationPipeline.codeOptimization = Compilation.CodeOptimization.Debug;
+                    EditorPrefs.SetBool("ScriptDebugInfoEnabled", true);
+                    m_IncludeWarnings = false;
+                    m_DoRepaint = true;
+                }
+            }
+            else
+            {
+                m_IncludeWarnings = false;
+            }
+#endif
         }
 
         void DrawCodeCoverageLocation()
@@ -353,6 +417,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         private void ClearResultsRootFolderIfExists()
         {
+            if (!EditorUtility.DisplayDialog(L10n.Tr("Clear Data"), L10n.Tr("Are you sure you would like to clear the Coverage data from previous test runs or from previous Coverage Recording sessions? Note that you cannot undo this action."), L10n.Tr("Clear"), L10n.Tr("Cancel")))
+                return;
+
             if (m_CoverageSettings == null)
                 return;
 
@@ -374,6 +441,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         private void ClearReportHistoryFolderIfExists()
         {
+            if (!EditorUtility.DisplayDialog(L10n.Tr("Clear History"), L10n.Tr("Are you sure you would like to clear the Coverage Report history? Note that you cannot undo this action."), L10n.Tr("Clear"), L10n.Tr("Cancel")))
+                return;
+
             if (m_CoverageSettings == null)
                 return;
 

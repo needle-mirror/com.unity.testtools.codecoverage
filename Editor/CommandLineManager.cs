@@ -1,6 +1,7 @@
 using System;
 using UnityEditor.TestRunner.CommandLineParser;
 using UnityEditor.TestTools.CodeCoverage.Utils;
+using UnityEngine;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -62,6 +63,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public PathFiltering pathFiltering
+        {
+            get;
+            private set;
+        }
+
         public bool runTests
         {
             get;
@@ -72,6 +79,8 @@ namespace UnityEditor.TestTools.CodeCoverage
         private string[] m_CoverageOptions;
         private string m_IncludeAssemblies;
         private string m_ExcludeAssemblies;
+        private string m_IncludePaths;
+        private string m_ExcludePaths;
 
         public CommandLineManagerImplementation(string[] commandLineArgs)
         {
@@ -81,12 +90,15 @@ namespace UnityEditor.TestTools.CodeCoverage
             generateHTMLReport = false;
             generateBadgeReport = false;
             assemblyFiltering = new AssemblyFiltering();
+            pathFiltering = new PathFiltering();
             runTests = false;
 
             m_CoverageOptionsArg = string.Empty;
             m_CoverageOptions = new string[] { };
             m_IncludeAssemblies = string.Empty;
             m_ExcludeAssemblies = string.Empty;
+            m_IncludePaths = string.Empty;
+            m_ExcludePaths = string.Empty;
 
             string codeCoverageLocation = string.Empty;
             CommandLineOptionSet optionSet = new CommandLineOptionSet(
@@ -114,12 +126,20 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             foreach (string optionArgsStr in m_CoverageOptions)
             {
-                string[] optionArgs = optionArgsStr.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (optionArgs.Length == 0)
+                if (optionArgsStr.Length == 0)
                     continue;
 
-                switch (optionArgs[0].ToUpperInvariant())
+                string optionName = optionArgsStr;
+                string optionArgs = string.Empty;
+
+                int indexOfColon = optionArgsStr.IndexOf(':');
+                if (indexOfColon > 0)
+                {
+                    optionName = optionArgsStr.Substring(0, indexOfColon);
+                    optionArgs = optionArgsStr.Substring(indexOfColon+1);
+                }        
+
+                switch (optionName.ToUpperInvariant())
                 {
                     case "ENABLECYCLOMATICCOMPLEXITY":
                         enableCyclomaticComplexity = true;
@@ -134,9 +154,9 @@ namespace UnityEditor.TestTools.CodeCoverage
                         break;
 
                     case "ASSEMBLYFILTERS":
-                        if (optionArgs.Length > 1)
+                        if (optionArgs.Length > 0)
                         {
-                            string[] assemblyFilters = optionArgs[1].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                            string[] assemblyFilters = optionArgs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                             for (int i = 0; i < assemblyFilters.Length; ++i)
                             {
@@ -154,6 +174,39 @@ namespace UnityEditor.TestTools.CodeCoverage
                                         m_ExcludeAssemblies += ",";
                                     m_ExcludeAssemblies += filter.Substring(1);
                                 }
+                                else
+                                {
+                                    Debug.LogWarning($"[Code Coverage] -coverageOptions assemblyFilters argument {filter} would not be applied as it is not prefixed with +/-.");
+                                }
+                            }
+                        }
+                        break;
+
+                    case "PATHFILTERS":
+                        if (optionArgs.Length > 0)
+                        {
+                            string[] pathFilters = optionArgs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                            for (int i = 0; i < pathFilters.Length; ++i)
+                            {
+                                string filter = pathFilters[i];
+
+                                if (filter.StartsWith("+", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (m_IncludePaths.Length > 0)
+                                        m_IncludePaths += ",";
+                                    m_IncludePaths += filter.Substring(1);
+                                }
+                                else if (filter.StartsWith("-", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    if (m_ExcludePaths.Length > 0)
+                                        m_ExcludePaths += ",";
+                                    m_ExcludePaths += filter.Substring(1);
+                                }
+                                else
+                                {
+                                    Debug.LogWarning($"[Code Coverage] -coverageOptions pathFilters argument {filter} would not be applied as it is not prefixed with +/-.");
+                                }
                             }
                         }
                         break;
@@ -169,6 +222,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_ExcludeAssemblies += AssemblyFiltering.kDefaultExcludedAssemblies;
 
             assemblyFiltering.Parse(m_IncludeAssemblies, m_ExcludeAssemblies);
+            pathFiltering.Parse(m_IncludePaths, m_ExcludePaths);
         }
     }
 }

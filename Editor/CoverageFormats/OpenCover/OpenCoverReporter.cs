@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEditor.TestTools.TestRunner.Api;
@@ -93,15 +92,18 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
         public void OutputCoverageReport(ITestResultAdaptor testResults = null, bool clearProgressBar = true)
         {
-            EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressGatheringResults.text, 0.0f);
+            if (!CommandLineManager.instance.runFromCommandLine)
+                EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressWritingFile.text, 0.95f);
 
             CoverageSession coverageSession = GenerateOpenCoverSession();
-            EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressWritingFile.text, 0.95f);
-
             if (coverageSession != null && m_Writer != null)
             {
                 m_Writer.CoverageSession = coverageSession;
                 m_Writer.WriteCoverageSession();
+            }
+            else
+            {
+                Debug.LogWarning("[Code Coverage] No coverage results were saved.");
             }
 
             if (clearProgressBar)
@@ -114,6 +116,16 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                 return CommandLineManager.instance.assemblyFiltering.IsAssemblyIncluded(assemblyName);
 
             return m_AssemblyFiltering.IsAssemblyIncluded(assemblyName);
+        }
+
+        private bool ShouldProcessFile(string filename)
+        {
+            // PathFiltering is implemented only via the command line.
+            // Will assess whether PathFiltering is needed to be set via the UI too (similar to Assembly Filtering).
+            if (CommandLineManager.instance.runFromCommandLine)
+                return CommandLineManager.instance.pathFiltering.IsPathIncluded(filename);
+            else
+                return true;
         }
 
         private bool IsSpecialMethod(MethodBase methodBase)
@@ -504,7 +516,8 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
             foreach (Assembly assembly in assemblies)
             {
-                EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressGatheringResults.text, currentProgress);
+                if (!CommandLineManager.instance.runFromCommandLine)
+                    EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressGatheringResults.text, currentProgress);
                 currentProgress += progressInterval;
 
                 string assemblyName = assembly.GetName().Name.ToLower();
@@ -556,20 +569,21 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                 CoveredSequencePoint[] classMethodSequencePointsArray = Coverage.GetSequencePointsFor(classMethodStats.method);
                                 foreach (CoveredSequencePoint classMethodSequencePoint in classMethodSequencePointsArray)
                                 {
-                                    if (filesNotFound.Contains(classMethodSequencePoint.filename))
+                                    string filename = classMethodSequencePoint.filename;
+                                    if (filesNotFound.Contains(filename) || !ShouldProcessFile(filename))
                                         continue;
 
-                                    if (!fileList.TryGetValue(classMethodSequencePoint.filename, out fileId))
+                                    if (!fileList.TryGetValue(filename, out fileId))
                                     {
-                                        if (!File.Exists(classMethodSequencePoint.filename))
+                                        if (!File.Exists(filename))
                                         {
-                                            filesNotFound.Add(classMethodSequencePoint.filename);
+                                            filesNotFound.Add(filename);
                                             continue;
                                         }
                                         else
                                         {
                                             fileId = ++fileUID;
-                                            fileList.Add(classMethodSequencePoint.filename, fileId);
+                                            fileList.Add(filename, fileId);
                                         }
                                     }
 

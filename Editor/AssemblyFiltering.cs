@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor.Compilation;
+using UnityEditor.TestTools.CodeCoverage.Utils;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -49,6 +50,8 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public bool IsAssemblyIncluded(string name)
         {
+            name = name.ToLowerInvariant();
+
             if (m_ExcludeAssemblies.Any(f => f.IsMatch(name)))
             {
                 return false;
@@ -85,11 +88,8 @@ namespace UnityEditor.TestTools.CodeCoverage
         public static Regex CreateFilterRegex(string filter)
         {
             filter = filter.ToLowerInvariant();
-            filter = filter.Replace("*", "$$$*");
-            filter = Regex.Escape(filter);
-            filter = filter.Replace(@"\$\$\$\*", ".*");
 
-            return new Regex($"^{filter}$", RegexOptions.Compiled);
+            return new Regex(CoverageUtils.GlobToRegex(filter), RegexOptions.Compiled);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (CoverageUtils.GetNumberOfXMLFilesInFolder(rootFolderPath) == 0)
             {
-                Debug.LogError("[Code Coverage] Failed to generate Code Coverage Report. Make sure you have run one or more tests before generating a report.");
+                Debug.LogError($"[{CoverageSettings.PackageName}] Failed to generate Code Coverage Report. Make sure you have run one or more tests before generating a report.");
                 EditorUtility.ClearProgressBar();
                 return;
             }
@@ -79,7 +79,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (assemblyFilters.Length == 0)
             {
-                Debug.LogError("[Code Coverage] Failed to generate Code Coverage Report. Make sure you have inlcuded at least one assembly before generating a report.");
+                Debug.LogError($"[{CoverageSettings.PackageName}] Failed to generate Code Coverage Report. Make sure you have inlcuded at least one assembly before generating a report.");
                 return;
             }
 
@@ -116,13 +116,13 @@ namespace UnityEditor.TestTools.CodeCoverage
                 Generator generator = new Generator();
                 if (generator.GenerateReport(config, new Settings() { DisableRiskHotspots = !includeCoverageOptions }, new RiskHotspotsAnalysisThresholds()))
                 {
-                    Debug.Log("[Code Coverage] Code Coverage Report was generated in " + targetDirectory +"\n" + loggerFactory.Logger.ToString());
+                    Debug.Log($"[{CoverageSettings.PackageName}] Code Coverage Report was generated in {targetDirectory}\n{loggerFactory.Logger.ToString()}");
                     if (!CommandLineManager.instance.runFromCommandLine)
                         EditorUtility.RevealInFinder(targetDirectory);
                 }
                 else
                 {
-                    Debug.LogError("[Code Coverage] Failed to generate Code Coverage Report.\n" + loggerFactory.Logger.ToString());
+                    Debug.LogError($"[{CoverageSettings.PackageName}] Failed to generate Code Coverage Report.\n{loggerFactory.Logger.ToString()}");
                 }
             }
             finally

@@ -15,7 +15,7 @@ If **Auto Generate Report** is checked then an HTML report will be generated and
 ![Select Assemblies](images/using_coverage/select_assemblies.png)
 
 4. Switch to the [Test Runner](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html?subfolder=/manual/workflow-run-test.html) and run your _EditMode_ or _PlayMode_ test(s).<br/><br/>
-![Run Tests in Test Runner](images/coverage_testrunner/run_tests.png)
+![Run Tests in Test Runner](images/coverage_testrunner/test_runner.png)
 
   Example test:
   ```
