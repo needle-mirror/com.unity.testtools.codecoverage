@@ -1,6 +1,6 @@
 # How to interpret the results
 
-This section assumes that you enabled the **Generate HTML Report** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReport` option in `-coverageOptions` on the [command line](UsingCodeCoverage.md#using-code-coverage-in-batchmode). If you're running the tests in the editor, a file viewer window will open up containing the coverage results once the test run has been finished. If you're running the tests from the command line, navigate to the `-coverageResultsPath` location with your file viewer. Open the `Report` folder then open `index.html` in a web browser. This shows a summary of the coverage results from the tests.
+This section assumes that you enabled the **Generate HTML Report** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReport` option in `-coverageOptions` on the [command line](UsingCodeCoverage.md#using-code-coverage-in-batchmode). If you're running the tests in the editor, a file viewer window will open up containing the coverage report once the test run has been finished. If you're running the tests from the command line, navigate to the `-coverageResultsPath` location with your file viewer. Open the `Report` folder then open `index.htm` in a web browser. This shows a summary of the coverage results from the tests.
 
 ## Summary View
 

@@ -4,7 +4,7 @@ With Coverage Recording you can capture coverage data on demand and generate an 
 
 To start recording coverage data, select the **Start Recording** button. While recording, use the editor as usual, for example to enter Play Mode. To stop recording coverage data, select the **Stop Recording** button. If **Auto Generate Report** is checked, then an HTML report is generated and a file viewer window opens. It contains the coverage results and the report. Otherwise, select the **Generate from Last** button to generate the report. The results are based on the assemblies specified in **Included Assemblies**.
 
-You can also control Coverage Recording via the [CodeCoverage ScriptingAPI](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@0.2/api/UnityEditor.TestTools.CodeCoverage.CodeCoverage.html).
+You can also control Coverage Recording via the [CodeCoverage ScriptingAPI](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@latest/index.html?subfolder=/api/UnityEditor.TestTools.CodeCoverage.CodeCoverage.html).
 
 ## Steps
 
@@ -24,10 +24,9 @@ You can also control Coverage Recording via the [CodeCoverage ScriptingAPI](http
 6. When you have finished your testing and have collected enough coverage data, select the **Stop Recording** button.<br/><br/>
 ![Stop Recording](images/coverage_recording/stop_recording.png)
 
-7. A file viewer window will open up containing the coverage results and the report. **Note** that to generate the report automatically after you stop recording you should have **Auto Generate Report** checked in the [Code Coverage window](CodeCoverageWindow.md). Alternatively, you can select the **Generate from Last** button.<br/><br/>
-![Coverage Results File Viewer](images/using_coverage/report_folder.png)
+7. A file viewer window will open up containing the coverage report. **Note** that to generate the report automatically after you stop recording you should have **Auto Generate Report** checked in the [Code Coverage window](CodeCoverageWindow.md). Alternatively, you can select the **Generate from Last** button.<br/>
 
-8. Navigate into the `Report` folder and select `index.htm`.<br/><br/>
+8. Select `index.htm`.<br/><br/>
 ![Report File Viewer](images/using_coverage/index_folder.png)
 
 9. This opens the [HTML coverage report](HowToInterpretResults.md).<br/><br/>

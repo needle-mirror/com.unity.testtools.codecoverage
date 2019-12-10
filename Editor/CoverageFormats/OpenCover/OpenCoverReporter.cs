@@ -497,7 +497,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             m_AssemblyFiltering = new AssemblyFiltering();
 
             string projectPathHash = Application.dataPath.GetHashCode().ToString("X8");
-            string includeAssemblies = EditorPrefs.GetString("CodeCoverageSettings.IncludeAssemblies." + projectPathHash, AssemblyFiltering.GetAllProjectAssembliesString());
+            string includeAssemblies = EditorPrefs.GetString("CodeCoverageSettings.IncludeAssemblies." + projectPathHash, AssemblyFiltering.GetUserOnlyAssembliesString());
 
             m_AssemblyFiltering.Parse(includeAssemblies, AssemblyFiltering.kDefaultExcludedAssemblies);
         }

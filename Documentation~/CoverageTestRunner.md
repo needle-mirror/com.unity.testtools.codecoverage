@@ -33,10 +33,9 @@ If **Auto Generate Report** is checked then an HTML report will be generated and
   }
   ```
 
-5. When the test(s) finish running, a file viewer window will open up containing the coverage results and the report.<br/>**Note:** To generate the report automatically after the Test Runner has finished running the tests you should have **Auto Generate Report** checked in the [Code Coverage window](CodeCoverageWindow.md). Alternatively, you can select the **Generate from Last** button.<br/><br/>
-![Coverage Results File Viewer](images/using_coverage/report_folder.png)
+5. When the test(s) finish running, a file viewer window will open up containing the coverage report.<br/>**Note:** To generate the report automatically after the Test Runner has finished running the tests you should have **Auto Generate Report** checked in the [Code Coverage window](CodeCoverageWindow.md). Alternatively, you can select the **Generate from Last** button.<br/>
 
-6. Navigate into the `Report` folder and select `index.htm`.<br/><br/>
+6. Select `index.htm`.<br/><br/>
 ![Report File Viewer](images/using_coverage/index_folder.png)
 
 7. This opens the [HTML coverage report](HowToInterpretResults.md).<br/><br/>

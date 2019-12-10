@@ -4,6 +4,11 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.2.2-preview] - 2019-12-11
+- The default *Included Assemblies* are now only the assemblies found under the project's *Assets* folder, instead of all project assemblies
+- After the report is generated, the file viewer window highlights the `index.htm` file, if *Generate HTML Report* is selected
+- Fixed unassigned *CodeCoverageWindow.m_IncludeWarnings* warning in 2019.3
+
 ## [0.2.1-preview] - 2019-12-04
 - Added `pathFilters` batchmode *coverageOption*
 - Improved globbing for `pathFilters` and `assemblyFilters`

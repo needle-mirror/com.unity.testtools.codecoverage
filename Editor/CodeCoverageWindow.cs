@@ -97,7 +97,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_CodeCoveragePath = EditorPrefs.GetString("CodeCoverageSettings.Path." + m_ProjectPathHash, string.Empty);
             m_CodeCoverageFormat = (CoverageFormat)EditorPrefs.GetInt("CodeCoverageSettings.Format." + m_ProjectPathHash, 0);
             m_EnableCyclomaticComplexity = EditorPrefs.GetBool("CodeCoverageSettings.EnableCyclomaticComplexity." + m_ProjectPathHash, false);
-            m_AssembliesToInclude = EditorPrefs.GetString("CodeCoverageSettings.IncludeAssemblies." + m_ProjectPathHash, AssemblyFiltering.GetAllProjectAssembliesString());
+            m_AssembliesToInclude = EditorPrefs.GetString("CodeCoverageSettings.IncludeAssemblies." + m_ProjectPathHash, AssemblyFiltering.GetUserOnlyAssembliesString());
             m_ReportGenerator = new CoverageReportGenerator();
             m_GenerateHTMLReport = EditorPrefs.GetBool("CodeCoverageSettings.GenerateHTMLReport." + m_ProjectPathHash, true);
             m_GenerateBadge = EditorPrefs.GetBool("CodeCoverageSettings.GenerateBadge." + m_ProjectPathHash, true);
@@ -105,6 +105,8 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             UpdateCoverageSettings();
             RefreshCodeCoverageWindow();
+
+            m_IncludeWarnings = false;
         }
 
         private void RefreshCodeCoverageWindow()

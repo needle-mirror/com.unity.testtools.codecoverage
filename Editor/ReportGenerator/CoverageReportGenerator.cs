@@ -67,7 +67,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string includeAssemblies = CommandLineManager.instance.runFromCommandLine ?
                 CommandLineManager.instance.assemblyFiltering.includedAssemblies :
-                EditorPrefs.GetString("CodeCoverageSettings.IncludeAssemblies." + projectPathHash, AssemblyFiltering.GetAllProjectAssembliesString());
+                EditorPrefs.GetString("CodeCoverageSettings.IncludeAssemblies." + projectPathHash, AssemblyFiltering.GetUserOnlyAssembliesString());
 
             string[] includeAssembliesArray = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < includeAssembliesArray.Length; i++)
@@ -118,7 +118,13 @@ namespace UnityEditor.TestTools.CodeCoverage
                 {
                     Debug.Log($"[{CoverageSettings.PackageName}] Code Coverage Report was generated in {targetDirectory}\n{loggerFactory.Logger.ToString()}");
                     if (!CommandLineManager.instance.runFromCommandLine)
-                        EditorUtility.RevealInFinder(targetDirectory);
+                    {
+                        string indexHtm = Path.Combine(targetDirectory, "index.htm");
+                        if (File.Exists(indexHtm))
+                            EditorUtility.RevealInFinder(indexHtm);
+                        else
+                            EditorUtility.RevealInFinder(targetDirectory);
+                    }
                 }
                 else
                 {

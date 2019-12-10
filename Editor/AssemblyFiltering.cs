@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor.Compilation;
 using UnityEditor.TestTools.CodeCoverage.Utils;
+using System.Collections.Generic;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -79,6 +80,37 @@ namespace UnityEditor.TestTools.CodeCoverage
             {
                 assembliesString += assemblies[i].name;
                 if (i < assembliesLength - 1)
+                    assembliesString += ",";
+            }
+
+            return assembliesString;
+        }
+
+        public static string GetUserOnlyAssembliesString()
+        {
+            Assembly[] assemblies = AssemblyFiltering.GetAllProjectAssemblies();
+            List<string> userAssemblies = new List<string>();
+
+            string assembliesString = "";
+            int assembliesLength = assemblies.Length;
+            int i;
+            for (i = 0; i < assembliesLength; ++i)
+            {
+                string name = assemblies[i].name;
+                string[] sourceFiles = assemblies[i].sourceFiles;
+
+                if (sourceFiles.Length > 0 &&
+                    sourceFiles[0].StartsWith("Assets"))
+                {
+                    userAssemblies.Add(name);
+                }
+            }
+
+            int userAssembliesLength = userAssemblies.Count;
+            for (i = 0; i < userAssembliesLength; ++i)
+            {
+                assembliesString += userAssemblies[i];
+                if (i < userAssembliesLength - 1)
                     assembliesString += ",";
             }
 
