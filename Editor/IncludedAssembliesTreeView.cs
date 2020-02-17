@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Linq;
 using System;
+using UnityEngine;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -11,13 +12,15 @@ namespace UnityEditor.TestTools.CodeCoverage
     {
         string m_AssembliesToInclude;
         CodeCoverageWindow m_Parent;
+        const float kCheckBoxWidth = 42f;
+
+        public float Width { get; set; } = 100f;
 
         public IncludedAssembliesTreeView(string assembliesToInclude, CodeCoverageWindow parent)
             : base(new TreeViewState())
         {
             m_AssembliesToInclude = assembliesToInclude;
             m_Parent = parent;
-
             showAlternatingRowBackgrounds = true;
             showBorder = true;
             Reload();
@@ -42,11 +45,18 @@ namespace UnityEditor.TestTools.CodeCoverage
             Array.Sort(assemblies, (x, y) => String.Compare(x.name, y.name));
 
             int assembliesLength = assemblies.Length;
+
+            GUIContent textContent = new GUIContent();
             for (int i = 0; i < assembliesLength; ++i)
             {
                 Assembly assembly = assemblies[i];
                 bool enabled = includeAssemblies.Any(f => f.IsMatch(assembly.name.ToLowerInvariant()));
                 root.AddChild(new AssembliesTreeViewItem() { id = i+1, displayName = assembly.name, Enabled = enabled });
+
+                textContent.text = assembly.name;
+                float itemWidth = TreeView.DefaultStyles.label.CalcSize(textContent).x + kCheckBoxWidth;
+                if (Width < itemWidth)
+                    Width = itemWidth;
             }
 
             return root;

@@ -28,6 +28,35 @@ namespace UnityEditor.TestTools.CodeCoverage
         private static readonly Vector2 m_WindowMinSizeNormal = new Vector2(430, 210);
         private static readonly Vector2 m_WindowMinSizeWithWarnings = new Vector2(430, 280);
 
+        private bool m_AfterPopupDelayInput = false;
+        private bool m_GenerateReport = false;
+        private bool m_StopRecording = false;
+
+        public void HandleInputAfterPopup()
+        {
+            m_AfterPopupDelayInput = true;
+        }
+
+        private void Update()
+        {
+            if (m_AfterPopupDelayInput)
+            {
+                m_AfterPopupDelayInput = false;
+            }
+
+            if (m_GenerateReport)
+            {
+                m_ReportGenerator.Generate(m_CoverageSettings);
+                m_GenerateReport = false;
+            }
+
+            if (m_StopRecording)
+            {
+                CodeCoverage.StopRecording();
+                m_StopRecording = false;
+            }
+        }
+
         public string AssembliesToInclude
         {
             set
@@ -107,6 +136,9 @@ namespace UnityEditor.TestTools.CodeCoverage
             RefreshCodeCoverageWindow();
 
             m_IncludeWarnings = false;
+            m_AfterPopupDelayInput = false;
+            m_GenerateReport = false;
+            m_StopRecording = false;
         }
 
         private void RefreshCodeCoverageWindow()
@@ -186,7 +218,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                         SettingsService.OpenUserPreferences("Preferences/_General");
                 }
 
-                using (new EditorGUI.DisabledScope(!m_EnableCodeCoverage || m_EnableCodeCoverage != Coverage.enabled))
+                using (new EditorGUI.DisabledScope(!m_EnableCodeCoverage || m_EnableCodeCoverage != Coverage.enabled || m_AfterPopupDelayInput))
                 {
                     DrawCodeCoverageLocation();
                     DrawCoverageSettings();
@@ -378,11 +410,11 @@ namespace UnityEditor.TestTools.CodeCoverage
             GUILayout.FlexibleSpace();
 
             buttonSize = EditorStyles.miniButton.CalcSize(Styles.GenerateReportButtonLabel);
-            using (new EditorGUI.DisabledScope((!m_GenerateHTMLReport && !m_GenerateBadge) || !DoesResultsRootFolderExist() || CoverageRunData.instance.isRunning))
+            using (new EditorGUI.DisabledScope((!m_GenerateHTMLReport && !m_GenerateBadge) || !DoesResultsRootFolderExist() || CoverageRunData.instance.isRunning || m_GenerateReport))
             {
                 if (EditorGUILayout.DropdownButton(Styles.GenerateReportButtonLabel, FocusType.Keyboard, Styles.largeButton, GUILayout.MaxWidth(buttonSize.x)))
                 {
-                    m_ReportGenerator.Generate(m_CoverageSettings);
+                    m_GenerateReport = true;
                 }
             }
 
@@ -390,13 +422,13 @@ namespace UnityEditor.TestTools.CodeCoverage
             bool isRunning = CoverageRunData.instance.isRunning;
             bool isRecording = CoverageRunData.instance.isRecording;
 
-            using (new EditorGUI.DisabledScope(isRunning && !isRecording))
+            using (new EditorGUI.DisabledScope((isRunning && !isRecording) || m_StopRecording))
             {
                 if (EditorGUILayout.DropdownButton(isRecording ? Styles.StopRecordingButtonLabel : Styles.StartRecordingButtonLabel, FocusType.Keyboard, Styles.largeButton, GUILayout.MaxWidth(buttonSize.x)))
                 {
                     if (isRecording)
                     {
-                        CodeCoverage.StopRecording();
+                        m_StopRecording = true;
                     }
                     else
                     {

@@ -6,7 +6,7 @@ namespace UnityEditor.TestTools.CodeCoverage
     /// Utility class for the CodeCoverage api.
     /// </summary>
     /// <example>
-    /// The following example loads a scene, starts coverage recording, initialises a number of instances of a prefab, then pauses the recording to load another scene, unpauses the recording, initilises a number of instances of a different prefab and finally stops the recording.
+    /// The following example loads a scene, starts coverage recording, initialises a number of instances of a prefab, then pauses the recording to load another scene, unpauses the recording, initialises a number of instances of a different prefab and finally stops the recording.
     /// <code>
     /// using UnityEngine;
     /// using UnityEditor;

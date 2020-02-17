@@ -10,6 +10,8 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public float Width { get; set; }
 
+        private CodeCoverageWindow m_Parent;
+
         class Styles
         {
             public static GUIContent SelectAllButtonLabel = EditorGUIUtility.TrTextContent("Select All");
@@ -20,6 +22,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             m_SearchField = new SearchField();
             m_TreeView = new IncludedAssembliesTreeView(assembliesToInclude, parent);
+            m_Parent = parent;
         }
 
         public override void OnGUI(Rect rect)
@@ -56,7 +59,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         public override Vector2 GetWindowSize()
         {
             Vector2 result = base.GetWindowSize();
-            result.x = Width;
+            result.x = Mathf.Max(Width, m_TreeView.Width);
             return result;
         }
 
@@ -64,6 +67,12 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             m_SearchField.SetFocus();
             base.OnOpen();
+        }
+
+        public override void OnClose()
+        {
+            m_Parent.HandleInputAfterPopup();
+            base.OnClose();
         }
     }
 }

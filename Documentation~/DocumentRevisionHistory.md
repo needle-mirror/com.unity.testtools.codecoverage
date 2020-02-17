@@ -2,6 +2,7 @@
 
 |Date|Reason|
 |:---|:---|
+|Feb 18, 2020|<li>Added *Generate combined report from EditMode and PlayMode tests* section<li>Matches package version *0.2.3-preview*|
 |Dec 11, 2019|<li>Matches package version *0.2.2-preview*|
 |Dec 3, 2019|<li>Added *pathFilters* section<li>Added examples for *assemblyFilters* and *pathFilters*<li>Added a reference to the *Coverage Recording ScriptingAPI*<li>Matches package version *0.2.1-preview*|
 |Nov 10, 2019|<li>Split documentation into separate pages<li>Matches package version *0.2.0-preview*|

@@ -4,6 +4,13 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.2.3-preview] - 2020-02-18
+- If more than one instance of the *-coverageOptions* command-line argument is specified, they will now be merged into a single instance
+- If more than one instance of the *-coverageResultsPath* command-line argument is specified, only the first instance will be accepted
+- Added *Generate combined report from EditMode and PlayMode tests* section in documentation, under *Using Code Coverage in batchmode*
+- When closing (selecting outside of) the *Included Assemblies* dropdown, input is not accidentally propagated to the Code Coverage window
+- *Included Assemblies* dropdown is now resizing to the longest assembly name (case 1215600)
+
 ## [0.2.2-preview] - 2019-12-11
 - The default *Included Assemblies* are now only the assemblies found under the project's *Assets* folder, instead of all project assemblies
 - After the report is generated, the file viewer window highlights the `index.htm` file, if *Generate HTML Report* is selected

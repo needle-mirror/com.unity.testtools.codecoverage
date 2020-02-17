@@ -100,11 +100,10 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_IncludePaths = string.Empty;
             m_ExcludePaths = string.Empty;
 
-            string codeCoverageLocation = string.Empty;
             CommandLineOptionSet optionSet = new CommandLineOptionSet(
                 new CommandLineOption("enableCodeCoverage", () => { runFromCommandLine = true; }),
-                new CommandLineOption("coverageResultsPath", filePathArg => { coverageResultsPath = filePathArg; }),
-                new CommandLineOption("coverageOptions", optionsArg => { m_CoverageOptionsArg = optionsArg.Trim('\''); }),
+                new CommandLineOption("coverageResultsPath", filePathArg => { SetCoverageResultsPath(filePathArg); }),
+                new CommandLineOption("coverageOptions", optionsArg => { AddCoverageOptions(optionsArg); }),
                 new CommandLineOption("runTests", () => { runTests = true; })
             );
             optionSet.Parse(commandLineArgs);
@@ -114,10 +113,46 @@ namespace UnityEditor.TestTools.CodeCoverage
             ParseCoverageOptions();
         }
 
+        private void SetCoverageResultsPath(string filePathArg)
+        {
+            if (coverageResultsPath != string.Empty)
+            {
+                Debug.LogWarning($"[Code Coverage] '-coverageResultsPath' has already been specified on the command-line. Keeping the original setting: '{coverageResultsPath}'.");
+            }
+            else
+            {
+                if (filePathArg != null)
+                {
+                    coverageResultsPath = filePathArg;
+                }
+            }
+        }
+
         private void ValidateCoverageResultsPath()
         {
             if (!CoverageUtils.EnsureFolderExists(coverageResultsPath))
                 coverageResultsPath = string.Empty;
+        }
+
+        private void AddCoverageOptions(string coverageOptionsArg)
+        {
+            if (coverageOptionsArg != null)
+            {
+                coverageOptionsArg = coverageOptionsArg.Trim('\'');
+
+                if (coverageOptionsArg != string.Empty)
+                {
+                    if (m_CoverageOptionsArg == string.Empty)
+                    {
+                        m_CoverageOptionsArg = coverageOptionsArg;
+                    }
+                    else
+                    {
+                        m_CoverageOptionsArg += ";";
+                        m_CoverageOptionsArg += coverageOptionsArg;
+                    }
+                }
+            }
         }
 
         private void ParseCoverageOptions()

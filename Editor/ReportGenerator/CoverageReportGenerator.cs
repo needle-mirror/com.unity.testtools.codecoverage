@@ -15,7 +15,31 @@ namespace UnityEditor.TestTools.CodeCoverage
         public void Generate(CoverageSettings coverageSettings)
         {
             if (coverageSettings == null)
+            {
+                EditorUtility.ClearProgressBar();
                 return;
+            }
+
+            string projectPathHash = Application.dataPath.GetHashCode().ToString("X8");
+
+            string includeAssemblies = CommandLineManager.instance.runFromCommandLine ?
+                CommandLineManager.instance.assemblyFiltering.includedAssemblies :
+                EditorPrefs.GetString("CodeCoverageSettings.IncludeAssemblies." + projectPathHash, AssemblyFiltering.GetUserOnlyAssembliesString());
+
+            string[] includeAssembliesArray = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < includeAssembliesArray.Length; i++)
+            {
+                includeAssembliesArray[i] = "+" + includeAssembliesArray[i];
+            }
+            string assemblies = string.Join(",", includeAssembliesArray);
+            string[] assemblyFilters = assemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (assemblyFilters.Length == 0)
+            {
+                Debug.LogError($"[{CoverageSettings.PackageName}] Failed to generate Code Coverage Report. Make sure you have included at least one assembly before generating a report.");
+                EditorUtility.ClearProgressBar();
+                return;
+            }
 
             string rootFolderPath = coverageSettings.rootFolderPath;
 
@@ -44,8 +68,6 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string historyDirectory = Path.Combine(rootFolderPath, CoverageSettings.ReportHistoryFolderName);
 
-            string projectPathHash = Application.dataPath.GetHashCode().ToString("X8");
-
             bool generateHTMLReport = CommandLineManager.instance.runFromCommandLine ?
                 CommandLineManager.instance.generateHTMLReport :
                 EditorPrefs.GetBool("CodeCoverageSettings.GenerateHTMLReport." + projectPathHash, true);
@@ -62,26 +84,6 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string[] reportTypes = reportTypesString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             string[] plugins = new string[] { };
-
-            string[] assemblyFilters = new string[] { };
-
-            string includeAssemblies = CommandLineManager.instance.runFromCommandLine ?
-                CommandLineManager.instance.assemblyFiltering.includedAssemblies :
-                EditorPrefs.GetString("CodeCoverageSettings.IncludeAssemblies." + projectPathHash, AssemblyFiltering.GetUserOnlyAssembliesString());
-
-            string[] includeAssembliesArray = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < includeAssembliesArray.Length; i++)
-            {
-                includeAssembliesArray[i] = "+" + includeAssembliesArray[i];
-            }
-            string assemblies = string.Join(",", includeAssembliesArray);
-            assemblyFilters = assemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (assemblyFilters.Length == 0)
-            {
-                Debug.LogError($"[{CoverageSettings.PackageName}] Failed to generate Code Coverage Report. Make sure you have inlcuded at least one assembly before generating a report.");
-                return;
-            }
 
             bool includeCoverageOptions = CommandLineManager.instance.runFromCommandLine ?
                 CommandLineManager.instance.enableCyclomaticComplexity :

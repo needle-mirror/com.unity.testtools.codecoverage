@@ -10,4 +10,8 @@ The Code Coverage package is available as a preview package via the Package Mana
 
 For more information see the [Code Coverage package documentation](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@latest).
 
-![ReleaseBadge](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/candidates-badge.svg) ![ReleaseBadge](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/release-badge.svg)
+|CI Status|
+|:---|
+|![ReleaseBadge](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/candidates-badge.svg) ![ReleaseBadge](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/release-badge.svg)|
+|[![](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/build-badge.svg?branch=master&testWorkflow=package-isolation)](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/build-info?branch=master&testWorkflow=package-isolation) [![](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/warnings-badge.svg?branch=master)](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/warnings-info?branch=master)|
+|[![](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/dependencies-badge.svg?branch=master&testWorkflow=updated-dependencies)](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/dependencies-info?branch=master&testWorkflow=updated-dependencies) [![](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/dependants-badge.svg)](https://badges.cds.internal.unity3d.com/packages/com.unity.testtools.codecoverage/dependants-info)|

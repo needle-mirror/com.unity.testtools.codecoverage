@@ -37,6 +37,21 @@ The example above will open the project at _\<path-to-project\>_, run the _EditM
 
 **Note:** `-debugCodeOptimization` is passed above to ensure Code optimization is set to Debug mode. See [Using Code Coverage with Code Optimization](#using-code-coverage-with-code-optimization)
 
+### Generate combined report from EditMode and PlayMode tests
+
+To get coverage information for both EditMode and PlayMode tests, run the editor three times as shown in the example below.
+```
+Unity.exe -projectPath <path-to-project> -batchmode -testPlatform editmode -runTests -debugCodeOptimization -enableCodeCoverage -coverageResultsPath <path-to-coverage-results>
+-coverageOptions enableCyclomaticComplexity;assemblyFilters:+my.assembly.*
+
+Unity.exe -projectPath <path-to-project> -batchmode -testPlatform playmode -runTests -debugCodeOptimization -enableCodeCoverage -coverageResultsPath <path-to-coverage-results>
+-coverageOptions enableCyclomaticComplexity;assemblyFilters:+my.assembly.*
+
+Unity.exe -projectPath <path-to-project> -batchmode -debugCodeOptimization -enableCodeCoverage -coverageResultsPath <path-to-coverage-results>
+-coverageOptions generateHtmlReport;generateBadgeReport -quit
+```
+The first will generate the coverage results for the EditMode tests, the second will generate the coverage results for the PlayMode tests and the third will generate the coverage report and summary badge based on both coverage results.
+
 ## Using Code Coverage with Burst compiler
 
 If you use the [Burst package](https://docs.unity3d.com/Packages/com.unity.burst@latest) and have jobs compiled with Burst, you will need to disable Burst compilation in order to get full coverage. To disable Burst compilation you can do **one** of the following:

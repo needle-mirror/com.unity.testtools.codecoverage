@@ -1,7 +1,7 @@
 {
   "name": "com.unity.testtools.codecoverage",
   "displayName": "Code Coverage",
-  "version": "0.2.2-preview",
+  "version": "0.2.3-preview",
   "unity": "2019.3",
   "unityRelease": "0a8",
   "description": "Use this package to export code coverage data and reports from your tests.",
@@ -11,15 +11,16 @@
     "testing",
     "opencover"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git@github.cds.internal.unity3d.com:unity/com.unity.testtools.codecoverage.git",
-    "revision": "6bde3c329d27ed2ffc7d36dea2d0460900753dea"
-  },
   "dependencies": {
     "com.unity.test-framework": "1.0.16"
   },
   "relatedPackages": {
-    "com.unity.testtools.codecoverage.tests": "0.2.2-preview"
+    "com.unity.testtools.codecoverage.tests": "0.2.3-preview"
+  },
+  "repository": {
+    "footprint": "122c7010947e40d5328665c356feeb7a1495ec60",
+    "type": "git",
+    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.testtools.codecoverage.git",
+    "revision": "7dca943a676e07ef6496ef2dd631582fb64053ab"
   }
 }
