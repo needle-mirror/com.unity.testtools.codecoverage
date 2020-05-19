@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEditor.TestTools.TestRunner.Api;
@@ -22,11 +23,47 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
         }
 
         private bool m_OutputPerTest = false;
-        private bool m_OutputCyclomaticComplexity = false;
 
         private CoverageSettings m_CoverageSettings;
-        private AssemblyFiltering m_AssemblyFiltering;
+        private ICoverageReporterFilter m_ReporterFilter;
         private OpenCoverResultWriter m_Writer;
+
+        private static readonly Dictionary<string, string> m_Operators = new Dictionary<string, string>
+        {
+            { "op_Addition", "operator+" },
+            { "op_UnaryPlus", "operator+" },
+            { "op_Increment", "operator++" },
+            { "op_Subtraction", "operator-" },
+            { "op_UnaryNegation", "operator-" },
+            { "op_Decrement", "operator--" },
+            { "op_Multiply", "operator*" },
+            { "op_Division", "operator/" },
+            { "op_Modulus", "operator%" },
+            { "op_ExclusiveOr", "operator^" },
+            { "op_BitwiseAnd", "operator&" },
+            { "op_BitwiseOr", "operator|" },
+            { "op_LeftShift", "operator<<" },
+            { "op_RightShift", "operator>>" },
+            { "op_Equality", "operator==" },
+            { "op_Inequality", "operator!=" },
+            { "op_GreaterThan", "operator>" },
+            { "op_LessThan", "operator<" },
+            { "op_GreaterThanOrEqual", "operator>=" },
+            { "op_LessThanOrEqual", "operator<=" },
+            { "op_OnesComplement", "operator~" },
+            { "op_LogicalNot", "operator!" },
+            { "op_True", "operator true" },
+            { "op_False", "operator false" }
+        };
+
+        public OpenCoverReporter() : this(new OpenCoverReporterFilter())
+        {
+        }
+
+        internal OpenCoverReporter(ICoverageReporterFilter reporterFilter)
+        {
+            m_ReporterFilter = reporterFilter;
+        }
 
         public void OnBeforeAssemblyReload()
         {
@@ -47,8 +84,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                 Coverage.ResetAll();
             }
 
-            SetupAssemblyFiltering();
-            m_OutputCyclomaticComplexity = ShouldOutputCyclomaticComplexity();
+            m_ReporterFilter.SetupFiltering();
 
             if (m_Writer == null)
             {
@@ -110,24 +146,6 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                 EditorUtility.ClearProgressBar();
         }
 
-        private bool ShouldProcessAssembly(string assemblyName)
-        {
-            if (CommandLineManager.instance.runFromCommandLine)
-                return CommandLineManager.instance.assemblyFiltering.IsAssemblyIncluded(assemblyName);
-
-            return m_AssemblyFiltering.IsAssemblyIncluded(assemblyName);
-        }
-
-        private bool ShouldProcessFile(string filename)
-        {
-            // PathFiltering is implemented only via the command line.
-            // Will assess whether PathFiltering is needed to be set via the UI too (similar to Assembly Filtering).
-            if (CommandLineManager.instance.runFromCommandLine)
-                return CommandLineManager.instance.pathFiltering.IsPathIncluded(filename);
-            else
-                return true;
-        }
-
         private bool IsSpecialMethod(MethodBase methodBase)
         {
             return methodBase.IsSpecialName && ((methodBase.Attributes & MethodAttributes.HideBySig) != 0);
@@ -158,113 +176,32 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             return IsSpecialMethod(methodBase) && methodBase.Name.Contains("op_");
         }
 
+        private bool IsAnonymousOrInnerMethod(MethodBase methodBase)
+        {
+            char[] invalidChars = { '<', '>' };
+            return methodBase.Name.IndexOfAny(invalidChars) != -1;
+        }
+
         private string GenerateOperatorName(MethodBase methodBase)
         {
             string operatorName = string.Empty;
 
-            switch (methodBase.Name)
+            if (!m_Operators.TryGetValue(methodBase.Name, out operatorName))
             {
-                case "op_Implicit":
-                    operatorName = string.Format("implicit operator {0}", GetReturnTypeName(methodBase));
-                    break;
+                switch (methodBase.Name)
+                {
+                    case "op_Implicit":
+                        operatorName = $"implicit operator {GetReturnTypeName(methodBase)}";
+                        break;
 
-                case "op_Explicit":
-                    operatorName = string.Format("explicit operator {0}", GetReturnTypeName(methodBase));
-                    break;
+                    case "op_Explicit":
+                        operatorName = $"explicit operator {GetReturnTypeName(methodBase)}";
+                        break;
 
-                case "op_Addition":
-                case "op_UnaryPlus":
-                    operatorName = "operator+";
-                    break;
-
-                case "op_Increment":
-                    operatorName = "operator++";
-                    break;
-
-                case "op_Subtraction":
-                case "op_UnaryNegation":
-                    operatorName = "operator-";
-                    break;
-
-                case "op_Decrement":
-                    operatorName = "operator--";
-                    break;
-
-                case "op_Multiply":
-                    operatorName = "operator*";
-                    break;
-
-                case "op_Division":
-                    operatorName = "operator/";
-                    break;
-
-                case "op_Modulus":
-                    operatorName = "operator%";
-                    break;
-
-                case "op_ExclusiveOr":
-                    operatorName = "operator^";
-                    break;
-
-                case "op_BitwiseAnd":
-                    operatorName = "operator&";
-                    break;
-
-                case "op_BitwiseOr":
-                    operatorName = "operator|";
-                    break;
-
-                case "op_LeftShift":
-                    operatorName = "operator<<";
-                    break;
-
-                case "op_RightShift":
-                    operatorName = "operator>>";
-                    break;
-
-                case "op_Equality":
-                    operatorName = "operator==";
-                    break;
-
-                case "op_Inequality":
-                    operatorName = "operator!=";
-                    break;
-
-                case "op_GreaterThan":
-                    operatorName = "operator>";
-                    break;
-
-                case "op_LessThan":
-                    operatorName = "operator<";
-                    break;
-
-                case "op_GreaterThanOrEqual":
-                    operatorName = "operator>=";
-                    break;
-
-                case "op_LessThanOrEqual":
-                    operatorName = "operator<=";
-                    break;
-
-                case "op_OnesComplement":
-                    operatorName = "operator~";
-                    break;
-
-                case "op_LogicalNot":
-                    operatorName = "operator!";
-                    break;
-
-                case "op_True":
-                    operatorName = "operator true";
-                    break;
-
-                case "op_False":
-                    operatorName = "operator false";
-                    break;
-
-                default:
-                    operatorName = string.Format("unknown operator {0}", methodBase.Name);
-                    break;
+                    default:
+                        operatorName = $"unknown operator {methodBase.Name}";
+                        break;
+                }
             }
 
             return operatorName;
@@ -302,6 +239,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
             methodStringBuilder.Append(GenerateTypeName(methodBase.DeclaringType));
             methodStringBuilder.Append(".");
+            bool lastDotSubstituted = false;
 
             if (IsConstructor(methodBase) || IsStaticConstructor(methodBase))
             {
@@ -309,30 +247,22 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             }
             else if (IsOperator(methodBase))
             {
+                lastDotSubstituted = SubstituteLastDotWithDoubleColon(ref methodStringBuilder);
                 methodStringBuilder.Append(GenerateOperatorName(methodBase));
+            }
+            else if (IsAnonymousOrInnerMethod(methodBase))
+            {
+                lastDotSubstituted = SubstituteLastDotWithDoubleColon(ref methodStringBuilder);
+                methodStringBuilder.Append(methodBase.Name);
             }
             else
             {
                 methodStringBuilder.Append(methodBase.Name);
             }
 
-            if ( methodStringBuilder.Length > 0)
+            if (!lastDotSubstituted)
             {
-                int lastDotPos = -1;
-                for (int i = methodStringBuilder.Length - 1; i >= 0; i--)
-                {
-                    if (methodStringBuilder[i] == '.')
-                    {
-                        lastDotPos = i;
-                        break;
-                    }
-                }
-
-                if (lastDotPos != -1 )
-                {
-                    methodStringBuilder.Remove(lastDotPos, 1);
-                    methodStringBuilder.Insert(lastDotPos, "::");
-                }
+                lastDotSubstituted = SubstituteLastDotWithDoubleColon(ref methodStringBuilder);
             }
 
             sb.Append(methodStringBuilder.ToString());
@@ -354,6 +284,33 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             sb.Append(')');
 
             return sb.ToString();
+        }
+
+        private bool SubstituteLastDotWithDoubleColon(ref StringBuilder sb)
+        {
+            bool substituted = false;
+
+            if ( sb.Length > 0)
+            {
+                int lastDotPos = -1;
+                for (int i = sb.Length - 1; i >= 0; i--)
+                {
+                    if (sb[i] == '.')
+                    {
+                        lastDotPos = i;
+                        break;
+                    }
+                }
+
+                if (lastDotPos != -1 )
+                {
+                    sb.Remove(lastDotPos, 1);
+                    sb.Insert(lastDotPos, "::");
+                    substituted = true;
+                }
+            }
+
+            return substituted;
         }
 
         private string GenerateTypeName(Type type)
@@ -480,29 +437,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             return sb.ToString();
         }
 
-        private bool ShouldOutputCyclomaticComplexity()
-        {
-            bool shouldOutputCyclomaticComplexity = CommandLineManager.instance.enableCyclomaticComplexity;
-
-            if (!shouldOutputCyclomaticComplexity)
-            {
-                string projectPathHash = Application.dataPath.GetHashCode().ToString("X8");
-                shouldOutputCyclomaticComplexity = EditorPrefs.GetBool("CodeCoverageSettings.EnableCyclomaticComplexity." + projectPathHash, false);
-            }
-            return shouldOutputCyclomaticComplexity;
-        }
-
-        private void SetupAssemblyFiltering()
-        {
-            m_AssemblyFiltering = new AssemblyFiltering();
-
-            string projectPathHash = Application.dataPath.GetHashCode().ToString("X8");
-            string includeAssemblies = EditorPrefs.GetString("CodeCoverageSettings.IncludeAssemblies." + projectPathHash, AssemblyFiltering.GetUserOnlyAssembliesString());
-
-            m_AssemblyFiltering.Parse(includeAssemblies, AssemblyFiltering.kDefaultExcludedAssemblies);
-        }
-
-        private CoverageSession GenerateOpenCoverSession()
+        internal CoverageSession GenerateOpenCoverSession()
         {
             CoverageSession coverageSession = null;
 
@@ -514,6 +449,8 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             float progressInterval = 0.9f / assemblies.Length;
             float currentProgress = 0.0f;
 
+            bool shouldGenerateAdditionalMetrics = m_ReporterFilter.ShouldGenerateAdditionalMetrics();
+
             foreach (Assembly assembly in assemblies)
             {
                 if (!CommandLineManager.instance.runFromCommandLine)
@@ -521,7 +458,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                 currentProgress += progressInterval;
 
                 string assemblyName = assembly.GetName().Name.ToLower();
-                if (!ShouldProcessAssembly(assemblyName))
+                if (!m_ReporterFilter.ShouldProcessAssembly(assemblyName))
                 {
                     continue;
                 }
@@ -541,7 +478,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     // happens, the Types property array contains a Type for all loaded types and null for each
                     // type that couldn't be loaded.
                     assemblyTypes = ex.Types;
-                    ShouldProcessAssembly(assemblyName);
+                    m_ReporterFilter.ShouldProcessAssembly(assemblyName);
                 }
 
                 Debug.Assert(assemblyTypes != null);
@@ -570,7 +507,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                 foreach (CoveredSequencePoint classMethodSequencePoint in classMethodSequencePointsArray)
                                 {
                                     string filename = classMethodSequencePoint.filename;
-                                    if (filesNotFound.Contains(filename) || !ShouldProcessFile(filename))
+                                    if (filesNotFound.Contains(filename) || !m_ReporterFilter.ShouldProcessFile(filename))
                                         continue;
 
                                     if (!fileList.TryGetValue(filename, out fileId))
@@ -613,10 +550,17 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                     coveredMethod.SequencePoints = coveredSequencePoints.ToArray();
                                     decimal sequenceCoverage = decimal.Round(100.0m * (decimal)(classMethodStats.totalSequencePoints - classMethodStats.uncoveredSequencePoints) / (decimal)(classMethodStats.totalSequencePoints), 1);
                                     coveredMethod.SequenceCoverage = sequenceCoverage;
+                                    coveredMethod.Summary.NumClasses = 0;
+                                    coveredMethod.Summary.VisitedClasses = 0;
+                                    coveredMethod.Summary.NumMethods = 1;
+                                    coveredMethod.Summary.VisitedMethods = (coveredMethod.Visited) ? 1 : 0;
                                     coveredMethod.Summary.SequenceCoverage = sequenceCoverage;
-                                    if (m_OutputCyclomaticComplexity)
+                                    coveredMethod.Summary.NumSequencePoints = classMethodStats.totalSequencePoints;
+                                    coveredMethod.Summary.VisitedSequencePoints = classMethodStats.totalSequencePoints - classMethodStats.uncoveredSequencePoints;
+                                    if (shouldGenerateAdditionalMetrics)
                                     {
-                                        coveredMethod.CyclomaticComplexity = methodBase.CalculateCyclomaticComplexity();
+                                        AddCyclomaticComplexityCalculation(methodBase, coveredMethod);
+                                        AddCrapScoreCalculation(methodBase, coveredMethod);
                                     }
                                     coveredMethods.Add(coveredMethod);
                                 }
@@ -628,6 +572,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                             Class coveredClass = new Class();
                             coveredClass.FullName = GenerateTypeName(type);
                             coveredClass.Methods = coveredMethods.ToArray();
+                            UpdateClassSummary(coveredClass);
                             coveredClasses.Add(coveredClass);
                         }
                     }
@@ -648,6 +593,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     }
                     module.Files = coveredFileList.ToArray();
                     module.Classes = coveredClasses.ToArray();
+                    UpdateModuleSummary(module);
                     moduleList.Add(module);
                 }
             }
@@ -656,11 +602,101 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             {
                 coverageSession = new CoverageSession();
                 coverageSession.Modules = moduleList.ToArray();
+                ProcessGenericMethods(coverageSession);
+                UpdateSessionSummary(coverageSession);
             }
 
-            ProcessGenericMethods(coverageSession);
-
             return coverageSession;
+        }
+
+        private void AddCyclomaticComplexityCalculation(MethodBase methodBase, Method coveredMethod)
+        {
+            int cyclomaticComplexity = methodBase.CalculateCyclomaticComplexity();
+            coveredMethod.CyclomaticComplexity = cyclomaticComplexity;
+            coveredMethod.Summary.MaxCyclomaticComplexity = cyclomaticComplexity;
+            coveredMethod.Summary.MinCyclomaticComplexity = cyclomaticComplexity;
+        }
+
+        private void AddCrapScoreCalculation(MethodBase methodBase, Method coveredMethod)
+        {
+            int cyclomaticComplexity = coveredMethod.CyclomaticComplexity;
+            decimal sequenceCoverage = coveredMethod.SequenceCoverage;
+
+            decimal crapScore = Math.Round((decimal)Math.Pow(cyclomaticComplexity, 2) *
+              (decimal)Math.Pow(1.0 - (double)(sequenceCoverage / (decimal)100.0), 3.0) +
+              cyclomaticComplexity,
+              2);
+
+            coveredMethod.CrapScore = crapScore;
+            coveredMethod.Summary.MaxCrapScore = crapScore;
+            coveredMethod.Summary.MinCrapScore = crapScore;
+        }
+
+        private void UpdateClassSummary(Class coveredClass)
+        {
+            coveredClass.Summary.NumClasses = 1;
+            UpdateSummary(coveredClass.Summary, coveredClass.Methods);
+            coveredClass.Summary.VisitedClasses = (coveredClass.Summary.VisitedMethods > 0) ? 1 : 0;
+        }
+
+        private void UpdateModuleSummary(Module coveredModule)
+        {
+            UpdateSummary(coveredModule.Summary, coveredModule.Classes);
+        }
+
+        private void UpdateSessionSummary(CoverageSession coverageSession)
+        {
+            UpdateSummary(coverageSession.Summary, coverageSession.Modules);
+        }
+
+        private void UpdateSummary(Summary summary, SummarySkippedEntity[] entities)
+        {
+            if (entities.Length > 0)
+            {
+                foreach (SummarySkippedEntity entity in entities)
+                {
+                    summary.NumSequencePoints += entity.Summary.NumSequencePoints;
+                    summary.VisitedSequencePoints += entity.Summary.VisitedSequencePoints;
+                    summary.NumBranchPoints += entity.Summary.NumBranchPoints;
+                    summary.VisitedBranchPoints += entity.Summary.VisitedBranchPoints;
+                    summary.NumMethods += entity.Summary.NumMethods;
+                    summary.VisitedMethods += entity.Summary.VisitedMethods;
+                    summary.NumClasses += entity.Summary.NumClasses;
+                    summary.VisitedClasses += entity.Summary.VisitedClasses;
+                }
+
+                summary.MaxCyclomaticComplexity = entities.Max(entity => entity.Summary.MaxCyclomaticComplexity);
+                summary.MinCyclomaticComplexity = entities.Min(entity => entity.Summary.MinCyclomaticComplexity);
+                summary.MaxCrapScore = entities.Max(entity => entity.Summary.MaxCrapScore);
+                summary.MinCrapScore = entities.Min(entity => entity.Summary.MinCrapScore);
+
+                CalculateSummarySequenceCoverage(summary);
+                CalculateSummaryBranchCoverage(summary);
+            }
+        }
+
+        void CalculateSummarySequenceCoverage(Summary summary)
+        {
+            if (summary.NumSequencePoints > 0)
+            {
+                summary.SequenceCoverage = decimal.Round(100.0m * (summary.VisitedSequencePoints / (decimal)summary.NumSequencePoints), 1);
+            }
+            else
+            {
+                summary.SequenceCoverage = 0.0m;
+            }
+        }
+
+        void CalculateSummaryBranchCoverage(Summary summary)
+        {
+            if (summary.NumBranchPoints > 0)
+            {
+                summary.BranchCoverage = decimal.Round(100.0m * (summary.VisitedBranchPoints / (decimal)summary.NumBranchPoints), 1);
+            }
+            else
+            {
+                summary.BranchCoverage = 0.0m;
+            }
         }
 
         private void ProcessGenericMethods(CoverageSession coverageSession)
@@ -672,7 +708,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
                 Type declaringType = method.DeclaringType;
                 string assemblyName = declaringType.Assembly.GetName().Name.ToLower();
-                if (!ShouldProcessAssembly(assemblyName))
+                if (!m_ReporterFilter.ShouldProcessAssembly(assemblyName))
                 {
                     continue;
                 }

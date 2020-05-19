@@ -95,8 +95,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             }
             else
             {
-                string projectPathHash = coverageSettings.projectPath.GetHashCode().ToString("X8");
-                coverageFolderPath = EditorPrefs.GetString("CodeCoverageSettings.Path." + projectPathHash, string.Empty);
+                coverageFolderPath = CoveragePreferences.instance.GetString("Path", string.Empty);
             }
 
             string projectPath = CoverageUtils.StripAssetsFolderIfExists(coverageSettings.projectPath);
@@ -119,6 +118,43 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
                 rootFolderPath = Path.Combine(projectPath, coverageSettings.rootFolderName);
             }
             return rootFolderPath;
+        }
+
+        public static string GetHistoryFolderPath(CoverageSettings coverageSettings)
+        {
+            string historyFolderPath = string.Empty;
+
+            if (coverageSettings.historyPathFromCommandLine.Length > 0)
+            {
+                historyFolderPath = coverageSettings.historyPathFromCommandLine;
+                CoverageUtils.EnsureFolderExists(historyFolderPath);
+            }
+            else
+            {
+                historyFolderPath = CoveragePreferences.instance.GetString("HistoryPath", string.Empty);
+            }
+
+            string projectPath = CoverageUtils.StripAssetsFolderIfExists(coverageSettings.projectPath);
+            projectPath = CoverageUtils.NormaliseFolderSeparators(projectPath, true);
+
+            if (CoverageUtils.IsValidFolder(historyFolderPath))
+            {
+                historyFolderPath = CoverageUtils.NormaliseFolderSeparators(historyFolderPath, true);
+
+                // Add 'CodeCoverage' & 'History' directories if historyFolderPath is projectPath
+                if (string.Equals(historyFolderPath, projectPath, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    historyFolderPath = Path.Combine(projectPath, coverageSettings.rootFolderName);
+                    historyFolderPath = Path.Combine(historyFolderPath, CoverageSettings.ReportHistoryFolderName);
+                }
+            }
+            else
+            {
+                // Add 'CodeCoverage' & 'History' directories if historyFolderPath is projectPath
+                historyFolderPath = Path.Combine(projectPath, coverageSettings.rootFolderName);
+                historyFolderPath = Path.Combine(historyFolderPath, CoverageSettings.ReportHistoryFolderName);
+            }
+            return historyFolderPath;
         }
 
         public static int GetNumberOfXMLFilesInFolder(string folderPath)

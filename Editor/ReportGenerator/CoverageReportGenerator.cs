@@ -20,11 +20,9 @@ namespace UnityEditor.TestTools.CodeCoverage
                 return;
             }
 
-            string projectPathHash = Application.dataPath.GetHashCode().ToString("X8");
-
             string includeAssemblies = CommandLineManager.instance.runFromCommandLine ?
                 CommandLineManager.instance.assemblyFiltering.includedAssemblies :
-                EditorPrefs.GetString("CodeCoverageSettings.IncludeAssemblies." + projectPathHash, AssemblyFiltering.GetUserOnlyAssembliesString());
+                CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
 
             string[] includeAssembliesArray = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < includeAssembliesArray.Length; i++)
@@ -50,14 +48,18 @@ namespace UnityEditor.TestTools.CodeCoverage
                 return;
             }
 
-            string sourceXmlPath = Path.Combine(rootFolderPath, "**");
-
             // Only include xml files with the correct filename format
+            string sourceXmlPath = Path.Combine(rootFolderPath, "**");       
             string testResultsXmlPath = Path.Combine(sourceXmlPath, "TestCoverageResults_????.xml");
             string recordingResultsXmlPath = Path.Combine(sourceXmlPath, "RecordingCoverageResults_????.xml");
-            string historyXmlPath = Path.Combine(sourceXmlPath, "????-??-??_??-??-??_CoverageHistory.xml");
 
-            string[] reportFilePatterns = new string[] { testResultsXmlPath, recordingResultsXmlPath, historyXmlPath };
+            string[] reportFilePatterns = new string[] { testResultsXmlPath, recordingResultsXmlPath };
+
+            bool includeHistoryInReport = CommandLineManager.instance.runFromCommandLine ?
+                CommandLineManager.instance.generateHTMLReportHistory :
+                CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
+
+            string historyDirectory = includeHistoryInReport ? coverageSettings.historyFolderPath : null;
 
             string targetDirectory = Path.Combine(rootFolderPath, CoverageSettings.ReportFolderName);
 
@@ -66,15 +68,13 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string[] sourceDirectories = new string[] { };
 
-            string historyDirectory = Path.Combine(rootFolderPath, CoverageSettings.ReportHistoryFolderName);
-
             bool generateHTMLReport = CommandLineManager.instance.runFromCommandLine ?
                 CommandLineManager.instance.generateHTMLReport :
-                EditorPrefs.GetBool("CodeCoverageSettings.GenerateHTMLReport." + projectPathHash, true);
+                CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
 
             bool generateBadge = CommandLineManager.instance.runFromCommandLine ?
                 CommandLineManager.instance.generateBadgeReport :
-                EditorPrefs.GetBool("CodeCoverageSettings.GenerateBadge." + projectPathHash, true);
+                CoveragePreferences.instance.GetBool("GenerateBadge", true);
 
             string reportTypesString = "xmlSummary,";
             if (generateHTMLReport)
@@ -86,8 +86,8 @@ namespace UnityEditor.TestTools.CodeCoverage
             string[] plugins = new string[] { };
 
             bool includeCoverageOptions = CommandLineManager.instance.runFromCommandLine ?
-                CommandLineManager.instance.enableCyclomaticComplexity :
-                EditorPrefs.GetBool("CodeCoverageSettings.EnableCyclomaticComplexity." + projectPathHash, false);
+                CommandLineManager.instance.generateAdditionalMetrics :
+                CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
 
             string[] classFilters = new string[] { };
             string[] fileFilters = new string[] { };

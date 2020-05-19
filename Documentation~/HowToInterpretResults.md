@@ -12,11 +12,17 @@ This section shows a brief summary of the coverage results including the number 
 
 ### Coverage History
 
-Here you will see a graph showing the total percantage coverage for every test run for this project. Aim to keep this percentage as high as possible. If it is decreasing, consider writing more tests to improve your coverage.
+This section will only appear if you enabled the **Generate History** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReportHistory` option in `-coverageOptions` on the [command line](UsingCodeCoverage.md#using-code-coverage-in-batchmode). Here you will see a graph showing the total percentage coverage for every test run for this project. Aim to keep this percentage as high as possible. If it is decreasing, consider writing more tests to improve your coverage.
 
 ### Risk Hotspots
 
-This section will only appear if you enabled the **Cyclomatic Complexity** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `enableCyclomaticComplexity` option in `-coverageOptions` on the [command line](UsingCodeCoverage.md#using-code-coverage-in-batchmode). In this section, you will see information about any methods that have a Cyclomatic Compexity score that is greater than 15. The Cyclomatic Complexity score is a value that is based on the number of paths that can be taken through a method. The score will tend to be higher if a method has a large number of `if` or `switch` statements. For more detailed information see the [Wikipedia entry on Cyclomatic Complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity).<br/>**Note:** NPath Complexity and Crap Score calculations are not implemented at present so will always appear as zero. If there are any methods with a very high Cyclometric Complexity score, consider re-factoring the method to reduce its complexity.
+This section will only appear if you enabled the **Generate Additional Metrics** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateAdditionalMetrics` option in `-coverageOptions` on the [command line](UsingCodeCoverage.md#using-code-coverage-in-batchmode).
+
+In this section, you will see information about any methods that have a Cyclomatic Compexity score that is greater than 15. The Cyclomatic Complexity score is a value that is based on the number of paths that can be taken through a method. The score will tend to be higher if a method has a large number of `if` or `switch` statements. For more detailed information see the [Wikipedia entry on Cyclomatic Complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity). You will also see information about any methods with a high Crap Score. CRAP stands for Change Risk Anti-Patterns. For more detailed information see this [article](https://testing.googleblog.com/2011/02/this-code-is-crap.html).
+
+If there are any methods with a very high Cyclometric Complexity or Crap Score, consider re-factoring the method to reduce its complexity.
+
+**Note:** NPath Complexity calculation and Branch Coverage are not implemented at present so will always appear as zero.
 
 ### Coverage
 By default, this shows a list of the assemblies that have been covered together with some stats showing how well covered they are. Select the **+** button next to the assembly name to see a list of the classes or structs within the assembly and their associated coverage data. To see more detailed information for a particular class, select its name in the list.
@@ -29,11 +35,11 @@ Similar to the Summary section of the previous page, this section shows some bri
 
 ### Coverage History
 
-This shows a graph of the coverage percentage of the class/struct over time. Try to keep this value as high as you can. Make sure that as you add new code the coverage percentage is maintained by adding more tests.
+This section will only appear if you enabled the **Generate History** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReportHistory` option in `-coverageOptions` on the [command line](UsingCodeCoverage.md#using-code-coverage-in-batchmode). It shows a graph of the coverage percentage of the class/struct over time. Try to keep this value as high as you can. Make sure that as you add new code the coverage percentage is maintained by adding more tests.
 
 ### Metrics
 
-The metrics section displays a list of the methods and properties of the class, along with each method's Cyclomatic Complexity and Sequence Coverage scores. Currently, the NPath Complexity, Branch Coverage and Crap Score aren't calculated, so will always appear as zero.
+The metrics section displays a list of the methods and properties of the class, along with each method's Cyclomatic Complexity, Crap Score and Sequence Coverage scores. Currently, the NPath Complexity and Branch Coverage aren't calculated, so will always appear as zero.
 
 ### File(s)
 

@@ -109,7 +109,8 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             CoverageSettings coverageSettings = new CoverageSettings()
             {
-                resultsPathFromCommandLine = CommandLineManager.instance.coverageResultsPath
+                resultsPathFromCommandLine = CommandLineManager.instance.coverageResultsPath,
+                historyPathFromCommandLine = CommandLineManager.instance.coverageHistoryPath
             };
 
             CoverageReporterManager = new CoverageReporterManager(coverageSettings);

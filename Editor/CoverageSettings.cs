@@ -17,7 +17,9 @@ namespace UnityEditor.TestTools.CodeCoverage
         public string resultsFolderSuffix;
         public string resultsFolderPath;
         public string resultsRootFolderPath;
-        public string resultsFilePath;      
+        public string resultsFilePath;
+        public string historyPathFromCommandLine;
+        public string historyFolderPath;
         public bool hasPersistentRunData = true;
         public bool resetCoverageData = true;
     }

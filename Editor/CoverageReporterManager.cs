@@ -30,8 +30,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             m_CoverageReporter = null;
 
-            string projectPathHash = Application.dataPath.GetHashCode().ToString("X8");
-            CoverageFormat coverageFormat = (CoverageFormat)EditorPrefs.GetInt("CodeCoverageSettings.Format." + projectPathHash, 0);
+            CoverageFormat coverageFormat = (CoverageFormat)CoveragePreferences.instance.GetInt("Format", 0);
 
             switch (coverageFormat)
             {
@@ -52,10 +51,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void GenerateReport()
         {
-            string projectPathHash = Application.dataPath.GetHashCode().ToString("X8");
-            bool autoGenerateReport = EditorPrefs.GetBool("CodeCoverageSettings.AutoGenerateReport." + projectPathHash, true);
-            bool generateHTMLReport = EditorPrefs.GetBool("CodeCoverageSettings.GenerateHTMLReport." + projectPathHash, true);
-            bool generateBadge = EditorPrefs.GetBool("CodeCoverageSettings.GenerateBadge." + projectPathHash, true);
+            bool autoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", true);
+            bool generateHTMLReport = CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
+            bool generateBadge = CoveragePreferences.instance.GetBool("GenerateBadge", true);
             autoGenerateReport = autoGenerateReport && (generateHTMLReport || generateBadge);
 
             if (CommandLineManager.instance.runFromCommandLine)

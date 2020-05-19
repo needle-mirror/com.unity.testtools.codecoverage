@@ -39,7 +39,19 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
-        public bool enableCyclomaticComplexity
+        public string coverageHistoryPath
+        {
+            get;
+            private set;
+        }
+
+        public bool generateAdditionalMetrics
+        {
+            get;
+            private set;
+        }
+
+        public bool generateHTMLReportHistory
         {
             get;
             private set;
@@ -86,7 +98,9 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             runFromCommandLine = false;
             coverageResultsPath = string.Empty;
-            enableCyclomaticComplexity = false;
+            coverageHistoryPath = string.Empty;
+            generateAdditionalMetrics = false;
+            generateHTMLReportHistory = false;
             generateHTMLReport = false;
             generateBadgeReport = false;
             assemblyFiltering = new AssemblyFiltering();
@@ -103,12 +117,14 @@ namespace UnityEditor.TestTools.CodeCoverage
             CommandLineOptionSet optionSet = new CommandLineOptionSet(
                 new CommandLineOption("enableCodeCoverage", () => { runFromCommandLine = true; }),
                 new CommandLineOption("coverageResultsPath", filePathArg => { SetCoverageResultsPath(filePathArg); }),
+                new CommandLineOption("coverageHistoryPath", filePathArg => { SetCoverageHistoryPath(filePathArg); }),
                 new CommandLineOption("coverageOptions", optionsArg => { AddCoverageOptions(optionsArg); }),
                 new CommandLineOption("runTests", () => { runTests = true; })
             );
             optionSet.Parse(commandLineArgs);
 
             ValidateCoverageResultsPath();
+            ValidateCoverageHistoryPath();
 
             ParseCoverageOptions();
         }
@@ -117,7 +133,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             if (coverageResultsPath != string.Empty)
             {
-                Debug.LogWarning($"[Code Coverage] '-coverageResultsPath' has already been specified on the command-line. Keeping the original setting: '{coverageResultsPath}'.");
+                Debug.LogWarning($"[{CoverageSettings.PackageName}] '-coverageResultsPath' has already been specified on the command-line. Keeping the original setting: '{coverageResultsPath}'.");
             }
             else
             {
@@ -132,6 +148,27 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             if (!CoverageUtils.EnsureFolderExists(coverageResultsPath))
                 coverageResultsPath = string.Empty;
+        }
+
+        private void SetCoverageHistoryPath(string filePathArg)
+        {
+            if (coverageHistoryPath != string.Empty)
+            {
+                Debug.LogWarning($"[{CoverageSettings.PackageName}] '-coverageHistoryPath' has already been specified on the command-line. Keeping the original setting: '{coverageHistoryPath}'.");
+            }
+            else
+            {
+                if (filePathArg != null)
+                {
+                    coverageHistoryPath = filePathArg;
+                }
+            }
+        }
+
+        private void ValidateCoverageHistoryPath()
+        {
+            if (!CoverageUtils.EnsureFolderExists(coverageHistoryPath))
+                coverageHistoryPath = string.Empty;
         }
 
         private void AddCoverageOptions(string coverageOptionsArg)
@@ -176,8 +213,12 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                 switch (optionName.ToUpperInvariant())
                 {
-                    case "ENABLECYCLOMATICCOMPLEXITY":
-                        enableCyclomaticComplexity = true;
+                    case "GENERATEADDITIONALMETRICS":
+                        generateAdditionalMetrics = true;
+                        break;
+
+                    case "GENERATEHTMLREPORTHISTORY":
+                        generateHTMLReportHistory = true;
                         break;
 
                     case "GENERATEHTMLREPORT":
@@ -211,7 +252,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                                 }
                                 else
                                 {
-                                    Debug.LogWarning($"[Code Coverage] -coverageOptions assemblyFilters argument {filter} would not be applied as it is not prefixed with +/-.");
+                                    Debug.LogWarning($"[{CoverageSettings.PackageName}] -coverageOptions assemblyFilters argument {filter} would not be applied as it is not prefixed with +/-.");
                                 }
                             }
                         }
@@ -240,7 +281,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                                 }
                                 else
                                 {
-                                    Debug.LogWarning($"[Code Coverage] -coverageOptions pathFilters argument {filter} would not be applied as it is not prefixed with +/-.");
+                                    Debug.LogWarning($"[{CoverageSettings.PackageName}] -coverageOptions pathFilters argument {filter} would not be applied as it is not prefixed with +/-.");
                                 }
                             }
                         }

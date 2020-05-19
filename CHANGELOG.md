@@ -4,6 +4,21 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-preview] - 2020-05-20
+- Added `coverageHistoryPath` and `generateHtmlReportHistory` in *-coverageOptions* for batchmode
+- Added *History Location* and *Generate History* settings in the Code Coverage window
+- Added `generateAdditionalMetrics` in *-coverageOptions* for batchmode and removed *enableCyclomaticComplexity* (it is now included in Additional Metrics)
+- Added *Generate Additional Metrics* setting in the Code Coverage window and removed *Cyclomatic Complexity* (it is now included in Additional Metrics)
+- Added *Crap Score* in Additional Metrics
+- Using the *Settings Manager* package to handle the serialization of project settings
+- Added Code Coverage Workshop sample project
+- Added a DisplayDialog warning when Code Optimization is set to Release mode
+- Execute *Stop Recording* on the update loop, instead of the OnGUI (removes an *EndLayoutGroup* error)
+- Make sure *operator* and *anonymous function* names are generated correctly
+- Refactored code; in OpenCoverReporter class (to reduce Cyclomatic Complexity), in CodeCoverageWindow class and others
+- Updated Report Generator to version v4.5.8
+- Updated documentation to match version 0.3.0-preview
+
 ## [0.2.3-preview] - 2020-02-18
 - If more than one instance of the *-coverageOptions* command-line argument is specified, they will now be merged into a single instance
 - If more than one instance of the *-coverageResultsPath* command-line argument is specified, only the first instance will be accepted
@@ -17,7 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed unassigned *CodeCoverageWindow.m_IncludeWarnings* warning in 2019.3
 
 ## [0.2.1-preview] - 2019-12-04
-- Added `pathFilters` batchmode *coverageOption*
+- Added `pathFilters` in  *-coverageOptions* for batchmode
 - Improved globbing for `pathFilters` and `assemblyFilters`
 - Added new sections and examples in documentation
 - Added warning and button to switch to debug mode, when using Code Optimization in release mode in 2020.1 and above
