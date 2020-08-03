@@ -222,7 +222,7 @@ public class WeaponTests
     }
 
     [UnityTest]
-    public IEnumerator _18LaserFiresSuccessfully()
+    public IEnumerator _18_LaserFiresSuccessfully()
     {
         // ClearScene();
         // SpaceshipController spaceship = Object.Instantiate(spaceshipPrefab).GetComponent<SpaceshipController>();

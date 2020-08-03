@@ -138,11 +138,11 @@ For further details visit https://github.com/JamesNK/Newtonsoft.Json/blob/master
 
 ---------
 
-Component Name: SixLabors.Core, SixLabors.Fonts, SixLabors.ImageSharp, SixLabors.Shapes 
+Component Name: SixLabors.Fonts, SixLabors.ImageSharp 
 
 License Type: Apache 2.0
 
-Copyright (c) 2017 Scott Williams
+Copyright (c) 2017 Six Labors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -158,7 +158,5 @@ limitations under the License.
 
 For further details visit:
 
-SixLabors.Core - https://github.com/SixLabors/Core/blob/master/LICENSE  
 SixLabors.Fonts - https://github.com/SixLabors/Fonts/blob/master/LICENSE  
 SixLabors.ImageSharp - https://github.com/SixLabors/ImageSharp/blob/master/LICENSE  
-SixLabors.Shapes - https://github.com/SixLabors/Shapes/blob/master/LICENSE.txt

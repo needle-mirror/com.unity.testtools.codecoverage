@@ -290,7 +290,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
 
             if (m_IncludeAssemblies.Length == 0)
-                m_IncludeAssemblies = AssemblyFiltering.GetAllProjectAssembliesString();
+                m_IncludeAssemblies = AssemblyFiltering.GetUserOnlyAssembliesString();
 
             if (m_ExcludeAssemblies.Length >= 0)
                 m_ExcludeAssemblies += ",";

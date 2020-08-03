@@ -542,25 +542,14 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                     coveredMethod.MetadataToken = methodBase.MetadataToken;
                                     coveredMethod.FullName = GenerateMethodName(methodBase);
                                     coveredMethod.FileRef = new FileRef() { UniqueId = fileId };
-                                    coveredMethod.Visited = (classMethodStats.uncoveredSequencePoints != classMethodStats.totalSequencePoints) ? true : false;
                                     coveredMethod.IsConstructor = IsConstructor(methodBase) || IsStaticConstructor(methodBase);
                                     coveredMethod.IsStatic = methodBase.IsStatic;
                                     coveredMethod.IsSetter = IsPropertySetter(methodBase);
                                     coveredMethod.IsGetter = IsPropertyGetter(methodBase);
                                     coveredMethod.SequencePoints = coveredSequencePoints.ToArray();
-                                    decimal sequenceCoverage = decimal.Round(100.0m * (decimal)(classMethodStats.totalSequencePoints - classMethodStats.uncoveredSequencePoints) / (decimal)(classMethodStats.totalSequencePoints), 1);
-                                    coveredMethod.SequenceCoverage = sequenceCoverage;
-                                    coveredMethod.Summary.NumClasses = 0;
-                                    coveredMethod.Summary.VisitedClasses = 0;
-                                    coveredMethod.Summary.NumMethods = 1;
-                                    coveredMethod.Summary.VisitedMethods = (coveredMethod.Visited) ? 1 : 0;
-                                    coveredMethod.Summary.SequenceCoverage = sequenceCoverage;
-                                    coveredMethod.Summary.NumSequencePoints = classMethodStats.totalSequencePoints;
-                                    coveredMethod.Summary.VisitedSequencePoints = classMethodStats.totalSequencePoints - classMethodStats.uncoveredSequencePoints;
                                     if (shouldGenerateAdditionalMetrics)
                                     {
-                                        AddCyclomaticComplexityCalculation(methodBase, coveredMethod);
-                                        AddCrapScoreCalculation(methodBase, coveredMethod);
+                                        coveredMethod.CyclomaticComplexity = methodBase.CalculateCyclomaticComplexity();
                                     }
                                     coveredMethods.Add(coveredMethod);
                                 }
@@ -572,7 +561,6 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                             Class coveredClass = new Class();
                             coveredClass.FullName = GenerateTypeName(type);
                             coveredClass.Methods = coveredMethods.ToArray();
-                            UpdateClassSummary(coveredClass);
                             coveredClasses.Add(coveredClass);
                         }
                     }
@@ -593,7 +581,6 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     }
                     module.Files = coveredFileList.ToArray();
                     module.Classes = coveredClasses.ToArray();
-                    UpdateModuleSummary(module);
                     moduleList.Add(module);
                 }
             }
@@ -603,33 +590,58 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                 coverageSession = new CoverageSession();
                 coverageSession.Modules = moduleList.ToArray();
                 ProcessGenericMethods(coverageSession);
+
+                foreach (Module coveredModule in moduleList)
+                {
+                    foreach (Class coveredClass in coveredModule.Classes)
+                    {
+                        foreach (Method coveredMethod in coveredClass.Methods)
+                        {
+                            UpdateMethodSummary(coveredMethod);
+                        }
+                        UpdateClassSummary(coveredClass);
+                    }
+                    UpdateModuleSummary(coveredModule);
+                }
+
                 UpdateSessionSummary(coverageSession);
             }
 
             return coverageSession;
         }
 
-        private void AddCyclomaticComplexityCalculation(MethodBase methodBase, Method coveredMethod)
+        private void UpdateMethodSummary(Method coveredMethod)
         {
-            int cyclomaticComplexity = methodBase.CalculateCyclomaticComplexity();
-            coveredMethod.CyclomaticComplexity = cyclomaticComplexity;
-            coveredMethod.Summary.MaxCyclomaticComplexity = cyclomaticComplexity;
-            coveredMethod.Summary.MinCyclomaticComplexity = cyclomaticComplexity;
+            int totalSequencePoints = coveredMethod.SequencePoints.Length;
+            int numCoveredSequencePoints = coveredMethod.SequencePoints.Where(sp => sp.VisitCount > 0).Count();
+
+            coveredMethod.Visited = numCoveredSequencePoints != 0;
+            coveredMethod.Summary.NumClasses = 0;
+            coveredMethod.Summary.VisitedClasses = 0;
+            coveredMethod.Summary.NumMethods = 1;
+            coveredMethod.Summary.VisitedMethods = (coveredMethod.Visited) ? 1 : 0;
+            coveredMethod.Summary.NumSequencePoints = totalSequencePoints;
+            coveredMethod.Summary.VisitedSequencePoints = numCoveredSequencePoints;
+            CalculateSummarySequenceCoverage(coveredMethod.Summary);
+            coveredMethod.SequenceCoverage = coveredMethod.Summary.SequenceCoverage;
+            if (m_ReporterFilter.ShouldGenerateAdditionalMetrics())
+            {
+                coveredMethod.Summary.MaxCyclomaticComplexity = coveredMethod.CyclomaticComplexity;
+                coveredMethod.Summary.MinCyclomaticComplexity = coveredMethod.CyclomaticComplexity;
+                coveredMethod.CrapScore = CalculateCrapScore(coveredMethod.CyclomaticComplexity, coveredMethod.SequenceCoverage);
+                coveredMethod.Summary.MaxCrapScore = coveredMethod.CrapScore;
+                coveredMethod.Summary.MinCrapScore = coveredMethod.CrapScore;
+            }
         }
 
-        private void AddCrapScoreCalculation(MethodBase methodBase, Method coveredMethod)
+        internal decimal CalculateCrapScore(int cyclomaticComplexity, decimal sequenceCoverage)
         {
-            int cyclomaticComplexity = coveredMethod.CyclomaticComplexity;
-            decimal sequenceCoverage = coveredMethod.SequenceCoverage;
-
             decimal crapScore = Math.Round((decimal)Math.Pow(cyclomaticComplexity, 2) *
               (decimal)Math.Pow(1.0 - (double)(sequenceCoverage / (decimal)100.0), 3.0) +
               cyclomaticComplexity,
               2);
 
-            coveredMethod.CrapScore = crapScore;
-            coveredMethod.Summary.MaxCrapScore = crapScore;
-            coveredMethod.Summary.MinCrapScore = crapScore;
+            return crapScore;
         }
 
         private void UpdateClassSummary(Class coveredClass)
@@ -675,11 +687,11 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             }
         }
 
-        void CalculateSummarySequenceCoverage(Summary summary)
+        private void CalculateSummarySequenceCoverage(Summary summary)
         {
             if (summary.NumSequencePoints > 0)
             {
-                summary.SequenceCoverage = decimal.Round(100.0m * (summary.VisitedSequencePoints / (decimal)summary.NumSequencePoints), 1);
+                summary.SequenceCoverage = decimal.Round(100.0m * (summary.VisitedSequencePoints / (decimal)summary.NumSequencePoints), 2);
             }
             else
             {
@@ -687,11 +699,11 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             }
         }
 
-        void CalculateSummaryBranchCoverage(Summary summary)
+        private void CalculateSummaryBranchCoverage(Summary summary)
         {
             if (summary.NumBranchPoints > 0)
             {
-                summary.BranchCoverage = decimal.Round(100.0m * (summary.VisitedBranchPoints / (decimal)summary.NumBranchPoints), 1);
+                summary.BranchCoverage = decimal.Round(100.0m * (summary.VisitedBranchPoints / (decimal)summary.NumBranchPoints), 2);
             }
             else
             {

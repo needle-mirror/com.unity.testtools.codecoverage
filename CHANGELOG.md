@@ -4,6 +4,12 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.3.1-preview] - 2020-08-03
+- Fixed issue where CRAP calculation was incorrect when generic methods were parsed (case 1261159)
+- Corrected Six Labors License copyright in Third Party Notices (case 1257869)
+- If `assemblyFilters` is not specified in *-coverageOptions* in batchmode, include only the assemblies found under the *Assets* folder
+- Updated Report Generator to version v4.6.4
+
 ## [0.3.0-preview] - 2020-05-20
 - Added `coverageHistoryPath` and `generateHtmlReportHistory` in *-coverageOptions* for batchmode
 - Added *History Location* and *Generate History* settings in the Code Coverage window
