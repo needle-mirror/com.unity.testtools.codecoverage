@@ -31,7 +31,7 @@ By default, this shows a list of the assemblies that have been covered together 
 
 ### Summary
 
-Similar to the Summary section of the previous page, this section shows some brief statistics for the selected class. The most important value is the Line Coverage percentage. Setect the **<** button in the top left hand corner to return to the previous screen.
+Similar to the Summary section of the previous page, this section shows some brief statistics for the selected class. The most important value is the Line Coverage percentage. Select the **<** button in the top left hand corner to return to the previous screen.
 
 ### Coverage History
 

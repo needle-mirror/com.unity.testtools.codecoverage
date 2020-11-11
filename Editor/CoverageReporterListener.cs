@@ -1,3 +1,5 @@
+using UnityEditor.TestTools.CodeCoverage.Analytics;
+using UnityEditor.TestTools.CodeCoverage.Utils;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -7,6 +9,7 @@ namespace UnityEditor.TestTools.CodeCoverage
     internal class CoverageReporterListener : ScriptableObject, ICallbacks
     {
         private CoverageReporterManager m_CoverageReporterManager;
+        private bool m_IsConnectedToPlayer;
 
         public CoverageReporterManager CoverageReporterManager
         {
@@ -18,6 +21,14 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void RunStarted(ITestAdaptor testsToRun)
         {
+            m_IsConnectedToPlayer = CoverageUtils.IsConnectedToPlayer;
+
+            if (m_IsConnectedToPlayer)
+            {
+                ResultsLogger.Log(ResultID.Warning_StandaloneUnsupported);
+                return;
+            }
+
             if (CoverageRunData.instance.isRunning)
                 return;
 
@@ -30,7 +41,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void RunFinished(ITestResultAdaptor testResults)
         {
-            if (CoverageRunData.instance.isRecording)
+            if (CoverageRunData.instance.isRecording || m_IsConnectedToPlayer)
                 return;
 
             CoverageRunData.instance.Stop();
@@ -47,7 +58,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void TestStarted(ITestAdaptor test)
         {
-            if (CoverageRunData.instance.HasLastIgnoredSuiteID())
+            if (CoverageRunData.instance.HasLastIgnoredSuiteID() || m_IsConnectedToPlayer)
                 return;
 
             if (test.RunState == RunState.Ignored)
@@ -69,6 +80,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void TestFinished(ITestResultAdaptor result)
         {
+            if (m_IsConnectedToPlayer)
+                return;
+
             if (result.Test.RunState == RunState.Ignored)
             {
                 if (result.Test.IsSuite && string.Equals(CoverageRunData.instance.GetLastIgnoredSuiteID(), result.Test.Id))
@@ -127,8 +141,14 @@ namespace UnityEditor.TestTools.CodeCoverage
                 (CommandLineManager.instance.generateHTMLReport || CommandLineManager.instance.generateBadgeReport) &&
                 !CommandLineManager.instance.runTests)
             {
-                CoverageReporterManager.CoverageReporter.OnInitialise(coverageSettings);
-                CoverageReporterManager.GenerateReport();
+                // Start the timer for analytics for Report only
+                CoverageAnalytics.instance.StartTimer();
+                CoverageAnalytics.instance.CurrentCoverageEvent.actionID = ActionID.ReportOnly;
+
+                coverageSettings.rootFolderPath = CoverageUtils.GetRootFolderPath(coverageSettings);
+                coverageSettings.historyFolderPath = CoverageUtils.GetHistoryFolderPath(coverageSettings);
+
+                CoverageReporterManager.ReportGenerator.Generate(coverageSettings);
             }
         }
 

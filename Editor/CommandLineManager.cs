@@ -1,7 +1,6 @@
 using System;
-using UnityEditor.TestRunner.CommandLineParser;
+using UnityEditor.TestTools.CodeCoverage.CommandLineParser;
 using UnityEditor.TestTools.CodeCoverage.Utils;
-using UnityEngine;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -69,6 +68,18 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public bool assemblyFiltersSpecified
+        {
+            get;
+            private set;
+        }
+
+        public bool pathFiltersSpecified
+        {
+            get;
+            private set;
+        }
+
         public AssemblyFiltering assemblyFiltering
         {
             get;
@@ -103,6 +114,8 @@ namespace UnityEditor.TestTools.CodeCoverage
             generateHTMLReportHistory = false;
             generateHTMLReport = false;
             generateBadgeReport = false;
+            assemblyFiltersSpecified = false;
+            pathFiltersSpecified = false;
             assemblyFiltering = new AssemblyFiltering();
             pathFiltering = new PathFiltering();
             runTests = false;
@@ -133,7 +146,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             if (coverageResultsPath != string.Empty)
             {
-                Debug.LogWarning($"[{CoverageSettings.PackageName}] '-coverageResultsPath' has already been specified on the command-line. Keeping the original setting: '{coverageResultsPath}'.");
+                ResultsLogger.Log(ResultID.Warning_MultipleResultsPaths, coverageResultsPath);
             }
             else
             {
@@ -154,7 +167,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             if (coverageHistoryPath != string.Empty)
             {
-                Debug.LogWarning($"[{CoverageSettings.PackageName}] '-coverageHistoryPath' has already been specified on the command-line. Keeping the original setting: '{coverageHistoryPath}'.");
+                ResultsLogger.Log(ResultID.Warning_MultipleHistoryPaths, coverageHistoryPath);
             }
             else
             {
@@ -232,6 +245,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                     case "ASSEMBLYFILTERS":
                         if (optionArgs.Length > 0)
                         {
+                            assemblyFiltersSpecified = true;
+
                             string[] assemblyFilters = optionArgs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                             for (int i = 0; i < assemblyFilters.Length; ++i)
@@ -252,7 +267,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                                 }
                                 else
                                 {
-                                    Debug.LogWarning($"[{CoverageSettings.PackageName}] -coverageOptions assemblyFilters argument {filter} would not be applied as it is not prefixed with +/-.");
+                                    ResultsLogger.Log(ResultID.Warning_AssemblyFiltersNotPrefixed, filter);
                                 }
                             }
                         }
@@ -261,6 +276,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                     case "PATHFILTERS":
                         if (optionArgs.Length > 0)
                         {
+                            pathFiltersSpecified = true;
+
                             string[] pathFilters = optionArgs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                             for (int i = 0; i < pathFilters.Length; ++i)
@@ -281,7 +298,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                                 }
                                 else
                                 {
-                                    Debug.LogWarning($"[{CoverageSettings.PackageName}] -coverageOptions pathFilters argument {filter} would not be applied as it is not prefixed with +/-.");
+                                    ResultsLogger.Log(ResultID.Warning_PathFiltersNotPrefixed, filter);
                                 }
                             }
                         }
@@ -292,7 +309,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (m_IncludeAssemblies.Length == 0)
                 m_IncludeAssemblies = AssemblyFiltering.GetUserOnlyAssembliesString();
 
-            if (m_ExcludeAssemblies.Length >= 0)
+            if (m_ExcludeAssemblies.Length > 0)
                 m_ExcludeAssemblies += ",";
 
             m_ExcludeAssemblies += AssemblyFiltering.kDefaultExcludedAssemblies;

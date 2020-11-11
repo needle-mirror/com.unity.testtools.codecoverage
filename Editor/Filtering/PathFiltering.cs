@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEditor.TestTools.CodeCoverage.Analytics;
 using UnityEditor.TestTools.CodeCoverage.Utils;
 
 namespace UnityEditor.TestTools.CodeCoverage
@@ -46,6 +47,9 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_ExcludePaths = excludePathFilters
                 .Select(f => CreateFilterRegex(f))
                 .ToArray();
+
+            CoverageAnalytics.instance.CurrentCoverageEvent.numOfIncludedPaths = m_IncludePaths.Length;
+            CoverageAnalytics.instance.CurrentCoverageEvent.numOfExcludedPaths = m_ExcludePaths.Length;
 
             m_HasIncludePaths = m_IncludePaths.Length > 0;
             m_HasExcludePaths = m_ExcludePaths.Length > 0;

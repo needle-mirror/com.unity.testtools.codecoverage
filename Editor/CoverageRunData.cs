@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEditor.TestTools.CodeCoverage.Analytics;
 using UnityEngine;
 
 namespace UnityEditor.TestTools.CodeCoverage
@@ -24,12 +25,19 @@ namespace UnityEditor.TestTools.CodeCoverage
         [SerializeField]
         private bool m_IsRecordingPaused = false;
 
-        public void Start()
+        public void Start(bool initAnalytics = true)
         {
             m_LastIgnoredSuite = string.Empty;
             m_IsRunning = true;
             m_FileIndex = 0;
             m_TestRunCount = 0;
+
+            if (initAnalytics)
+            {
+                CoverageAnalytics.instance.CurrentCoverageEvent.actionID = ActionID.DataOnly;
+                CoverageAnalytics.instance.CurrentCoverageEvent.coverageModeId = CoverageModeID.TestRunner;
+                CoverageAnalytics.instance.StartTimer();
+            } 
         }
 
         public void Stop()
@@ -44,6 +52,8 @@ namespace UnityEditor.TestTools.CodeCoverage
             IncrementTestRunCount();
             m_IsRecording = true;
             m_IsRecordingPaused = false;
+
+            CoverageAnalytics.instance.CurrentCoverageEvent.coverageModeId = CoverageModeID.Recording;
         }
 
         public void PauseRecording()

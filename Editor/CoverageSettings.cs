@@ -8,7 +8,6 @@ namespace UnityEditor.TestTools.CodeCoverage
         public const string ReportHistoryFolderName = "Report-history";
         public const string PackageName = "Code Coverage";
 
-        public string projectPath = Application.dataPath;
         public string rootFolderPath;
         public string rootFolderName = "CodeCoverage";
         public string resultsPathFromCommandLine;
@@ -20,7 +19,9 @@ namespace UnityEditor.TestTools.CodeCoverage
         public string resultsFilePath;
         public string historyPathFromCommandLine;
         public string historyFolderPath;
+        public string overrideIncludeAssemblies;
         public bool hasPersistentRunData = true;
         public bool resetCoverageData = true;
+        public bool revealReportInFinder = true;
     }
 }

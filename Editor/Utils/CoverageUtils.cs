@@ -3,20 +3,30 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using UnityEditor.Networking.PlayerConnection;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.CodeCoverage.Utils
 {
     internal static class CoverageUtils
     {
+        public static bool IsConnectedToPlayer
+        {
+            get
+            {
+                return EditorConnection.instance.ConnectedPlayers.Count > 0;
+            }
+        }
+
         public static string NormaliseFolderSeparators(string folderPath, bool stripTrailingSlash = false)
         {
             if (folderPath != null)
             {
-                folderPath = folderPath.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
+                folderPath = folderPath.Replace('\\', '/');
                 if (stripTrailingSlash)
                 {
-                    folderPath = folderPath.TrimEnd(Path.DirectorySeparatorChar);
+                    folderPath = folderPath.TrimEnd('/');
                 }
             }
 
@@ -43,13 +53,13 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             return true;
         }
 
-        public static string GetProjectFolderName(string projectPath)
+        public static string GetProjectFolderName()
         {
-            if (projectPath == null)
-                return null;
+            string[] projectPathArray = GetProjectPath().Split('/');
 
-            string[] projectPathArray = CoverageUtils.NormaliseFolderSeparators(projectPath).Split(Path.DirectorySeparatorChar);
-            string folderName = projectPathArray[projectPathArray.Length - 2];
+            Debug.Assert(projectPathArray.Length > 0);
+
+            string folderName = projectPathArray[projectPathArray.Length - 1];
 
             char[] invalidChars = Path.GetInvalidPathChars();
             StringBuilder folderNameStringBuilder = new StringBuilder();
@@ -73,14 +83,15 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             if (folderPath != null)
             {
                 string toTrim = "Assets";
-                if (folderPath.EndsWith(toTrim))
-                {
-                    int startIndex = toTrim.Length;
-                    return folderPath.Substring(0, folderPath.Length - startIndex);
-                }
+                folderPath = folderPath.TrimEnd(toTrim.ToCharArray());
             }
 
             return folderPath;
+        }
+
+        public static string GetProjectPath()
+        {
+            return NormaliseFolderSeparators(StripAssetsFolderIfExists(Application.dataPath), true);
         }
 
         public static string GetRootFolderPath(CoverageSettings coverageSettings)
@@ -88,26 +99,28 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             string rootFolderPath = string.Empty;
             string coverageFolderPath = string.Empty;
 
-            if (coverageSettings.resultsPathFromCommandLine.Length > 0)
+            if (CommandLineManager.instance.runFromCommandLine)
             {
-                coverageFolderPath = coverageSettings.resultsPathFromCommandLine;
-                CoverageUtils.EnsureFolderExists(coverageFolderPath);
+                if (coverageSettings.resultsPathFromCommandLine.Length > 0)
+                {
+                    coverageFolderPath = coverageSettings.resultsPathFromCommandLine;
+                    EnsureFolderExists(coverageFolderPath);
+                }  
             }
             else
             {
-                coverageFolderPath = CoveragePreferences.instance.GetString("Path", string.Empty);
+                coverageFolderPath = CoveragePreferences.instance.GetStringForPaths("Path", string.Empty);
             }
 
-            string projectPath = CoverageUtils.StripAssetsFolderIfExists(coverageSettings.projectPath);
-            projectPath = CoverageUtils.NormaliseFolderSeparators(projectPath, true);
+            string projectPath = GetProjectPath();
 
-            if (CoverageUtils.IsValidFolder(coverageFolderPath))
+            if (IsValidFolder(coverageFolderPath))
             {
-                coverageFolderPath = CoverageUtils.NormaliseFolderSeparators(coverageFolderPath, true);
+                coverageFolderPath = NormaliseFolderSeparators(coverageFolderPath, true);
 
                 // Add 'CodeCoverage' directory if coverageFolderPath is projectPath
                 if (string.Equals(coverageFolderPath, projectPath, StringComparison.InvariantCultureIgnoreCase))
-                    rootFolderPath = Path.Combine(coverageFolderPath, coverageSettings.rootFolderName);
+                    rootFolderPath = JoinPaths(coverageFolderPath, coverageSettings.rootFolderName);
                 // else user coverageFolderPath as the root folder
                 else
                     rootFolderPath = coverageFolderPath;
@@ -115,7 +128,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             else
             {
                 // Add 'CodeCoverage' directory to projectPath if coverageFolderPath is not valid
-                rootFolderPath = Path.Combine(projectPath, coverageSettings.rootFolderName);
+                rootFolderPath = JoinPaths(projectPath, coverageSettings.rootFolderName);
             }
             return rootFolderPath;
         }
@@ -123,58 +136,83 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
         public static string GetHistoryFolderPath(CoverageSettings coverageSettings)
         {
             string historyFolderPath = string.Empty;
+            string rootFolderPath = coverageSettings.rootFolderPath;
 
-            if (coverageSettings.historyPathFromCommandLine.Length > 0)
+            if (CommandLineManager.instance.runFromCommandLine)
             {
-                historyFolderPath = coverageSettings.historyPathFromCommandLine;
-                CoverageUtils.EnsureFolderExists(historyFolderPath);
-            }
-            else
-            {
-                historyFolderPath = CoveragePreferences.instance.GetString("HistoryPath", string.Empty);
-            }
-
-            string projectPath = CoverageUtils.StripAssetsFolderIfExists(coverageSettings.projectPath);
-            projectPath = CoverageUtils.NormaliseFolderSeparators(projectPath, true);
-
-            if (CoverageUtils.IsValidFolder(historyFolderPath))
-            {
-                historyFolderPath = CoverageUtils.NormaliseFolderSeparators(historyFolderPath, true);
-
-                // Add 'CodeCoverage' & 'History' directories if historyFolderPath is projectPath
-                if (string.Equals(historyFolderPath, projectPath, StringComparison.InvariantCultureIgnoreCase))
+                if (coverageSettings.historyPathFromCommandLine.Length > 0)
                 {
-                    historyFolderPath = Path.Combine(projectPath, coverageSettings.rootFolderName);
-                    historyFolderPath = Path.Combine(historyFolderPath, CoverageSettings.ReportHistoryFolderName);
+                    historyFolderPath = coverageSettings.historyPathFromCommandLine;
+                    EnsureFolderExists(historyFolderPath);
                 }
             }
             else
             {
-                // Add 'CodeCoverage' & 'History' directories if historyFolderPath is projectPath
-                historyFolderPath = Path.Combine(projectPath, coverageSettings.rootFolderName);
-                historyFolderPath = Path.Combine(historyFolderPath, CoverageSettings.ReportHistoryFolderName);
+                historyFolderPath = CoveragePreferences.instance.GetStringForPaths("HistoryPath", string.Empty);
             }
+
+            bool addHistorySubDir = false;
+            string projectPath = GetProjectPath();
+
+            if (IsValidFolder(historyFolderPath))
+            {
+                historyFolderPath = NormaliseFolderSeparators(historyFolderPath, true);
+                
+                // If historyFolderPath == rootFolderPath, add 'Report-history' sub directory in rootFolderPath 
+                if (string.Equals(historyFolderPath, rootFolderPath, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    addHistorySubDir = true;
+                }
+                // If historyFolderPath == projectPath, add 'CodeCoverage' directory to projectPath
+                // and add 'Report-history' sub directory in rootFolderPath 
+                else if (string.Equals(historyFolderPath, projectPath, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    rootFolderPath = JoinPaths(projectPath, coverageSettings.rootFolderName);
+                    addHistorySubDir = true;
+                }
+                // otherwise keep the original historyFolderPath
+            }
+            else
+            {
+                // If historyFolderPath is not valid, add 'CodeCoverage' directory to projectPath
+                // and add 'Report-history' sub directory in rootFolderPath
+                rootFolderPath = JoinPaths(projectPath, coverageSettings.rootFolderName);
+                addHistorySubDir = true;
+            }
+
+            if (addHistorySubDir)
+            {
+                historyFolderPath = JoinPaths(rootFolderPath, CoverageSettings.ReportHistoryFolderName);
+            }
+
             return historyFolderPath;
         }
 
-        public static int GetNumberOfXMLFilesInFolder(string folderPath)
+        public static string JoinPaths(string pathLeft, string pathRight)
+        {
+            string[] pathsToJoin = new string[] { pathLeft, pathRight };
+            return string.Join("/", pathsToJoin);
+        }
+
+        public static int GetNumberOfFilesInFolder(string folderPath, string filePattern, SearchOption searchOption)
         {
             if (folderPath == null)
                 return 0;
 
-            string[] files = Directory.GetFiles(folderPath, "*.xml", SearchOption.AllDirectories);
-            int numFiles = files.Length;
-            return numFiles;
+            string[] files = Directory.GetFiles(folderPath, filePattern, searchOption);
+            return files.Length;
         }
 
-        public static void ClearFolderIfExists(string folderPath)
+        public static void ClearFolderIfExists(string folderPath, string filePattern)
         {
             if (folderPath != null)
             {
                 if (Directory.Exists(folderPath))
                 {
+                    
                     DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
-                    foreach (FileInfo file in dirInfo.GetFiles())
+
+                    foreach (FileInfo file in dirInfo.GetFiles(filePattern))
                     {
                         try
                         {
@@ -182,9 +220,10 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
                         }
                         catch (Exception)
                         {
-                            Debug.LogWarning($"[{CoverageSettings.PackageName}] Failed to delete file: {file.FullName}");
+                            ResultsLogger.Log(ResultID.Warning_FailedToDeleteFile, file.FullName);
                         }
                     }
+
                     foreach (DirectoryInfo dir in dirInfo.GetDirectories())
                     {
                         try
@@ -193,7 +232,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
                         }
                         catch (Exception)
                         {
-                            Debug.LogWarning($"[{CoverageSettings.PackageName}] Failed to delete directory: {dir.FullName}");
+                            ResultsLogger.Log(ResultID.Warning_FailedToDeleteDir, dir.FullName);
                         }
                     }
                 }
@@ -216,7 +255,12 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
 
         public static bool IsValidFolder(string folderPath)
         {
-            return folderPath != null && !string.IsNullOrEmpty(folderPath) && Directory.Exists(folderPath);
+            return !string.IsNullOrEmpty(folderPath) && Directory.Exists(folderPath);
+        }
+
+        public static bool IsValidFile(string filePath)
+        {
+            return !string.IsNullOrEmpty(filePath) && File.Exists(filePath);
         }
 
         private static HashSet<char> regexSpecialChars = new HashSet<char>(new[] { '[', '\\', '^', '$', '.', '|', '?', '*', '+', '(', ')' });
@@ -260,6 +304,54 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             }
             regex.Append("$");
             return regex.ToString();
+        }
+
+        [ExcludeFromCoverage]
+        public static string BrowseForDir(string directory, string title)
+        {
+            if (string.IsNullOrEmpty(directory))
+            {
+                string variable = "ProgramFiles";
+#if UNITY_EDITOR_OSX
+                variable = "HOME";
+#endif
+                string candidateDirectory = Environment.GetEnvironmentVariable(variable);
+                if (IsValidFolder(candidateDirectory))
+                    directory = candidateDirectory;
+            }
+
+            directory = EditorUtility.OpenFolderPanel(title, directory, string.Empty);
+
+            EditorWindow.FocusWindowIfItsOpen(typeof(CodeCoverageWindow));
+
+            if (!IsValidFolder(directory))
+                return string.Empty;
+
+            return directory;
+        }
+
+        [ExcludeFromCoverage]
+        public static string BrowseForFile(string directory, string title)
+        {
+            if (string.IsNullOrEmpty(directory))
+            {
+                string variable = "ProgramFiles";
+#if UNITY_EDITOR_OSX
+                variable = "HOME";
+#endif
+                string candidateDirectory = Environment.GetEnvironmentVariable(variable);
+                if (IsValidFolder(candidateDirectory))
+                    directory = candidateDirectory;
+            }
+
+            string file = EditorUtility.OpenFilePanel(title, directory, "cs");
+
+            EditorWindow.FocusWindowIfItsOpen(typeof(CodeCoverageWindow));
+
+            if (!IsValidFile(file))
+                return string.Empty;
+
+            return file;
         }
     }
 }

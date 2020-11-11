@@ -7,10 +7,12 @@
 |Results Location|Select the **Browse** button to specify the folder where the coverage results and report will be saved to. The default destination is the Project's folder.|
 |History Location|Select the **Browse** button to specify the folder where the coverage report history will be saved to. The default destination is the Project's folder.|
 |**Settings**|
-|Included Assemblies|Specifies the assemblies to be included in the coverage results. This is a comma separated string. Select the **Select** button to view and select or deselect the assemblies.|
+|Included Assemblies|Specify assemblies to be included in the coverage results. This is a dropdown list containing the available assemblies. Click the dropdown to view, select or deselect the assemblies. All assemblies can be selected and deselected at once by expanding the list and using the **Select All** or **Deselect All** buttons.
+|Included Paths|Specify individual folders and files to only be included in coverage results by using the **Add Folder** and **Add File** buttons respectively. Leaving the list empty will include all files from the **Included Assemblies**. Globbing can be used to filter the paths. Individual list entries can be removed by selecting an entry and using **Remove > Remove Selected**. The list can be cleared using **Remove > Remove All**.|
+|Excluded Paths|Specify individual folders and files to be excluded from coverage results by using the **Add Folder** and **Add File** buttons respectively. Globbing can be used to filter the paths. Individual entries can be removed by selecting an entry and selecting **Remove > Remove Selected**. The list can be cleared using **Remove > Remove All**.|
 |Generate HTML Report|Check this to generate an HTML report.|
-|Generate History|Check this to generate and include the coverage history in the HTML report.|
 |Generate Summary Badges|Check this to generate coverage summary badges in SVG and PNG format.|
+|Generate History|Check this to generate and include the coverage history in the HTML report.|
 |Generate Additional Metrics|Check this to generate and include additional metrics in the HTML report. These currently include Cyclomatic Complexity and Crap Scrore calculations for each method. See the [Risk Hotspots](HowToInterpretResults.md#risk-hotspots) section for more information.|
 |Auto Generate Report|Check this to generate the report automatically after the [Test Runner](CoverageTestRunner.md) finishes running or the [Coverage Recording](CoverageRecording.md) session is complete.|
 |Clear Data|Select the **Clear Data** button to clear the coverage data from previous test runs for both _EditMode_ and _PlayMode_ tests or from previous [Coverage Recording](CoverageRecording.md) sessions. The **Clear Data** button is disabled if the coverage data is cleared, if no tests ran, or if there is no Coverage Recording data.|

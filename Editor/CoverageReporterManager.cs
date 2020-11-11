@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor.TestTools.CodeCoverage.OpenCover;
+using UnityEditor.TestTools.CodeCoverage.Analytics;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -30,7 +31,8 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             m_CoverageReporter = null;
 
-            CoverageFormat coverageFormat = (CoverageFormat)CoveragePreferences.instance.GetInt("Format", 0);
+            // Use OpenCover format as currently this is the only one supported
+            CoverageFormat coverageFormat = CoverageFormat.OpenCover;
 
             switch (coverageFormat)
             {
@@ -51,10 +53,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void GenerateReport()
         {
-            bool autoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", true);
-            bool generateHTMLReport = CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
-            bool generateBadge = CoveragePreferences.instance.GetBool("GenerateBadge", true);
-            autoGenerateReport = autoGenerateReport && (generateHTMLReport || generateBadge);
+            bool autoGenerateReport, generateHTMLReport, generateBadge;
 
             if (CommandLineManager.instance.runFromCommandLine)
             {
@@ -62,20 +61,41 @@ namespace UnityEditor.TestTools.CodeCoverage
                 generateBadge = CommandLineManager.instance.generateBadgeReport;
                 autoGenerateReport = generateHTMLReport || generateBadge;
             }
+            else
+            {
+                generateHTMLReport = CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
+                generateBadge = CoveragePreferences.instance.GetBool("GenerateBadge", true);
+                autoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", true) && (generateHTMLReport || generateBadge);
+            }
 
             if (!autoGenerateReport)
             {
                 // Clear ProgressBar left from saving results to file,
                 // otherwise continue on the same ProgressBar
                 EditorUtility.ClearProgressBar();
+
+                // Send Analytics event (Data Only)
+                CoverageAnalytics.instance.SendCoverageEvent(true);
+
                 return;
             }
 
-            if (m_ReportGenerator == null)
-                m_ReportGenerator = new CoverageReportGenerator();
-
             if (m_CoverageSettings != null)
-                m_ReportGenerator.Generate(m_CoverageSettings);
+            {
+                CoverageAnalytics.instance.CurrentCoverageEvent.actionID = ActionID.DataReport;
+                ReportGenerator.Generate(m_CoverageSettings);
+            }
+        }
+
+        public CoverageReportGenerator ReportGenerator
+        {
+            get 
+            {
+                if (m_ReportGenerator == null)
+                    m_ReportGenerator = new CoverageReportGenerator();
+
+                return m_ReportGenerator;
+            }         
         }
     }
 }

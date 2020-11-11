@@ -2,7 +2,7 @@
 
 ## Enable Code Coverage
 
-1. Go to **Edit** > **Preferences** > **General** and check **Enable Code Coverage**.<br/><br/>
+1. Go to **Edit** > **Preferences** > **General** (Windows, Linux) or **Unity** > **Preferences** > **General** (Mac) and check **Enable Code Coverage**.<br/><br/>
 ![Enable Code Coverage](images/enable_coverage.png)
 
     This will enable access to the interface for the code coverage data that Mono exposes. For more information, see the documentation on [Coverage API](https://docs.unity3d.com/ScriptReference/TestTools.Coverage.html). Enabling Code Coverage adds some overhead to the editor and lowers the performance, so it is not recommended to leave it on if you are not performing coverage testing and since it is an Editor Preference, if left on it will be enabled in all your projects.
@@ -72,3 +72,7 @@ Code Optimization was introduced in 2020.1. Code Optimization mode defines wheth
 - Switch to Debug mode in the Editor (bottom right corner, select the **Bug icon** > **Switch to debug mode**)
 - Using the CompilationPipeline api, set `CompilationPipeline.codeOptimization = CodeOptimization.Debug`
 - Pass `-debugCodeOptimization` to the command line
+
+## Excluding code from Code Coverage
+
+Any code that should not be contributing to the Code Coverage calculation can be excluded by adding the [`ExcludeFromCoverage`](https://docs.unity3d.com/ScriptReference/TestTools.ExcludeFromCoverageAttribute.html) attribute. This attribute can be added to Assemblies, Classes, Constructors, Methods and Structs. Note that you can also use the .NET [`ExcludeFromCodeCoverage`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.codeanalysis.excludefromcodecoverageattribute?view=netcore-2.0) attribute.

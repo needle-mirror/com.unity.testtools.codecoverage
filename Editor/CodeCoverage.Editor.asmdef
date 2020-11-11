@@ -26,6 +26,16 @@
             "name": "com.unity.test-framework",
             "expression": "1.0.16",
             "define": "CONDITIONAL_IGNORE_SUPPORTED"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "1.1.1",
+            "define": "BURST_INSTALLED"
+        },
+        {
+            "name": "com.unity.test-framework",
+            "expression": "1.1.18",
+            "define": "TEST_FRAMEWORK_1_1_18_OR_NEWER"
         }
     ],
     "noEngineReferences": false

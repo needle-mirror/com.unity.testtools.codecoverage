@@ -8,6 +8,8 @@ namespace UnityEditor.TestTools.CodeCoverage
         SearchField m_SearchField;
         IncludedAssembliesTreeView m_TreeView;
 
+        const float kWindowHeight = 221;
+
         public float Width { get; set; }
 
         class Styles
@@ -16,10 +18,10 @@ namespace UnityEditor.TestTools.CodeCoverage
             public static GUIContent DeselectAllButtonLabel = EditorGUIUtility.TrTextContent("Deselect All");
         }
 
-        public IncludedAssembliesPopupWindow(string assembliesToInclude, CodeCoverageWindow parent)
+        public IncludedAssembliesPopupWindow(CodeCoverageWindow parent, string assembliesToInclude)
         {
             m_SearchField = new SearchField();
-            m_TreeView = new IncludedAssembliesTreeView(assembliesToInclude, parent);
+            m_TreeView = new IncludedAssembliesTreeView(parent, assembliesToInclude);
         }
 
         public override void OnGUI(Rect rect)
@@ -55,9 +57,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public override Vector2 GetWindowSize()
         {
-            Vector2 result = base.GetWindowSize();
-            result.x = Mathf.Max(Width, m_TreeView.Width);
-            return result;
+            return new Vector2(Mathf.Max(Width, m_TreeView.Width), kWindowHeight);
         }
 
         public override void OnOpen()

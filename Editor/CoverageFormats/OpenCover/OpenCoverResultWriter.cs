@@ -2,6 +2,7 @@ using System.Xml.Serialization;
 using System.IO;
 using UnityEngine;
 using OpenCover.Framework.Model;
+using UnityEditor.TestTools.CodeCoverage.Utils;
 
 namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 {
@@ -20,7 +21,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                 serializer.Serialize(writer, CoverageSession);
             }
 
-            Debug.Log($"[{CoverageSettings.PackageName}] Code Coverage Results were saved in {fileFullPath}");
+            ResultsLogger.Log(ResultID.Log_ResultsSaved, fileFullPath);
 
             base.WriteCoverageSession();
         }

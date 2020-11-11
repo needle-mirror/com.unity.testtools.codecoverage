@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq;
 using System;
 using UnityEngine;
+using UnityEditor.TestTools.CodeCoverage.Analytics;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -16,7 +17,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public float Width { get; set; } = 100f;
 
-        public IncludedAssembliesTreeView(string assembliesToInclude, CodeCoverageWindow parent)
+        public IncludedAssembliesTreeView(CodeCoverageWindow parent, string assembliesToInclude)
             : base(new TreeViewState())
         {
             m_AssembliesToInclude = assembliesToInclude;
@@ -100,7 +101,8 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         void ApplyChanges()
         {
-            // TODO: How can we preserve the regex?
+            CoverageAnalytics.instance.CurrentCoverageEvent.updateAssembliesDialog = true;
+
             StringBuilder sb = new StringBuilder();
             foreach(var child in rootItem.children)
             {

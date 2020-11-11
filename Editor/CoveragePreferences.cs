@@ -1,12 +1,11 @@
-﻿using UnityEngine;
-using UnityEditor.SettingsManagement;
+﻿using UnityEditor.SettingsManagement;
+using UnityEditor.TestTools.CodeCoverage.Utils;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
     internal class CoveragePreferences : CoveragePreferencesImplementation
     {
         private static CoveragePreferences s_Instance = null;
-        private const string k_PreferencesBaseName = "CodeCoverageSettings";
         private const string k_PackageName = "com.unity.testtools.codecoverage";
 
         public static CoveragePreferences instance
@@ -20,27 +19,20 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
         }
 
-        protected CoveragePreferences() : base(k_PackageName, k_PreferencesBaseName, Application.dataPath.GetHashCode().ToString("X8"))
+        protected CoveragePreferences() : base(k_PackageName)
         {
         }
     }
 
     internal class CoveragePreferencesImplementation
     {
-        private string m_PreferencesBaseName;
-        private string m_ProjectPathHash;
+        private const string k_ProjectPathAlias = "{ProjectPath}";
+
         protected Settings m_Settings;
 
-        public CoveragePreferencesImplementation(string packageName, string preferencesBaseName, string projectPathHash)
+        public CoveragePreferencesImplementation(string packageName)
         {
-            m_ProjectPathHash = projectPathHash;
-            m_PreferencesBaseName = preferencesBaseName;
             m_Settings = new Settings(packageName);
-        }
-
-        private string GetEditorPrefKey(string key)
-        {
-            return $"{m_PreferencesBaseName}.{key}.{m_ProjectPathHash}";
         }
 
         public bool GetBool(string key, bool defaultValue, SettingsScope scope = SettingsScope.Project)
@@ -48,15 +40,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (m_Settings.ContainsKey<bool>(key, scope))
             {
                 return m_Settings.Get<bool>(key, scope, defaultValue);
-            }
-
-            string editorPrefKey = GetEditorPrefKey(key);
-            if (EditorPrefs.HasKey(editorPrefKey))
-            {
-                bool value = EditorPrefs.GetBool(editorPrefKey, defaultValue);
-                m_Settings.Set<bool>(key, value, scope);
-                m_Settings.Save();
-                return value;
             }
 
             return defaultValue;
@@ -69,16 +52,14 @@ namespace UnityEditor.TestTools.CodeCoverage
                 return m_Settings.Get<int>(key, scope, defaultValue);
             }
 
-            string editorPrefKey = GetEditorPrefKey(key);
-            if (EditorPrefs.HasKey(editorPrefKey))
-            {
-                int value = EditorPrefs.GetInt(editorPrefKey, defaultValue);
-                m_Settings.Set<int>(key, value, scope);
-                m_Settings.Save();
-                return value;
-            }
-
             return defaultValue;
+        }
+
+        public string GetStringForPaths(string key, string defaultValue, SettingsScope scope = SettingsScope.Project)
+        {
+            string value = GetString(key, defaultValue, scope);
+            value = value.Replace(k_ProjectPathAlias, CoverageUtils.GetProjectPath());
+            return value;
         }
 
         public string GetString(string key, string defaultValue, SettingsScope scope = SettingsScope.Project)
@@ -86,15 +67,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (m_Settings.ContainsKey<string>(key, scope))
             {
                 return m_Settings.Get<string>(key, scope, defaultValue);
-            }
-
-            string editorPrefKey = GetEditorPrefKey(key);
-            if (EditorPrefs.HasKey(editorPrefKey))
-            {
-                string value = EditorPrefs.GetString(editorPrefKey, defaultValue);
-                m_Settings.Set<string>(key, value, scope);
-                m_Settings.Save();
-                return value;
             }
 
             return defaultValue;
@@ -110,6 +82,13 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             m_Settings.Set<int>(key, value, scope);
             m_Settings.Save();
+        }
+
+        public void SetStringForPaths(string key, string value, SettingsScope scope = SettingsScope.Project)
+        {
+            value = CoverageUtils.NormaliseFolderSeparators(value, true);
+            value = value.Replace(CoverageUtils.GetProjectPath(), k_ProjectPathAlias);
+            SetString(key, value, scope);
         }
 
         public void SetString(string key, string value, SettingsScope scope = SettingsScope.Project)

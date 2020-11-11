@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -10,6 +11,7 @@ using OpenCover.Framework.Model;
 using Module = OpenCover.Framework.Model.Module;
 using ModelFile = OpenCover.Framework.Model.File;
 using File = System.IO.File;
+using UnityEditor.TestTools.CodeCoverage.Utils;
 
 namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 {
@@ -139,7 +141,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             }
             else
             {
-                Debug.LogWarning("[Code Coverage] No coverage results were saved.");
+                ResultsLogger.Log(ResultID.Warning_NoCoverageResultsSaved);
             }
 
             if (clearProgressBar)
@@ -439,6 +441,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
         internal CoverageSession GenerateOpenCoverSession()
         {
+            ResultsLogger.LogSessionItem("Started OpenCover Session", LogVerbosityLevel.Info);
             CoverageSession coverageSession = null;
 
             UInt32 fileUID = 0;
@@ -453,13 +456,31 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
             foreach (Assembly assembly in assemblies)
             {
+                string assemblyName = assembly.GetName().Name.ToLower();
+
+                ResultsLogger.LogSessionItem($"Processing assembly: {assemblyName}", LogVerbosityLevel.Verbose);
+
+                try
+                {
+                    if (assembly.GetCustomAttribute<ExcludeFromCoverageAttribute>() != null ||
+                        assembly.GetCustomAttribute<ExcludeFromCodeCoverageAttribute>() != null)
+                    {
+                        ResultsLogger.LogSessionItem($"Excluded assembly (ExcludeFromCoverage): {assemblyName}", LogVerbosityLevel.Verbose);
+                        continue;
+                    }
+                }
+                catch
+                {
+                    ResultsLogger.Log(ResultID.Warning_ExcludeAttributeAssembly, assemblyName);
+                }
+
                 if (!CommandLineManager.instance.runFromCommandLine)
                     EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressGatheringResults.text, currentProgress);
                 currentProgress += progressInterval;
-
-                string assemblyName = assembly.GetName().Name.ToLower();
+        
                 if (!m_ReporterFilter.ShouldProcessAssembly(assemblyName))
                 {
+                    ResultsLogger.LogSessionItem($"Excluded assembly (Assembly Filtering): {assemblyName}", LogVerbosityLevel.Verbose);
                     continue;
                 }
 
@@ -481,7 +502,10 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     m_ReporterFilter.ShouldProcessAssembly(assemblyName);
                 }
 
-                Debug.Assert(assemblyTypes != null);
+                // Debug.Assert(assemblyTypes != null)
+                ResultsLogger.Log(ResultID.Assert_NullAssemblyTypes, assemblyTypes == null ? "0" : "1");
+
+                ResultsLogger.LogSessionItem($"Processing included assembly: {assemblyName}", LogVerbosityLevel.Info);
 
                 foreach (Type type in assemblyTypes)
                 {
@@ -491,6 +515,25 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                         continue;
                     }
 
+                    string className = type.FullName;
+                    ResultsLogger.LogSessionItem($"Processing class: {className}", LogVerbosityLevel.Verbose);
+
+                    try
+                    {
+                        if (type.GetCustomAttribute<ExcludeFromCoverageAttribute>() != null ||
+                            type.GetCustomAttribute<ExcludeFromCodeCoverageAttribute>() != null)
+                        {
+                            ResultsLogger.LogSessionItem($"Excluded class (ExcludeFromCoverage): {className}", LogVerbosityLevel.Verbose);
+                            continue;
+                        }
+                    }
+                    catch
+                    {
+                        ResultsLogger.Log(ResultID.Warning_ExcludeAttributeClass, className, assemblyName);
+                    }
+
+                    ResultsLogger.LogSessionItem($"Processing included class: {className}", LogVerbosityLevel.Info);
+
                     CoveredMethodStats[] classMethodStatsArray = Coverage.GetStatsFor(type);
                     if (classMethodStatsArray.Length > 0)
                     {
@@ -498,6 +541,27 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
                         foreach (CoveredMethodStats classMethodStats in classMethodStatsArray)
                         {
+                            if (classMethodStats.method == null)
+                                continue;
+
+                            string methodName = classMethodStats.method.Name;
+
+                            ResultsLogger.LogSessionItem($"Processing method: {methodName}", LogVerbosityLevel.Verbose);
+
+                            try
+                            {
+                                if (classMethodStats.method.GetCustomAttribute<ExcludeFromCoverageAttribute>() != null ||
+                                    classMethodStats.method.GetCustomAttribute<ExcludeFromCodeCoverageAttribute>() != null)
+                                {
+                                    ResultsLogger.LogSessionItem($"Excluded method (ExcludeFromCoverage): {methodName}", LogVerbosityLevel.Verbose);
+                                    continue;
+                                }
+                            }
+                            catch
+                            {
+                                ResultsLogger.Log(ResultID.Warning_ExcludeAttributeMethod, methodName, className, assemblyName);
+                            }
+
                             if (classMethodStats.totalSequencePoints > 0)
                             {
                                 List<SequencePoint> coveredSequencePoints = new List<SequencePoint>();
@@ -508,8 +572,11 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                 {
                                     string filename = classMethodSequencePoint.filename;
                                     if (filesNotFound.Contains(filename) || !m_ReporterFilter.ShouldProcessFile(filename))
+                                    {
+                                        ResultsLogger.LogSessionItem($"Excluded method (Path Filtering): {methodName}", LogVerbosityLevel.Verbose);
                                         continue;
-
+                                    }
+                                    
                                     if (!fileList.TryGetValue(filename, out fileId))
                                     {
                                         if (!File.Exists(filename))
@@ -551,6 +618,9 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                     {
                                         coveredMethod.CyclomaticComplexity = methodBase.CalculateCyclomaticComplexity();
                                     }
+
+                                    ResultsLogger.LogSessionItem($"Processing included method: {coveredMethod.FullName}", LogVerbosityLevel.Verbose);
+
                                     coveredMethods.Add(coveredMethod);
                                 }
                             }
@@ -574,7 +644,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     foreach (KeyValuePair<string, UInt32> fileEntry in fileList)
                     {
                         ModelFile coveredFile = new ModelFile();
-                        coveredFile.FullPath = fileEntry.Key;
+                        coveredFile.FullPath = CoverageUtils.NormaliseFolderSeparators(fileEntry.Key);
                         coveredFile.UniqueId = fileEntry.Value;
 
                         coveredFileList.Add(coveredFile);
@@ -606,6 +676,8 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
                 UpdateSessionSummary(coverageSession);
             }
+
+            ResultsLogger.LogSessionItem("Finished OpenCover Session", LogVerbosityLevel.Info);
 
             return coverageSession;
         }
@@ -718,10 +790,13 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             {
                 MethodBase method = coveredMethodStat.method;
 
+                ResultsLogger.LogSessionItem($"Processing generic method: {method.Name}", LogVerbosityLevel.Verbose);
+
                 Type declaringType = method.DeclaringType;
                 string assemblyName = declaringType.Assembly.GetName().Name.ToLower();
                 if (!m_ReporterFilter.ShouldProcessAssembly(assemblyName))
                 {
+                    ResultsLogger.LogSessionItem($"Excluded assembly from generic (Assembly Filtering): {assemblyName}", LogVerbosityLevel.Verbose);
                     continue;
                 }
 
@@ -750,6 +825,8 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                         Method targetMethod = Array.Find(klass.Methods, element => element.MetadataToken == method.MetadataToken);
                         if (targetMethod != null)
                         {
+                            ResultsLogger.LogSessionItem($"Processing included generic method: {method.Name}", LogVerbosityLevel.Verbose);
+
                             CoveredSequencePoint[] coveredSequencePoints = Coverage.GetSequencePointsFor(method);
                             foreach (CoveredSequencePoint coveredSequencePoint in coveredSequencePoints)
                             {

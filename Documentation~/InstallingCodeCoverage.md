@@ -9,23 +9,23 @@ Before you begin the following procedure, make sure you have no errors in the [C
 
 2. Open the Package Manager (go to **Window** > **Package Manager**).
 
-3. Make sure **Packages: All** is selected.
+3. Make sure **Packages: Unity Registry** is selected.
 
 4. Find the **Code Coverage** package in the package list (left hand side) or enter **Code Coverage** in the search box.
 
 5. Select the **Code Coverage** package in the package list (left hand side), then select the **Install** button in the package details (right hand side).<br/><br/>
 ![Install package](images/install_package_2020.png)
 
-6. To verify that Code Coverage has been installed correctly, open the Code Coverage window (go to **Window** > **General** > **Code Coverage**).
+6. To verify that Code Coverage has been installed correctly, open the Code Coverage window (go to **Window** > **Analysis** > **Code Coverage**).
 
   If you don't see the **Code Coverage** menu item, then Code Coverage did not install correctly.
 
-## Unity versions prior to 2020.1
+## Unity 2019.3 and Unity 2019.4
 
 1. Open the Package Manager (go to **Window** > **Package Manager**).
 
 2. Enable the **Show preview packages** option to see the Code Coverage package in the package list.  
-Make sure **All packages** is selected.<br/><br/>
+Make sure **Unity Registry** is selected (**All packages** in Unity 2019.3).<br/><br/>
 ![Show preview packages](images/install_show_preview.png)
 
 3. Find the **Code Coverage** package in the package list (left hand side) or enter **Code Coverage** in the search box.
@@ -33,6 +33,6 @@ Make sure **All packages** is selected.<br/><br/>
 4. Select the **Code Coverage** package in the package list (left hand side), then select the **Install** button in the package details (right hand side).<br/><br/>
 ![Install package](images/install_package.png)
 
-5. To verify that Code Coverage has been installed correctly, open the Code Coverage window (go to **Window** > **General** > **Code Coverage**).
+5. To verify that Code Coverage has been installed correctly, open the Code Coverage window (go to **Window** > **Analysis** > **Code Coverage**).
 
   If you don't see the **Code Coverage** menu item, then Code Coverage did not install correctly.

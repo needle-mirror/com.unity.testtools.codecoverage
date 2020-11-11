@@ -3,10 +3,10 @@ using System.IO;
 using System.Text;
 using Palmmedia.ReportGenerator.Core;
 using Palmmedia.ReportGenerator.Core.Logging;
-using UnityEngine;
 using UnityEditor.TestTools.CodeCoverage.Utils;
 using ILogger = Palmmedia.ReportGenerator.Core.Logging.ILogger;
 using Palmmedia.ReportGenerator.Core.CodeAnalysis;
+using UnityEditor.TestTools.CodeCoverage.Analytics;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -17,12 +17,17 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (coverageSettings == null)
             {
                 EditorUtility.ClearProgressBar();
+                ResultsLogger.Log(ResultID.Warning_FailedReportNullCoverageSettings);
                 return;
             }
 
             string includeAssemblies = CommandLineManager.instance.runFromCommandLine ?
                 CommandLineManager.instance.assemblyFiltering.includedAssemblies :
                 CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
+
+            // If override for include assemblies is set in coverageSettings, use overrideIncludeAssemblies instead
+            if (!String.IsNullOrEmpty(coverageSettings.overrideIncludeAssemblies))
+                includeAssemblies = coverageSettings.overrideIncludeAssemblies;
 
             string[] includeAssembliesArray = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < includeAssembliesArray.Length; i++)
@@ -34,24 +39,24 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (assemblyFilters.Length == 0)
             {
-                Debug.LogError($"[{CoverageSettings.PackageName}] Failed to generate Code Coverage Report. Make sure you have included at least one assembly before generating a report.");
                 EditorUtility.ClearProgressBar();
+                ResultsLogger.Log(ResultID.Error_FailedReportNoAssemblies);
                 return;
             }
 
             string rootFolderPath = coverageSettings.rootFolderPath;
 
-            if (CoverageUtils.GetNumberOfXMLFilesInFolder(rootFolderPath) == 0)
+            if (rootFolderPath == null || CoverageUtils.GetNumberOfFilesInFolder(rootFolderPath, "*.xml", SearchOption.AllDirectories) == 0)
             {
-                Debug.LogError($"[{CoverageSettings.PackageName}] Failed to generate Code Coverage Report. Make sure you have run one or more tests before generating a report.");
                 EditorUtility.ClearProgressBar();
+                ResultsLogger.Log(ResultID.Error_FailedReportNoTests);
                 return;
             }
 
             // Only include xml files with the correct filename format
-            string sourceXmlPath = Path.Combine(rootFolderPath, "**");       
-            string testResultsXmlPath = Path.Combine(sourceXmlPath, "TestCoverageResults_????.xml");
-            string recordingResultsXmlPath = Path.Combine(sourceXmlPath, "RecordingCoverageResults_????.xml");
+            string sourceXmlPath = CoverageUtils.JoinPaths(rootFolderPath, "**");       
+            string testResultsXmlPath = CoverageUtils.JoinPaths(sourceXmlPath, "TestCoverageResults_????.xml");
+            string recordingResultsXmlPath = CoverageUtils.JoinPaths(sourceXmlPath, "RecordingCoverageResults_????.xml");
 
             string[] reportFilePatterns = new string[] { testResultsXmlPath, recordingResultsXmlPath };
 
@@ -61,7 +66,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string historyDirectory = includeHistoryInReport ? coverageSettings.historyFolderPath : null;
 
-            string targetDirectory = Path.Combine(rootFolderPath, CoverageSettings.ReportFolderName);
+            string targetDirectory = CoverageUtils.JoinPaths(rootFolderPath, CoverageSettings.ReportFolderName);
 
             if (Directory.Exists(targetDirectory))
                 Directory.Delete(targetDirectory, true);
@@ -118,10 +123,16 @@ namespace UnityEditor.TestTools.CodeCoverage
                 Generator generator = new Generator();
                 if (generator.GenerateReport(config, new Settings() { DisableRiskHotspots = !includeCoverageOptions }, new RiskHotspotsAnalysisThresholds()))
                 {
-                    Debug.Log($"[{CoverageSettings.PackageName}] Code Coverage Report was generated in {targetDirectory}\n{loggerFactory.Logger.ToString()}");
-                    if (!CommandLineManager.instance.runFromCommandLine)
+                    ResultsLogger.Log(ResultID.Log_ReportSaved, targetDirectory);
+                    ResultsLogger.LogSessionItem(loggerFactory.Logger.ToString(), LogVerbosityLevel.Info);
+
+                    // Send Analytics event (Report Only / Data & Report)
+                    CoverageAnalytics.instance.SendCoverageEvent(true);
+
+                    if (!CommandLineManager.instance.runFromCommandLine &&
+                        coverageSettings.revealReportInFinder)
                     {
-                        string indexHtm = Path.Combine(targetDirectory, "index.htm");
+                        string indexHtm = CoverageUtils.JoinPaths(targetDirectory, "index.htm");
                         if (File.Exists(indexHtm))
                             EditorUtility.RevealInFinder(indexHtm);
                         else
@@ -130,7 +141,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                 }
                 else
                 {
-                    Debug.LogError($"[{CoverageSettings.PackageName}] Failed to generate Code Coverage Report.\n{loggerFactory.Logger.ToString()}");
+                    ResultsLogger.Log(ResultID.Error_FailedReport);
+                    ResultsLogger.LogSessionItem(loggerFactory.Logger.ToString(), LogVerbosityLevel.Error);
                 }
             }
             finally

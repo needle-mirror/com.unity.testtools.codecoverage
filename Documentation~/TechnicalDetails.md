@@ -12,7 +12,7 @@ This version of Code Coverage is compatible with the following versions of the U
 
 ## 3rd party libraries used
 
-* [ReportGenerator](https://github.com/danielpalme/ReportGenerator) - v4.6.4
+* [ReportGenerator](https://github.com/danielpalme/ReportGenerator) - v4.7.1
 
 ## Known limitations
 

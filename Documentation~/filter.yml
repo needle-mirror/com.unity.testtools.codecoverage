@@ -26,3 +26,9 @@ apiRules:
   - exclude:
       uidRegex: ^Mono\.Reflection
       type: namespace
+  - exclude:
+      uidRegex: Unity.TestTools.CodeCoverage.Editor.Test*
+      type: namespace
+  - exclude:
+      uidRegex: UnityEditor.TestTools.CodeCoverage.Tests
+      type: namespace

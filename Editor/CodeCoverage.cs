@@ -1,12 +1,15 @@
+using UnityEditor.TestTools.CodeCoverage.Analytics;
+using UnityEditor.TestTools.CodeCoverage.Utils;
 using UnityEngine.TestTools;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
     /// <summary>
-    /// Utility class for the CodeCoverage api.
+    /// Utility class for the CodeCoverage API.
     /// </summary>
     /// <example>
-    /// The following example loads a scene, starts coverage recording, initialises a number of instances of a prefab, then pauses the recording to load another scene, unpauses the recording, initialises a number of instances of a different prefab and finally stops the recording.
+    /// The following example loads a scene, starts coverage recording, initializes a number of instances of a prefab, then pauses the recording to load another scene, unpauses the recording, initializes a number of instances of a different prefab and finally stops the recording.
+    /// It also sets the verbosity level to Verbose, so all logs are printed to the editor log.
     /// <code>
     /// using UnityEngine;
     /// using UnityEditor;
@@ -18,6 +21,8 @@ namespace UnityEditor.TestTools.CodeCoverage
     ///     [MenuItem("CodeCoverage/Run Recording")]
     ///     static void RunRecording()
     ///     {
+    ///         CodeCoverage.VerbosityLevel = LogVerbosityLevel.Verbose;
+    ///         
     ///         int i;
     ///
     ///         EditorSceneManager.OpenScene("Assets/Scenes/Scene1.unity");
@@ -50,9 +55,35 @@ namespace UnityEditor.TestTools.CodeCoverage
         private static CoverageReporterManager s_CoverageReporterManager;
 
         /// <summary>
+        /// Sets the verbosity level used in editor and console logs. The default level is <see cref="LogVerbosityLevel.Info"/>.
+        /// </summary>
+        /// <value>
+        /// The verbosity level used in editor and console logs.
+        /// </value>
+        public static LogVerbosityLevel VerbosityLevel
+        {
+            set
+            {
+                ResultsLogger.VerbosityLevel = value;
+            }
+
+            get
+            {
+                return ResultsLogger.VerbosityLevel;
+            }
+        }
+
+        /// <summary>
         /// Call this to start a new coverage recording session.
         /// </summary>
         public static void StartRecording()
+        {
+            CoverageAnalytics.instance.CurrentCoverageEvent.useAPI_StartRec = true;
+
+            StartRecordingInternal();
+        }
+
+        internal static void StartRecordingInternal()
         {
             bool isRunning = CoverageRunData.instance.isRunning;
 
@@ -77,6 +108,8 @@ namespace UnityEditor.TestTools.CodeCoverage
         /// </summary>
         public static void PauseRecording()
         {
+            CoverageAnalytics.instance.CurrentCoverageEvent.useAPI_PauseRec = true;
+
             bool isRunning = CoverageRunData.instance.isRunning;
 
             if (isRunning)
@@ -100,6 +133,8 @@ namespace UnityEditor.TestTools.CodeCoverage
         /// </summary>
         public static void UnpauseRecording()
         {
+            CoverageAnalytics.instance.CurrentCoverageEvent.useAPI_UnpauseRec = true;
+
             bool isRunning = CoverageRunData.instance.isRunning;
 
             if (isRunning)
@@ -117,6 +152,13 @@ namespace UnityEditor.TestTools.CodeCoverage
         /// Call this to end the current coverage recording session.
         /// </summary>
         public static void StopRecording()
+        {
+            CoverageAnalytics.instance.CurrentCoverageEvent.useAPI_StopRec = true;
+
+            StopRecordingInternal();
+        }
+
+        internal static void StopRecordingInternal()
         {
             bool isRunning = CoverageRunData.instance.isRunning;
 

@@ -4,11 +4,32 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.4.0-preview] - 2020-11-11
+- Moved Code Coverage window under *Window* > *Analysis*
+- Added *Included Paths* and *Excluded Paths* as ReorderableLists in the Code Coverage window
+- *Included Assemblies* now use a single dropdown
+- Added support for `ExcludeFromCoverage` and `ExcludeFromCodeCoverage` attributes
+- Added CommandLineParser and removed dependency to internals in Test Framework
+- Implemented `{ProjectPath}` alias in `Settings.json`
+- Added Burst Compilation enabled console warning and info HelpBox with button to disable
+- Added Analytics to help improve the user experience
+- Removed the old *EditorPref* workflow from CoveragePreferences
+- Updated Report Generator to version 4.7.1
+- Refactored code; in Utils, Filtering, ResultWriter, Window and API classes
+- Added *CoverageWindow* and *Filtering* folders
+- Moved *Generate History* outside of Generate HTML Report. It is now disabled only if both Generate HTML Report and Generate Badges are not selected
+- Disabled *Generate from Last* button when there are no assemblies selected
+- Display info HelpBox when there are no assemblies selected
+- Paths are now stored with forward slashes on Windows
+- Added `CodeCoverage.VerbosityLevel` to set the verbosity level used in editor and console logs
+- Added warning about Code Coverage not being supported currently when running PlayMode tests in standalone player
+- Updated documentation and workshop to match version 0.4.0-preview
+
 ## [0.3.1-preview] - 2020-08-03
 - Fixed issue where CRAP calculation was incorrect when generic methods were parsed (case 1261159)
 - Corrected Six Labors License copyright in Third Party Notices (case 1257869)
 - If `assemblyFilters` is not specified in *-coverageOptions* in batchmode, include only the assemblies found under the *Assets* folder
-- Updated Report Generator to version v4.6.4
+- Updated Report Generator to version 4.6.4
 
 ## [0.3.0-preview] - 2020-05-20
 - Added `coverageHistoryPath` and `generateHtmlReportHistory` in *-coverageOptions* for batchmode
@@ -22,7 +43,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Execute *Stop Recording* on the update loop, instead of the OnGUI (removes an *EndLayoutGroup* error)
 - Make sure *operator* and *anonymous function* names are generated correctly
 - Refactored code; in OpenCoverReporter class (to reduce Cyclomatic Complexity), in CodeCoverageWindow class and others
-- Updated Report Generator to version v4.5.8
+- Updated Report Generator to version 4.5.8
 - Updated documentation to match version 0.3.0-preview
 
 ## [0.2.3-preview] - 2020-02-18
@@ -45,7 +66,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added confirmation dialogs when selecting *Clear Data* and *Clear History* buttons
 
 ## [0.2.0-preview] - 2019-11-13
-- Updated Report Generator to version v4.3.6
+- Updated Report Generator to version 4.3.6
 - Split documentation into separate pages
 - Updated UX design of the Code Coverage window
 - Exposed `CodeCoverage.StartRecording()`, `CodeCoverage.StopRecording()`, `CodeCoverage.PauseRecording()` and `CodeCoverage.UnpauseRecording()` API
@@ -60,7 +81,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Passing `-coverageOptions generateHtmlReport` on the command line now creates a report if `-runTests` is not passed
 
 ## [0.1.0-preview.2] - 2019-09-23
-- Updated Report Generator to version v4.2.20
+- Updated Report Generator to version 4.2.20
 - Added *Coverage Recording* feature
 - Added support for correct naming of c# operators
 - Added support for correct naming of constructors

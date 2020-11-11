@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using UnityEditor.Compilation;
 using UnityEditor.TestTools.CodeCoverage.Utils;
 using System.Collections.Generic;
+using UnityEditor.TestTools.CodeCoverage.Analytics;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -32,6 +33,19 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_ExcludeAssemblies = new Regex[] { };
         }
 
+        private string[] RemoveDefaultExcludedAssemblies(string[] excludeAssemblyFilters)
+        {
+            string[] defaultAssemblies = kDefaultExcludedAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            List<string> excludedAssemblies = excludeAssemblyFilters.ToList<string>();
+
+            foreach (string defaultAssembly in defaultAssemblies)
+            {
+                excludedAssemblies.Remove(defaultAssembly);
+            }
+
+            return excludedAssemblies.ToArray();
+        }
+
         public void Parse(string includeAssemblies, string excludeAssemblies)
         {
             includedAssemblies = includeAssemblies;
@@ -39,6 +53,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string[] includeAssemblyFilters = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             string[] excludeAssemblyFilters = excludeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            CoverageAnalytics.instance.CurrentCoverageEvent.includedAssemblies = includeAssemblyFilters;
+            CoverageAnalytics.instance.CurrentCoverageEvent.excludedAssemblies = RemoveDefaultExcludedAssemblies(excludeAssemblyFilters);
 
             m_IncludeAssemblies = includeAssemblyFilters
                 .Select(f => CreateFilterRegex(f))
@@ -63,7 +80,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
         }
 
-        public static Assembly[] GetAllProjectAssemblies()
+        private static Assembly[] GetAllProjectAssemblies()
         {
             Assembly[] assemblies = CompilationPipeline.GetAssemblies();
             Array.Sort(assemblies, (x, y) => String.Compare(x.name, y.name));
@@ -72,7 +89,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public static string GetAllProjectAssembliesString()
         {
-            Assembly[] assemblies = AssemblyFiltering.GetAllProjectAssemblies();
+            Assembly[] assemblies = GetAllProjectAssemblies();
 
             string assembliesString = "";
             int assembliesLength = assemblies.Length;
@@ -88,7 +105,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public static string GetUserOnlyAssembliesString()
         {
-            Assembly[] assemblies = AssemblyFiltering.GetAllProjectAssemblies();
+            Assembly[] assemblies = GetAllProjectAssemblies();
             List<string> userAssemblies = new List<string>();
 
             string assembliesString = "";
