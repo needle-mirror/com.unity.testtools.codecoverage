@@ -89,7 +89,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
                 CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
             CurrentCoverageEvent.useDefaultAssemblyFilters = runFromCommandLine ?
                 !CommandLineManager.instance.assemblyFiltersSpecified :
-                string.Equals(CoveragePreferences.instance.GetString("IncludeAssemblies", string.Empty), AssemblyFiltering.GetUserOnlyAssembliesString(), StringComparison.InvariantCultureIgnoreCase);
+                string.Equals(CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString()), AssemblyFiltering.GetUserOnlyAssembliesString(), StringComparison.InvariantCultureIgnoreCase);
             CurrentCoverageEvent.useDefaultPathFilters = runFromCommandLine ?
                 !CommandLineManager.instance.pathFiltersSpecified :
                 string.Equals(CoveragePreferences.instance.GetString("PathsToInclude", string.Empty), string.Empty) && string.Equals(CoveragePreferences.instance.GetString("PathsToExclude", string.Empty), string.Empty);

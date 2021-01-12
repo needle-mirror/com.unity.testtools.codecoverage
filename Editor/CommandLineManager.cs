@@ -252,18 +252,49 @@ namespace UnityEditor.TestTools.CodeCoverage
                             for (int i = 0; i < assemblyFilters.Length; ++i)
                             {
                                 string filter = assemblyFilters[i];
+                                string filterBody = filter.Length > 1 ? filter.Substring(1) : string.Empty;
 
                                 if (filter.StartsWith("+", StringComparison.OrdinalIgnoreCase))
                                 {
                                     if (m_IncludeAssemblies.Length > 0)
                                         m_IncludeAssemblies += ",";
-                                    m_IncludeAssemblies += filter.Substring(1);
+
+                                    if (filterBody.StartsWith("<", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        if (string.Equals(filterBody, AssemblyFiltering.kUserAlias, StringComparison.OrdinalIgnoreCase))
+                                            m_IncludeAssemblies += AssemblyFiltering.GetUserOnlyAssembliesString();
+                                        else if (string.Equals(filterBody, AssemblyFiltering.kProjectAlias, StringComparison.OrdinalIgnoreCase))
+                                            m_IncludeAssemblies += AssemblyFiltering.GetAllProjectAssembliesString();
+                                        else if (string.Equals(filterBody, AssemblyFiltering.kPackagesAlias, StringComparison.OrdinalIgnoreCase))
+                                            m_IncludeAssemblies += AssemblyFiltering.GetPackagesOnlyAssembliesString();
+                                        else if (string.Equals(filterBody, AssemblyFiltering.kAllAlias, StringComparison.OrdinalIgnoreCase))
+                                            m_IncludeAssemblies += "*";
+                                    }
+                                    else
+                                    {
+                                        m_IncludeAssemblies += filterBody;
+                                    }
                                 }
                                 else if (filter.StartsWith("-", StringComparison.OrdinalIgnoreCase))
                                 {
                                     if (m_ExcludeAssemblies.Length > 0)
                                         m_ExcludeAssemblies += ",";
-                                    m_ExcludeAssemblies += filter.Substring(1);
+
+                                    if (filterBody.StartsWith("<", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        if (string.Equals(filterBody, AssemblyFiltering.kUserAlias, StringComparison.OrdinalIgnoreCase))
+                                            m_ExcludeAssemblies += AssemblyFiltering.GetUserOnlyAssembliesString();
+                                        else if (string.Equals(filterBody, AssemblyFiltering.kProjectAlias, StringComparison.OrdinalIgnoreCase))
+                                            m_ExcludeAssemblies += AssemblyFiltering.GetAllProjectAssembliesString();
+                                        else if (string.Equals(filterBody, AssemblyFiltering.kPackagesAlias, StringComparison.OrdinalIgnoreCase))
+                                            m_ExcludeAssemblies += AssemblyFiltering.GetPackagesOnlyAssembliesString();
+                                        else if (string.Equals(filterBody, AssemblyFiltering.kAllAlias, StringComparison.OrdinalIgnoreCase))
+                                            m_ExcludeAssemblies += "*";
+                                    }
+                                    else
+                                    {
+                                        m_ExcludeAssemblies += filterBody;
+                                    }
                                 }
                                 else
                                 {
@@ -283,18 +314,19 @@ namespace UnityEditor.TestTools.CodeCoverage
                             for (int i = 0; i < pathFilters.Length; ++i)
                             {
                                 string filter = pathFilters[i];
+                                string filterBody = filter.Length > 1 ? filter.Substring(1) : string.Empty;
 
                                 if (filter.StartsWith("+", StringComparison.OrdinalIgnoreCase))
                                 {
                                     if (m_IncludePaths.Length > 0)
                                         m_IncludePaths += ",";
-                                    m_IncludePaths += filter.Substring(1);
+                                    m_IncludePaths += filterBody;
                                 }
                                 else if (filter.StartsWith("-", StringComparison.OrdinalIgnoreCase))
                                 {
                                     if (m_ExcludePaths.Length > 0)
                                         m_ExcludePaths += ",";
-                                    m_ExcludePaths += filter.Substring(1);
+                                    m_ExcludePaths += filterBody;
                                 }
                                 else
                                 {
@@ -307,7 +339,16 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
 
             if (m_IncludeAssemblies.Length == 0)
-                m_IncludeAssemblies = AssemblyFiltering.GetUserOnlyAssembliesString();
+            {
+                // If there are no inlcudedAssemblies specified but there are includedPaths specified
+                // then include all project assemblies so path filtering can take precedence over assembly filtering,
+                // othewise if there are no includedPaths specified neither then inlcude just the user assemblies (found under the Assets folder)
+                
+                if (m_IncludePaths.Length > 0)
+                    m_IncludeAssemblies = AssemblyFiltering.GetAllProjectAssembliesString();
+                else
+                    m_IncludeAssemblies = AssemblyFiltering.GetUserOnlyAssembliesString();
+            }
 
             if (m_ExcludeAssemblies.Length > 0)
                 m_ExcludeAssemblies += ",";

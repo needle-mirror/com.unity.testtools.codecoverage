@@ -14,10 +14,13 @@ namespace UnityEditor.TestTools.CodeCoverage
     {
         public void Generate(CoverageSettings coverageSettings)
         {
+            CoverageRunData.instance.ReportGenerationStart();
+
             if (coverageSettings == null)
             {
                 EditorUtility.ClearProgressBar();
                 ResultsLogger.Log(ResultID.Warning_FailedReportNullCoverageSettings);
+                CoverageRunData.instance.ReportGenerationEnd(false);
                 return;
             }
 
@@ -41,6 +44,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             {
                 EditorUtility.ClearProgressBar();
                 ResultsLogger.Log(ResultID.Error_FailedReportNoAssemblies);
+                CoverageRunData.instance.ReportGenerationEnd(false);
                 return;
             }
 
@@ -50,6 +54,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             {
                 EditorUtility.ClearProgressBar();
                 ResultsLogger.Log(ResultID.Error_FailedReportNoTests);
+                CoverageRunData.instance.ReportGenerationEnd(false);
                 return;
             }
 
@@ -126,6 +131,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                     ResultsLogger.Log(ResultID.Log_ReportSaved, targetDirectory);
                     ResultsLogger.LogSessionItem(loggerFactory.Logger.ToString(), LogVerbosityLevel.Info);
 
+                    CoverageRunData.instance.ReportGenerationEnd(true);
+
                     // Send Analytics event (Report Only / Data & Report)
                     CoverageAnalytics.instance.SendCoverageEvent(true);
 
@@ -143,6 +150,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                 {
                     ResultsLogger.Log(ResultID.Error_FailedReport);
                     ResultsLogger.LogSessionItem(loggerFactory.Logger.ToString(), LogVerbosityLevel.Error);
+
+                    CoverageRunData.instance.ReportGenerationEnd(false);
                 }
             }
             finally

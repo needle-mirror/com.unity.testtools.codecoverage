@@ -6,13 +6,13 @@ The package is a client of the coverage API that was added in Unity 2019.2. For 
 
 ## Requirements
 
-This version of Code Coverage is compatible with the following versions of the Unity Editor:
+This version of the Code Coverage package is compatible with the following versions of the Unity Editor:
 
 * 2019.3 and later
 
 ## 3rd party libraries used
 
-* [ReportGenerator](https://github.com/danielpalme/ReportGenerator) - v4.7.1
+* [ReportGenerator](https://github.com/danielpalme/ReportGenerator) - v4.8.4
 
 ## Known limitations
 
