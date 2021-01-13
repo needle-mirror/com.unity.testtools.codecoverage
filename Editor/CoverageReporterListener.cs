@@ -141,6 +141,9 @@ namespace UnityEditor.TestTools.CodeCoverage
                 (CommandLineManager.instance.generateHTMLReport || CommandLineManager.instance.generateBadgeReport) &&
                 !CommandLineManager.instance.runTests)
             {
+                if (CoverageRunData.instance.reportWasGenerated)
+                    return;
+
                 // Start the timer for analytics for Report only
                 CoverageAnalytics.instance.StartTimer();
                 CoverageAnalytics.instance.CurrentCoverageEvent.actionID = ActionID.ReportOnly;

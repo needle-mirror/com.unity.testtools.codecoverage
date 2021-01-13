@@ -10,7 +10,11 @@ namespace UnityEditor.TestTools.CodeCoverage
 {
     internal class AssemblyFiltering
     {
-        static public string kDefaultExcludedAssemblies = "system*,mono*,nunit*,microsoft*,mscorlib*,roslyn*";
+        public const string kDefaultExcludedAssemblies = "system*,mono*,nunit*,microsoft*,mscorlib*,roslyn*";
+        public const string kUserAlias = "<user>";
+        public const string kProjectAlias = "<project>";
+        public const string kPackagesAlias = "<packages>";
+        public const string kAllAlias = "<all>";
 
         public string includedAssemblies
         {
@@ -51,8 +55,8 @@ namespace UnityEditor.TestTools.CodeCoverage
             includedAssemblies = includeAssemblies;
             excludedAssemblies = excludeAssemblies;
 
-            string[] includeAssemblyFilters = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] excludeAssemblyFilters = excludeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] includeAssemblyFilters = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
+            string[] excludeAssemblyFilters = excludeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
 
             CoverageAnalytics.instance.CurrentCoverageEvent.includedAssemblies = includeAssemblyFilters;
             CoverageAnalytics.instance.CurrentCoverageEvent.excludedAssemblies = RemoveDefaultExcludedAssemblies(excludeAssemblyFilters);
@@ -105,8 +109,18 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public static string GetUserOnlyAssembliesString()
         {
+            return GetStartsWithAssembliesString("Assets");
+        }
+
+        public static string GetPackagesOnlyAssembliesString()
+        {
+            return GetStartsWithAssembliesString("Packages");
+        }
+
+        private static string GetStartsWithAssembliesString(string startsWithStr)
+        {
             Assembly[] assemblies = GetAllProjectAssemblies();
-            List<string> userAssemblies = new List<string>();
+            List<string> foundAssemblies = new List<string>();
 
             string assembliesString = "";
             int assembliesLength = assemblies.Length;
@@ -117,17 +131,17 @@ namespace UnityEditor.TestTools.CodeCoverage
                 string[] sourceFiles = assemblies[i].sourceFiles;
 
                 if (sourceFiles.Length > 0 &&
-                    sourceFiles[0].StartsWith("Assets"))
+                    sourceFiles[0].StartsWith(startsWithStr, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    userAssemblies.Add(name);
+                    foundAssemblies.Add(name);
                 }
             }
 
-            int userAssembliesLength = userAssemblies.Count;
-            for (i = 0; i < userAssembliesLength; ++i)
+            int foundAssembliesLength = foundAssemblies.Count;
+            for (i = 0; i < foundAssembliesLength; ++i)
             {
-                assembliesString += userAssemblies[i];
-                if (i < userAssembliesLength - 1)
+                assembliesString += foundAssemblies[i];
+                if (i < foundAssembliesLength - 1)
                     assembliesString += ",";
             }
 

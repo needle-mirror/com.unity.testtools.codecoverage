@@ -25,6 +25,9 @@ namespace UnityEditor.TestTools.CodeCoverage
         [SerializeField]
         private bool m_IsRecordingPaused = false;
 
+        [SerializeField]
+        private bool m_ReportWasGenerated = false;
+
         public void Start(bool initAnalytics = true)
         {
             m_LastIgnoredSuite = string.Empty;
@@ -88,6 +91,21 @@ namespace UnityEditor.TestTools.CodeCoverage
             get { return m_IsRecordingPaused; }
         }
 
+        public bool reportWasGenerated
+        {
+            get { return m_ReportWasGenerated; }
+        }
+
+        public void ReportGenerationStart()
+        {
+            m_ReportWasGenerated = false;
+        }
+
+        public void ReportGenerationEnd(bool success)
+        {
+            m_ReportWasGenerated = success;
+        }
+
         public int GetNextFileIndex()
         {
             return m_FileIndex++;
@@ -143,6 +161,11 @@ namespace UnityEditor.TestTools.CodeCoverage
         public bool isRecordingPaused
         {
             get { return m_CoverageRunDataImplementation.isRecordingPaused; }
+        }
+
+        public bool reportWasGenerated
+        {
+            get { return m_CoverageRunDataImplementation.reportWasGenerated; }
         }
 
         public int GetNextFileIndex()
@@ -203,6 +226,16 @@ namespace UnityEditor.TestTools.CodeCoverage
         public void UnpauseRecording()
         {
             m_CoverageRunDataImplementation.UnpauseRecording();
+        }
+
+        public void ReportGenerationStart()
+        {
+            m_CoverageRunDataImplementation.ReportGenerationStart();
+        }
+
+        public void ReportGenerationEnd(bool success)
+        {
+            m_CoverageRunDataImplementation.ReportGenerationEnd(success);
         }
     }
 }

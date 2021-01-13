@@ -13,7 +13,7 @@
 |Generate HTML Report|Check this to generate an HTML report.|
 |Generate Summary Badges|Check this to generate coverage summary badges in SVG and PNG format.|
 |Generate History|Check this to generate and include the coverage history in the HTML report.|
-|Generate Additional Metrics|Check this to generate and include additional metrics in the HTML report. These currently include Cyclomatic Complexity and Crap Scrore calculations for each method. See the [Risk Hotspots](HowToInterpretResults.md#risk-hotspots) section for more information.|
+|Generate Additional Metrics|Check this to generate and include additional metrics in the HTML report. These currently include Cyclomatic Complexity and Crap Score calculations for each method. See the [Risk Hotspots](HowToInterpretResults.md#risk-hotspots) section for more information.|
 |Auto Generate Report|Check this to generate the report automatically after the [Test Runner](CoverageTestRunner.md) finishes running or the [Coverage Recording](CoverageRecording.md) session is complete.|
 |Clear Data|Select the **Clear Data** button to clear the coverage data from previous test runs for both _EditMode_ and _PlayMode_ tests or from previous [Coverage Recording](CoverageRecording.md) sessions. The **Clear Data** button is disabled if the coverage data is cleared, if no tests ran, or if there is no Coverage Recording data.|
 |Clear History|Select the **Clear History** button to clear the coverage report history. The **Clear History** button is disabled if the history is cleared or if no reports were generated.|
