@@ -4,13 +4,18 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.4.2-preview] - 2021-01-21
+
+### Fixes
+- Updated Include Platforms to Editor only in the ReportGeneratorMerged.dll settings. Fixes an Android build error introduced in 0.4.1-preview (case 1306557)
+
 ## [0.4.1-preview] - 2021-01-12
 
 ### Fixes
 - Fixed multiple reports generated in batchmode when passing `generateHtmlReport` in *-coverageOptions* without passing `-runTests`
 
 ### Changes
-- All project assemblies are included when there are included paths specified in *pathFilters* but no inlcuded assemblies in *assemblyFilters*, when running in batchmode
+- All project assemblies are included when there are included paths specified in *pathFilters* but no included assemblies in *assemblyFilters*, when running in batchmode
 - Updated Report Generator to version 4.8.4
 - Updated documentation to match version 0.4.1-preview
 
