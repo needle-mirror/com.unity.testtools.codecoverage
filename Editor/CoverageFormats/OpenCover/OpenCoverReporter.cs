@@ -130,7 +130,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
         public void OutputCoverageReport(ITestResultAdaptor testResults = null, bool clearProgressBar = true)
         {
-            if (!CommandLineManager.instance.runFromCommandLine)
+            if (!CommandLineManager.instance.batchmode)
                 EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressWritingFile.text, 0.95f);
 
             CoverageSession coverageSession = GenerateOpenCoverSession();
@@ -474,7 +474,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     ResultsLogger.Log(ResultID.Warning_ExcludeAttributeAssembly, assemblyName);
                 }
 
-                if (!CommandLineManager.instance.runFromCommandLine)
+                if (!CommandLineManager.instance.batchmode)
                     EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressGatheringResults.text, currentProgress);
                 currentProgress += progressInterval;
         

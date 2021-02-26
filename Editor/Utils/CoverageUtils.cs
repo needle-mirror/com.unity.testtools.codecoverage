@@ -99,17 +99,25 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             string rootFolderPath = string.Empty;
             string coverageFolderPath = string.Empty;
 
-            if (CommandLineManager.instance.runFromCommandLine)
+            if (CommandLineManager.instance.batchmode)
             {
                 if (coverageSettings.resultsPathFromCommandLine.Length > 0)
                 {
                     coverageFolderPath = coverageSettings.resultsPathFromCommandLine;
                     EnsureFolderExists(coverageFolderPath);
-                }  
+                }
             }
             else
             {
-                coverageFolderPath = CoveragePreferences.instance.GetStringForPaths("Path", string.Empty);
+                if (CommandLineManager.instance.runFromCommandLine && coverageSettings.resultsPathFromCommandLine.Length > 0)
+                {
+                    coverageFolderPath = coverageSettings.resultsPathFromCommandLine;
+                    EnsureFolderExists(coverageFolderPath);
+                }
+                else
+                {
+                    coverageFolderPath = CoveragePreferences.instance.GetStringForPaths("Path", string.Empty);
+                }
             }
 
             string projectPath = GetProjectPath();
@@ -138,7 +146,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             string historyFolderPath = string.Empty;
             string rootFolderPath = coverageSettings.rootFolderPath;
 
-            if (CommandLineManager.instance.runFromCommandLine)
+            if (CommandLineManager.instance.batchmode)
             {
                 if (coverageSettings.historyPathFromCommandLine.Length > 0)
                 {
@@ -148,7 +156,15 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             }
             else
             {
-                historyFolderPath = CoveragePreferences.instance.GetStringForPaths("HistoryPath", string.Empty);
+                if (CommandLineManager.instance.runFromCommandLine && coverageSettings.historyPathFromCommandLine.Length > 0)
+                {
+                    historyFolderPath = coverageSettings.historyPathFromCommandLine;
+                    EnsureFolderExists(historyFolderPath);
+                }
+                else
+                {
+                    historyFolderPath = CoveragePreferences.instance.GetStringForPaths("HistoryPath", string.Empty);
+                }
             }
 
             bool addHistorySubDir = false;
@@ -209,7 +225,6 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             {
                 if (Directory.Exists(folderPath))
                 {
-                    
                     DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
 
                     foreach (FileInfo file in dirInfo.GetFiles(filePattern))

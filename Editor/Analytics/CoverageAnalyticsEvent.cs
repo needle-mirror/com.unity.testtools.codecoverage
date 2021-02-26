@@ -16,6 +16,8 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
         public long duration;
         // Was the coverage session result a success (batchmode compatible)
         public bool success;
+        // Did the user run the editor from the command line
+        public bool runFromCommandLine;
         // Did the user run the editor in batch mode
         public bool batchmode;
         // Did the user have Generate HTML Report selected  (batchmode compatible)

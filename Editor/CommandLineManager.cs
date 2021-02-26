@@ -98,6 +98,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public bool batchmode
+        {
+            get;
+            private set;
+        }
+
         private string m_CoverageOptionsArg;
         private string[] m_CoverageOptions;
         private string m_IncludeAssemblies;
@@ -119,6 +125,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             assemblyFiltering = new AssemblyFiltering();
             pathFiltering = new PathFiltering();
             runTests = false;
+            batchmode = false;
 
             m_CoverageOptionsArg = string.Empty;
             m_CoverageOptions = new string[] { };
@@ -132,7 +139,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                 new CommandLineOption("coverageResultsPath", filePathArg => { SetCoverageResultsPath(filePathArg); }),
                 new CommandLineOption("coverageHistoryPath", filePathArg => { SetCoverageHistoryPath(filePathArg); }),
                 new CommandLineOption("coverageOptions", optionsArg => { AddCoverageOptions(optionsArg); }),
-                new CommandLineOption("runTests", () => { runTests = true; })
+                new CommandLineOption("runTests", () => { runTests = true; }),
+                new CommandLineOption("batchmode", () => { batchmode = true; })
             );
             optionSet.Parse(commandLineArgs);
 
@@ -152,7 +160,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             {
                 if (filePathArg != null)
                 {
-                    coverageResultsPath = filePathArg;
+                    coverageResultsPath = CoverageUtils.NormaliseFolderSeparators(filePathArg);
                 }
             }
         }
@@ -173,7 +181,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             {
                 if (filePathArg != null)
                 {
-                    coverageHistoryPath = filePathArg;
+                    coverageHistoryPath = CoverageUtils.NormaliseFolderSeparators(filePathArg);
                 }
             }
         }
@@ -240,6 +248,30 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                     case "GENERATEBADGEREPORT":
                         generateBadgeReport = true;
+                        break;
+
+                    case "VERBOSITY":
+                        if (optionArgs.Length > 0)
+                        {
+                            switch (optionArgs.ToUpperInvariant())
+                            {
+                                case "VERBOSE":
+                                    ResultsLogger.VerbosityLevel = LogVerbosityLevel.Verbose;
+                                    break;
+                                case "INFO":
+                                    ResultsLogger.VerbosityLevel = LogVerbosityLevel.Info;
+                                    break;
+                                case "WARNING":
+                                    ResultsLogger.VerbosityLevel = LogVerbosityLevel.Warning;
+                                    break;
+                                case "ERROR":
+                                    ResultsLogger.VerbosityLevel = LogVerbosityLevel.Error;
+                                    break;
+                                case "OFF":
+                                    ResultsLogger.VerbosityLevel = LogVerbosityLevel.Off;
+                                    break;
+                            }
+                        }
                         break;
 
                     case "ASSEMBLYFILTERS":

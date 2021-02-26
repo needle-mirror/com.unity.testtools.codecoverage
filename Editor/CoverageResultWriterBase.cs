@@ -23,7 +23,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             {
                 ResultsLogger.Log(ResultID.Warning_DebugCodeOptimization);
 
-                if (!CommandLineManager.instance.runFromCommandLine)
+                if (!CommandLineManager.instance.batchmode)
                 {
                     if (EditorUtility.DisplayDialog(
                         L10n.Tr("Code Coverage"),

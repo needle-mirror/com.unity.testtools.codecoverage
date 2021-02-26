@@ -1,6 +1,8 @@
 # How to interpret the results
 
-This section assumes that you enabled the **Generate HTML Report** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReport` option in `-coverageOptions` on the [command line](UsingCodeCoverage.md#using-code-coverage-in-batchmode). If you're running the tests in the editor, a file viewer window will open up containing the coverage report once the test run has been finished. If you're running the tests from the command line, navigate to the `-coverageResultsPath` location with your file viewer. Open the `Report` folder then open `index.htm` in a web browser. This shows a summary of the coverage results from the tests.
+This section assumes that you enabled the **Generate HTML Report** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReport` option in `-coverageOptions` on the [command line](CoverageBatchmode.md). If you're running the tests in the editor, a file viewer window will open up containing the coverage report once the test run has been finished. If you're running the tests from the command line, navigate to the `-coverageResultsPath` location with your file viewer. Open the `Report` folder then open `index.htm` in a web browser. This shows a summary of the coverage results from the tests.<br/>
+
+![Code Coverage Report](images/report.png)
 
 ## Summary View
 
@@ -12,11 +14,11 @@ This section shows a brief summary of the coverage results including the number 
 
 ### Coverage History
 
-This section will only appear if you enabled the **Generate History** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReportHistory` option in `-coverageOptions` on the [command line](UsingCodeCoverage.md#using-code-coverage-in-batchmode). Here you will see a graph showing the total percentage coverage for every test run for this project. Aim to keep this percentage as high as possible. If it is decreasing, consider writing more tests to improve your coverage.
+This section will only appear if you enabled the **Generate History** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReportHistory` option in `-coverageOptions` on the [command line](CoverageBatchmode.md). Here you will see a graph showing the total percentage coverage for every test run for this project. Aim to keep this percentage as high as possible. If it is decreasing, consider writing more tests to improve your coverage.
 
 ### Risk Hotspots
 
-This section will only appear if you enabled the **Generate Additional Metrics** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateAdditionalMetrics` option in `-coverageOptions` on the [command line](UsingCodeCoverage.md#using-code-coverage-in-batchmode).
+This section will only appear if you enabled the **Generate Additional Metrics** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateAdditionalMetrics` option in `-coverageOptions` on the [command line](CoverageBatchmode.md).
 
 In this section, you will see information about any methods that have a Cyclomatic Compexity score that is greater than 15. The Cyclomatic Complexity score is a value that is based on the number of paths that can be taken through a method. The score will tend to be higher if a method has a large number of `if` or `switch` statements. For more detailed information see the [Wikipedia entry on Cyclomatic Complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity). You will also see information about any methods with a high Crap Score. CRAP stands for Change Risk Anti-Patterns. For more detailed information see this [article](https://testing.googleblog.com/2011/02/this-code-is-crap.html).
 
@@ -35,7 +37,7 @@ Similar to the Summary section of the previous page, this section shows some bri
 
 ### Coverage History
 
-This section will only appear if you enabled the **Generate History** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReportHistory` option in `-coverageOptions` on the [command line](UsingCodeCoverage.md#using-code-coverage-in-batchmode). It shows a graph of the coverage percentage of the class/struct over time. Try to keep this value as high as you can. Make sure that as you add new code the coverage percentage is maintained by adding more tests.
+This section will only appear if you enabled the **Generate History** option in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReportHistory` option in `-coverageOptions` on the [command line](CoverageBatchmode.md). It shows a graph of the coverage percentage of the class/struct over time. Try to keep this value as high as you can. Make sure that as you add new code the coverage percentage is maintained by adding more tests.
 
 ### Metrics
 

@@ -24,9 +24,13 @@ namespace UnityEditor.TestTools.CodeCoverage
                 return;
             }
 
-            string includeAssemblies = CommandLineManager.instance.runFromCommandLine ?
-                CommandLineManager.instance.assemblyFiltering.includedAssemblies :
-                CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
+            string includeAssemblies = string.Empty;
+            if (CommandLineManager.instance.batchmode)
+                includeAssemblies = CommandLineManager.instance.assemblyFiltering.includedAssemblies;
+            else
+                includeAssemblies = CommandLineManager.instance.assemblyFiltersSpecified ?
+                        CommandLineManager.instance.assemblyFiltering.includedAssemblies :
+                        CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
 
             // If override for include assemblies is set in coverageSettings, use overrideIncludeAssemblies instead
             if (!String.IsNullOrEmpty(coverageSettings.overrideIncludeAssemblies))
@@ -65,26 +69,26 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string[] reportFilePatterns = new string[] { testResultsXmlPath, recordingResultsXmlPath };
 
-            bool includeHistoryInReport = CommandLineManager.instance.runFromCommandLine ?
+            bool includeHistoryInReport = CommandLineManager.instance.batchmode ?
                 CommandLineManager.instance.generateHTMLReportHistory :
-                CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
+                CommandLineManager.instance.generateHTMLReportHistory || CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
 
             string historyDirectory = includeHistoryInReport ? coverageSettings.historyFolderPath : null;
 
             string targetDirectory = CoverageUtils.JoinPaths(rootFolderPath, CoverageSettings.ReportFolderName);
 
-            if (Directory.Exists(targetDirectory))
-                Directory.Delete(targetDirectory, true);
-
             string[] sourceDirectories = new string[] { };
 
-            bool generateHTMLReport = CommandLineManager.instance.runFromCommandLine ?
+            bool generateHTMLReport = CommandLineManager.instance.batchmode ?
                 CommandLineManager.instance.generateHTMLReport :
-                CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
+                CommandLineManager.instance.generateHTMLReport || CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
 
-            bool generateBadge = CommandLineManager.instance.runFromCommandLine ?
-                CommandLineManager.instance.generateBadgeReport :
-                CoveragePreferences.instance.GetBool("GenerateBadge", true);
+            if (coverageSettings.overrideGenerateReport)
+                generateHTMLReport = true;
+
+            bool generateBadge = CommandLineManager.instance.batchmode ?
+                CommandLineManager.instance.generateBadgeReport : 
+                CommandLineManager.instance.generateBadgeReport || CoveragePreferences.instance.GetBool("GenerateBadge", true);
 
             string reportTypesString = "xmlSummary,";
             if (generateHTMLReport)
@@ -95,9 +99,9 @@ namespace UnityEditor.TestTools.CodeCoverage
             string[] reportTypes = reportTypesString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             string[] plugins = new string[] { };
 
-            bool includeCoverageOptions = CommandLineManager.instance.runFromCommandLine ?
+            bool includeAdditionalMetrics = CommandLineManager.instance.batchmode ?
                 CommandLineManager.instance.generateAdditionalMetrics :
-                CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
+                CommandLineManager.instance.generateAdditionalMetrics || CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
 
             string[] classFilters = new string[] { };
             string[] fileFilters = new string[] { };
@@ -122,11 +126,14 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             try
             {
-                if (!CommandLineManager.instance.runFromCommandLine)
+                if (!CommandLineManager.instance.batchmode)
                     EditorUtility.DisplayProgressBar(ReportGeneratorStyles.ProgressTitle.text, ReportGeneratorStyles.ProgressInfo.text, 0.4f);
 
+                if (Directory.Exists(targetDirectory))
+                    Directory.Delete(targetDirectory, true);
+
                 Generator generator = new Generator();
-                if (generator.GenerateReport(config, new Settings() { DisableRiskHotspots = !includeCoverageOptions }, new RiskHotspotsAnalysisThresholds()))
+                if (generator.GenerateReport(config, new Settings() { DisableRiskHotspots = !includeAdditionalMetrics }, new RiskHotspotsAnalysisThresholds()))
                 {
                     ResultsLogger.Log(ResultID.Log_ReportSaved, targetDirectory);
                     ResultsLogger.LogSessionItem(loggerFactory.Logger.ToString(), LogVerbosityLevel.Info);
@@ -136,7 +143,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                     // Send Analytics event (Report Only / Data & Report)
                     CoverageAnalytics.instance.SendCoverageEvent(true);
 
-                    if (!CommandLineManager.instance.runFromCommandLine &&
+                    if (!CommandLineManager.instance.batchmode &&
                         coverageSettings.revealReportInFinder)
                     {
                         string indexHtm = CoverageUtils.JoinPaths(targetDirectory, "index.htm");
@@ -194,7 +201,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
 
-            if (!CommandLineManager.instance.runFromCommandLine)
+            if (!CommandLineManager.instance.batchmode)
             {
                 if (string.Equals(format, " Creating report {0}/{1} (Assembly: {2}, Class: {3})"))
                 {
@@ -235,7 +242,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
 
-            if (!CommandLineManager.instance.runFromCommandLine)
+            if (!CommandLineManager.instance.batchmode)
             {
                 if (string.Equals(format, "Loading report '{0}' {1}/{2}"))
                 {

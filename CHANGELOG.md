@@ -4,6 +4,21 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.4.3-preview] - 2021-02-26
+
+### Fixes
+- Fixed assembly version validation error due to internal libraries included in the ReportGeneratorMerged.dll (case 1312121)
+
+### Changes
+- Added *Enable Code Coverage* checkbox under Settings in [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@0.4/manual/CodeCoverageWindow.html).<br/>**Note:** In Unity 2019 and 2020 you can enable Code Coverage in [General Preferences](https://docs.unity3d.com/Manual/Preferences.html). This was removed in Unity 2021; the user interface for managing Code Coverage is now entirely inside the Code Coverage package.
+- The settings and options passed in the command line override/disable the settings in the Code Coverage window and relevant warnings display to indicate this
+- Updated Report Generator to version 4.8.5
+- Updated documentation and workshop to match version 0.4.3-preview
+
+### Improvements
+- Added `verbosity` in *-coverageOptions* for [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@0.4/manual/CoverageBatchmode.html)
+- Added *Generate combined report from separate projects* section in documentation, under [Using Code Coverage in batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@0.4/manual/CoverageBatchmode.html#generate-combined-report-from-separate-projects)
+
 ## [0.4.2-preview] - 2021-01-21
 
 ### Fixes
@@ -20,7 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated documentation to match version 0.4.1-preview
 
 ### Improvements
-- Introduced new *assemblyFilters* aliases in [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@0.4/manual/UsingCodeCoverage.html#using-code-coverage-in-batchmode), used for referencing a group of assemblies to include or exclude. These are `<user>`, `<project>` and `<packages>`
+- Introduced new *assemblyFilters* aliases in [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@0.4/manual/CoverageBatchmode.html), used for referencing a group of assemblies to include or exclude. These are `<user>`, `<project>` and `<packages>`
 
 ## [0.4.0-preview] - 2020-11-11
 

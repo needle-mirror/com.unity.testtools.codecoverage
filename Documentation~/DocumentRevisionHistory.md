@@ -2,6 +2,7 @@
 
 |Date|Reason|
 |:---|:---|
+|Feb 26, 2021|<li>Added information about the *Enable Code Coverage* setting in the Code Coverage window<li>Updated *Installing Code Coverage* section<li>Added *verbosity* section in *-coverageOptions*<li>Added *Generate combined report from separate projects* section<li>Matches package version *0.4.3-preview*|
 |Jan 12, 2021|<li>Added information about *assemblyFilters* aliases and note about how *path filtering* can take precedence over *assembly filtering* in *Using Code Coverage in batchmode* section<li>Matches package version *0.4.1-preview*|
 |Nov 11, 2020|<li>Added information about *Included Paths* and *Excluded Paths* settings in the Code Coverage window<li>Updated information about *Included Assemblies* setting in the Code Coverage window<li>Matches package version *0.4.0-preview*|
 |Aug 3, 2020|<li>Matches package version *0.3.1-preview*|
