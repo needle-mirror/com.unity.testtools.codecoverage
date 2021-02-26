@@ -1,38 +1,39 @@
 # Installing Code Coverage
 
-Before you begin the following procedure, make sure you have no errors in the [Console](https://docs.unity3d.com/Manual/Console.html) window (in red text).
+Before you install the package, make sure you have no errors in the [Console](https://docs.unity3d.com/Manual/Console.html) window (in red text).
 
-## Unity 2020.1 and later versions
+## From the Unity Package Manager
 
-1. Go to **Edit** > **Project Settings** > **Package Manager**, check **Enable Preview Packages** and confirm.<br/><br/>
-![Enable Preview Packages](images/install_show_preview_2020.png)
+Use the [Unity Package Manager](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest) to find and install the Code Coverage package.
 
-2. Open the Package Manager (go to **Window** > **Package Manager**).
+![Install Code Coverage package](images/install_package.png)
 
-3. Make sure **Packages: Unity Registry** is selected.
+To verify that Code Coverage has been installed correctly, open the Code Coverage window (go to **Window** > **Analysis** > **Code Coverage**). If you don't see the **Code Coverage** menu item, then Code Coverage did not install correctly.
 
-4. Find the **Code Coverage** package in the package list (left hand side) or enter **Code Coverage** in the search box.
+## Manually from the Package Manifest
 
-5. Select the **Code Coverage** package in the package list (left hand side), then select the **Install** button in the package details (right hand side).<br/><br/>
-![Install package](images/install_package_2020.png)
+You can also install the Code Coverage package manually. To do this, add a reference to Code Coverage in your project's `Packages/manifest.json` file. There are two ways you can reference a specific version of the Code Coverage package, depending on how you use it.
 
-6. To verify that Code Coverage has been installed correctly, open the Code Coverage window (go to **Window** > **Analysis** > **Code Coverage**).
+### Using a production version of the package
 
-  If you don't see the **Code Coverage** menu item, then Code Coverage did not install correctly.
+You can point the Package Manager at a publicly available version. To do this manually, add it to `manifest.json`:
 
-## Unity 2019.3 and Unity 2019.4
+```json
+    "dependencies": {
+        //...
+        "com.unity.testtools.codecoverage":"<full version number>"
+    }
+```
 
-1. Open the Package Manager (go to **Window** > **Package Manager**).
+### Using a local clone of the package
 
-2. Enable the **Show preview packages** option to see the Code Coverage package in the package list.  
-Make sure **Unity Registry** is selected (**All packages** in Unity 2019.3).<br/><br/>
-![Show preview packages](images/install_show_preview.png)
+If you want to use a cloned version of the package, you can point the Package Manager at a local folder as the package location:
 
-3. Find the **Code Coverage** package in the package list (left hand side) or enter **Code Coverage** in the search box.
+```json
+    "dependencies": {
+        //...
+        "com.unity.testtools.codecoverage":"file:path/to/package/root"
+    }
+```
 
-4. Select the **Code Coverage** package in the package list (left hand side), then select the **Install** button in the package details (right hand side).<br/><br/>
-![Install package](images/install_package.png)
-
-5. To verify that Code Coverage has been installed correctly, open the Code Coverage window (go to **Window** > **Analysis** > **Code Coverage**).
-
-  If you don't see the **Code Coverage** menu item, then Code Coverage did not install correctly.
+To verify that Code Coverage has been installed correctly, open the Code Coverage window (go to **Window** > **Analysis** > **Code Coverage**). If you don't see the **Code Coverage** menu item, then Code Coverage did not install correctly.

@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEditor.TestTools.CodeCoverage.Utils;
 using UnityEngine;
 using UnityEngine.Analytics;
@@ -70,46 +69,65 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
             CurrentCoverageEvent.resultIds = s_ResultsIdsList.ToArray();
 
             bool runFromCommandLine = CommandLineManager.instance.runFromCommandLine;
+            bool batchmode = CommandLineManager.instance.batchmode;
 
-            CurrentCoverageEvent.autogenerate = runFromCommandLine ?
+            CurrentCoverageEvent.runFromCommandLine = runFromCommandLine;
+            CurrentCoverageEvent.batchmode = batchmode;
+
+            CurrentCoverageEvent.autogenerate = batchmode ?
                 CommandLineManager.instance.generateBadgeReport || CommandLineManager.instance.generateHTMLReport :
-                CoveragePreferences.instance.GetBool("AutoGenerateReport", true);
-            CurrentCoverageEvent.batchmode = runFromCommandLine;
-            CurrentCoverageEvent.createBadges = runFromCommandLine ?
+                CommandLineManager.instance.generateBadgeReport || CommandLineManager.instance.generateHTMLReport || CoveragePreferences.instance.GetBool("AutoGenerateReport", true);
+
+            CurrentCoverageEvent.createBadges = batchmode ?
                 CommandLineManager.instance.generateBadgeReport :
-                CoveragePreferences.instance.GetBool("GenerateBadge", true);
-            CurrentCoverageEvent.generateHistory = runFromCommandLine ?
+                CommandLineManager.instance.generateBadgeReport || CoveragePreferences.instance.GetBool("GenerateBadge", true);
+
+            CurrentCoverageEvent.generateHistory = batchmode ?
                 CommandLineManager.instance.generateHTMLReportHistory :
-                CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
-            CurrentCoverageEvent.generateHTMLReport = runFromCommandLine ?
+                CommandLineManager.instance.generateHTMLReportHistory || CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
+
+            CurrentCoverageEvent.generateHTMLReport = batchmode ?
                 CommandLineManager.instance.generateHTMLReport :
-                CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
-            CurrentCoverageEvent.generateMetrics = runFromCommandLine ?
+                CommandLineManager.instance.generateHTMLReport || CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
+
+            CurrentCoverageEvent.generateMetrics = batchmode ?
                 CommandLineManager.instance.generateAdditionalMetrics :
-                CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
-            CurrentCoverageEvent.useDefaultAssemblyFilters = runFromCommandLine ?
-                !CommandLineManager.instance.assemblyFiltersSpecified :
-                string.Equals(CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString()), AssemblyFiltering.GetUserOnlyAssembliesString(), StringComparison.InvariantCultureIgnoreCase);
-            CurrentCoverageEvent.useDefaultPathFilters = runFromCommandLine ?
-                !CommandLineManager.instance.pathFiltersSpecified :
-                string.Equals(CoveragePreferences.instance.GetString("PathsToInclude", string.Empty), string.Empty) && string.Equals(CoveragePreferences.instance.GetString("PathsToExclude", string.Empty), string.Empty);
-            CurrentCoverageEvent.useDefaultResultsLoc = runFromCommandLine ?
-                CommandLineManager.instance.coverageResultsPath == string.Empty :
-                string.Equals(CoveragePreferences.instance.GetStringForPaths("Path", string.Empty), CoverageUtils.GetProjectPath(), StringComparison.InvariantCultureIgnoreCase);
-            CurrentCoverageEvent.useDefaultHistoryLoc = runFromCommandLine ?
-                CommandLineManager.instance.coverageHistoryPath == string.Empty :
-                string.Equals(CoveragePreferences.instance.GetStringForPaths("HistoryPath", string.Empty), CoverageUtils.GetProjectPath(), StringComparison.InvariantCultureIgnoreCase);
+                CommandLineManager.instance.generateAdditionalMetrics || CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
+
+            if (batchmode)
+                CurrentCoverageEvent.useDefaultAssemblyFilters = !CommandLineManager.instance.assemblyFiltersSpecified;
+            else
+                CurrentCoverageEvent.useDefaultAssemblyFilters = CommandLineManager.instance.assemblyFiltersSpecified ? false :
+                    string.Equals(CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString()), AssemblyFiltering.GetUserOnlyAssembliesString(), StringComparison.InvariantCultureIgnoreCase);
+
+            if (batchmode)
+                CurrentCoverageEvent.useDefaultPathFilters = !CommandLineManager.instance.pathFiltersSpecified;
+            else
+                CurrentCoverageEvent.useDefaultPathFilters = CommandLineManager.instance.pathFiltersSpecified ? false :
+                    string.Equals(CoveragePreferences.instance.GetString("PathsToInclude", string.Empty), string.Empty) && string.Equals(CoveragePreferences.instance.GetString("PathsToExclude", string.Empty), string.Empty);
+
+            if (batchmode)
+                CurrentCoverageEvent.useDefaultResultsLoc = CommandLineManager.instance.coverageResultsPath.Length == 0;
+            else
+                CurrentCoverageEvent.useDefaultResultsLoc = CommandLineManager.instance.coverageResultsPath.Length > 0  ? false :
+                    string.Equals(CoveragePreferences.instance.GetStringForPaths("Path", string.Empty), CoverageUtils.GetProjectPath(), StringComparison.InvariantCultureIgnoreCase);
+
+            if (batchmode)
+                CurrentCoverageEvent.useDefaultHistoryLoc = CommandLineManager.instance.coverageHistoryPath.Length == 0;
+            else
+                CurrentCoverageEvent.useDefaultHistoryLoc = CommandLineManager.instance.coverageHistoryPath.Length > 0 ? false :
+                    string.Equals(CoveragePreferences.instance.GetStringForPaths("HistoryPath", string.Empty), CoverageUtils.GetProjectPath(), StringComparison.InvariantCultureIgnoreCase);
 
 #if UNITY_2020_1_OR_NEWER
             CurrentCoverageEvent.inDebugMode = Compilation.CompilationPipeline.codeOptimization == Compilation.CodeOptimization.Debug;
 #else
             CurrentCoverageEvent.inDebugMode = true;
 #endif
-            if (!runFromCommandLine)
+            if (!runFromCommandLine || (runFromCommandLine && !batchmode && !CommandLineManager.instance.assemblyFiltersSpecified))
             {
                 if (CurrentCoverageEvent.actionID == ActionID.ReportOnly)
                 {
-                    string includeAssemblies = CoveragePreferences.instance.GetString("IncludeAssemblies", string.Empty);
+                    string includeAssemblies = CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
                     string[] includeAssembliesArray = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     CurrentCoverageEvent.includedAssemblies = includeAssembliesArray;
                 }

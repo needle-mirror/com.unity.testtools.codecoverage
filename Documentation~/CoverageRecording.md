@@ -2,16 +2,17 @@
 
 With Coverage Recording you can capture coverage data on demand and generate an HTML report which shows which lines of your code run while recording. It supports capturing in _EditMode_ as well as in _PlayMode_, and you can switch between the two.
 
-To start recording coverage data, select the **Start Recording** button. While recording, use the editor as usual, for example to enter Play Mode. To stop recording coverage data, select the **Stop Recording** button. If **Auto Generate Report** is checked, then an HTML report is generated and a file viewer window opens. It contains the coverage results and the report. Otherwise, select the **Generate from Last** button to generate the report. The results are based on the assemblies specified in **Included Assemblies**.
+To start recording coverage data, select the **Start Recording** button. While recording, use the editor as usual, for example to enter Play Mode. To stop recording coverage data, select the **Stop Recording** button. If **Auto Generate Report** is checked, then an [HTML report](HowToInterpretResults.md) is generated and a file viewer window opens. It contains the coverage results and the report. Otherwise, select the **Generate from Last** button to generate the report. The results are based on the assemblies specified in **Included Assemblies**.
 
 You can also control Coverage Recording via the [CodeCoverage ScriptingAPI](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@latest/index.html?subfolder=/api/UnityEditor.TestTools.CodeCoverage.CodeCoverage.html).
 
 ## Steps
 
-1. Make sure Code Coverage is enabled (see [Enable Code Coverage](UsingCodeCoverage.md#enable-code-coverage)).
-
-2. Open the [Code Coverage window](CodeCoverageWindow.md) (go to **Window** > **Analysis** > **Code Coverage**).<br/><br/>
+1. Open the [Code Coverage window](CodeCoverageWindow.md) (go to **Window** > **Analysis** > **Code Coverage**).<br/><br/>
 ![Code Coverage Window](images/using_coverage/open_coverage_window.png)
+
+2. Select **Enable Code Coverage** if not already selected, to be able to generate Coverage data and reports.<br/><br/>
+![Enable Code Coverage](images/using_coverage/enable_code_coverage.png)
 
 3. Select the [Assembly Definitions](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) you would like to see the coverage for. In this example we selected `Assembly-CSharp` and `Assembly-CSharp-Editor`. By default, Unity compiles almost all project scripts into the `Assembly-CSharp.dll` managed assembly and all editor scripts into the `Assembly-CSharp-Editor.dll` managed assembly.<br/><br/>
 ![Select Assemblies](images/using_coverage/select_assemblies.png)

@@ -55,7 +55,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             bool autoGenerateReport, generateHTMLReport, generateBadge;
 
-            if (CommandLineManager.instance.runFromCommandLine)
+            if (CommandLineManager.instance.batchmode)
             {
                 generateHTMLReport = CommandLineManager.instance.generateHTMLReport;
                 generateBadge = CommandLineManager.instance.generateBadgeReport;
@@ -66,6 +66,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                 generateHTMLReport = CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
                 generateBadge = CoveragePreferences.instance.GetBool("GenerateBadge", true);
                 autoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", true) && (generateHTMLReport || generateBadge);
+                bool commandLineAutoGenerateReport = CommandLineManager.instance.runFromCommandLine && (CommandLineManager.instance.generateHTMLReport || CommandLineManager.instance.generateBadgeReport);
+                autoGenerateReport = autoGenerateReport || commandLineAutoGenerateReport;
             }
 
             if (!autoGenerateReport)

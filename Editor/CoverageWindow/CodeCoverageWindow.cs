@@ -10,6 +10,7 @@ using System.Collections.Generic;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
+    [ExcludeFromCoverage]
     internal class CodeCoverageWindow : EditorWindow
     {
         private bool m_EnableCodeCoverage;
@@ -37,9 +38,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         private bool m_DoRepaint;
         private bool m_IncludeWarnings;
-        private bool m_IncludeWarningsLast;
-        private static readonly Vector2 s_WindowMinSizeNormal = new Vector2(445, 365);
+        private static readonly Vector2 s_WindowMinSizeNormal = new Vector2(445, 385);
         private float m_WarningsAddedAccumulativeHeight = 0;
+        private float m_WarningsAddedAccumulativeHeightLast = 0;
 
         private bool m_GenerateReport = false;
         private bool m_StopRecording = false;
@@ -52,8 +53,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         private Vector2 m_WindowScrollPosition = new Vector2(0, 0);
 
         private readonly string kLatestScriptingRuntimeMessage = L10n.Tr("Code Coverage requires the latest Scripting Runtime Version (.NET 4.x). You can set this in the Player Settings.");
-        private readonly string kCodeCoverageDisabledMessage = L10n.Tr("Code Coverage is disabled. To enable Code Coverage, go to Preferences > General, check Enable Code Coverage, and restart Unity.");
-        private readonly string kCodeCoverageDisabledNoRestartMessage = L10n.Tr("Code Coverage is disabled. To enable Code Coverage, go to Preferences > General and check Enable Code Coverage.");
+        private readonly string kCodeCoverageDisabledNoRestartMessage = L10n.Tr("Code Coverage should be enabled in order to generate Coverage data and reports.\nNote that Code Coverage can affect the Editor performance.");
         private readonly string kEnablingCodeCoverageMessage = L10n.Tr("Enabling Code Coverage will not take effect until Unity is restarted.");
         private readonly string kDisablingCodeCoverageMessage = L10n.Tr("Disabling Code Coverage will not take effect until Unity is restarted.");
         private readonly string kCodeOptimizationMessage = L10n.Tr("Code Coverage requires Code Optimization to be set to debug mode in order to obtain accurate coverage information.");
@@ -63,6 +63,8 @@ namespace UnityEditor.TestTools.CodeCoverage
         private readonly string kClearDataMessage = L10n.Tr("Are you sure you would like to clear the Coverage data from previous test runs or from previous Coverage Recording sessions? Note that you cannot undo this action.");
         private readonly string kClearHistoryMessage = L10n.Tr("Are you sure you would like to clear the coverage report history? Note that you cannot undo this action.");
         private readonly string kNoAssembliesSelectedMessage = L10n.Tr("Make sure you have included at least one assembly.");
+        private readonly string kSettingOverriddenMessage = L10n.Tr("{0} is overridden by the {1} command line argument.");
+        private readonly string kSettingsOverriddenMessage = L10n.Tr("{0} are overridden by the {1} command line argument.");
 
         private void Update()
         {
@@ -128,12 +130,12 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             static bool s_Initialized;
 
-            public static readonly GUIContent OpenPreferencesButton = EditorGUIUtility.TrTextContent("Open Preferences");
             public static readonly GUIContent SwitchToDebugCodeOptimizationButton = EditorGUIUtility.TrTextContent("Switch to debug mode");
             public static readonly GUIContent SwitchBurstCompilationOffButton = EditorGUIUtility.TrTextContent("Disable Burst Compilation");
             public static readonly GUIContent CodeCoverageResultsLocationLabel = EditorGUIUtility.TrTextContent("Results Location", "Click the Browse button to specify the folder where the coverage results and report will be saved to. The default location is the Project's folder.");
             public static readonly GUIContent CodeCoverageHistoryLocationLabel = EditorGUIUtility.TrTextContent("History Location", "Click the Browse button to specify the folder where the coverage report history will be saved to. The default location is the Project's folder.");
             public static readonly GUIContent CoverageSettingsLabel = EditorGUIUtility.TrTextContent("Settings");
+            public static readonly GUIContent EnableCodeCoverageLabel = EditorGUIUtility.TrTextContent("Enable Code Coverage", "Check this to enable Code Coverage. This is required in order to generate Coverage data and reports. Note that Code Coverage can affect the Editor performance.");
             public static readonly GUIContent CodeCoverageFormat = EditorGUIUtility.TrTextContent("Coverage Format", "The Code Coverage format used when saving the results.");
             public static readonly GUIContent GenerateAdditionalMetricsLabel = EditorGUIUtility.TrTextContent("Generate Additional Metrics", "Check this to generate and include additional metrics in the HTML report. These currently include Cyclomatic Complexity and Crap Score calculations for each method.");
             public static readonly GUIContent CoverageHistoryLabel = EditorGUIUtility.TrTextContent("Generate History", "Check this to generate and include the coverage history in the HTML report.");
@@ -193,8 +195,8 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             m_CoverageSettings = new CoverageSettings()
             {
-                resultsPathFromCommandLine = string.Empty,
-                historyPathFromCommandLine = string.Empty
+                resultsPathFromCommandLine = CommandLineManager.instance.coverageResultsPath,
+                historyPathFromCommandLine = CommandLineManager.instance.coverageHistoryPath
             };
 
             m_CodeCoveragePath = CoveragePreferences.instance.GetStringForPaths("Path", string.Empty);
@@ -227,8 +229,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             UpdateCoverageSettings();
             RefreshCodeCoverageWindow();
 
-            m_IncludeWarnings = false;
-            m_IncludeWarningsLast = false;
             m_GenerateReport = false;
             m_StopRecording = false;
         }
@@ -309,9 +309,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             CheckCodeOptimization();
             CheckBurstCompilation();
 
-            using (new EditorGUI.DisabledScope(!m_EnableCodeCoverage || 
-                                                m_EnableCodeCoverage != Coverage.enabled || 
-                                                !m_HasLatestScriptingRuntime))
+            using (new EditorGUI.DisabledScope(!m_HasLatestScriptingRuntime))
             {
                 DrawCodeCoverageLocation();
                 DrawCodeCoverageHistoryLocation();
@@ -337,16 +335,21 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         void ResetIncludeWarnings()
         {
+            m_WarningsAddedAccumulativeHeightLast = m_WarningsAddedAccumulativeHeight;
             m_WarningsAddedAccumulativeHeight = 0;
-            m_IncludeWarningsLast = m_IncludeWarnings;
             m_IncludeWarnings = false;
         }
 
         void HandleWarningsRepaint()
         {
-            if (m_IncludeWarnings != m_IncludeWarningsLast)
+            if (m_WarningsAddedAccumulativeHeight != m_WarningsAddedAccumulativeHeightLast)
             {
                 m_DoRepaint = true;
+            }
+
+            if (m_WarningsAddedAccumulativeHeight > 0)
+            {
+                m_IncludeWarnings = true;
             }
 
             if (m_DoRepaint)
@@ -370,52 +373,15 @@ namespace UnityEditor.TestTools.CodeCoverage
                 GUILayout.Space(5);
 
                 m_WarningsAddedAccumulativeHeight += 45;
-                m_IncludeWarnings = true;
             }
         }
 
         void CheckCoverageEnabled()
         {
-            m_EnableCodeCoverage = EditorPrefs.GetBool("CodeCoverageEnabled", false);
-
 #if UNITY_2020_2_OR_NEWER
-            if (!m_EnableCodeCoverage)
-            {
-                EditorGUILayout.HelpBox(kCodeCoverageDisabledNoRestartMessage, MessageType.Warning);
-
-                if (GUILayout.Button(Styles.OpenPreferencesButton))
-                    SettingsService.OpenUserPreferences("Preferences/_General");
-
-                GUILayout.Space(5);
-
-                m_WarningsAddedAccumulativeHeight += 45;
-                m_IncludeWarnings = true;
-            }
+            m_EnableCodeCoverage = Coverage.enabled;
 #else
-            if (m_EnableCodeCoverage != Coverage.enabled)
-            {
-                if (m_EnableCodeCoverage)
-                    EditorGUILayout.HelpBox(kEnablingCodeCoverageMessage, MessageType.Warning);
-                else
-                    EditorGUILayout.HelpBox(kDisablingCodeCoverageMessage, MessageType.Warning);
-
-                GUILayout.Space(5);
-
-                m_WarningsAddedAccumulativeHeight += 45;
-                m_IncludeWarnings = true;
-            }
-            else if (!m_EnableCodeCoverage)
-            {
-                EditorGUILayout.HelpBox(kCodeCoverageDisabledMessage, MessageType.Warning);
-
-                if (GUILayout.Button(Styles.OpenPreferencesButton))
-                    SettingsService.OpenUserPreferences("Preferences/_General");
-
-                GUILayout.Space(5);
-
-                m_WarningsAddedAccumulativeHeight += 45;
-                m_IncludeWarnings = true;
-            }
+            m_EnableCodeCoverage = EditorPrefs.GetBool("CodeCoverageEnabled", false);
 #endif
         }
 
@@ -425,19 +391,19 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (Compilation.CompilationPipeline.codeOptimization == Compilation.CodeOptimization.Release)
             {
                 EditorGUILayout.HelpBox(kCodeOptimizationMessage, MessageType.Warning);
-                m_IncludeWarnings = true;
 
-                if (GUILayout.Button(Styles.SwitchToDebugCodeOptimizationButton))
+                using (new EditorGUI.DisabledScope(EditorApplication.isCompiling))
                 {
-                    CoverageAnalytics.instance.CurrentCoverageEvent.switchToDebugMode = true;
-                    Compilation.CompilationPipeline.codeOptimization = Compilation.CodeOptimization.Debug;
-                    EditorPrefs.SetBool("ScriptDebugInfoEnabled", true);
-                    m_IncludeWarnings = false;
-                    m_DoRepaint = true;
+                    if (GUILayout.Button(Styles.SwitchToDebugCodeOptimizationButton))
+                    {
+                        CoverageAnalytics.instance.CurrentCoverageEvent.switchToDebugMode = true;
+                        Compilation.CompilationPipeline.codeOptimization = Compilation.CodeOptimization.Debug;
+                        EditorPrefs.SetBool("ScriptDebugInfoEnabled", true);
+                        HandleWarningsRepaint();
+                    }
                 }
 
                 GUILayout.Space(5);
-
                 m_WarningsAddedAccumulativeHeight += 65;
             }
 #endif
@@ -449,14 +415,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (EditorPrefs.GetBool("BurstCompilation", true))
             {
                 EditorGUILayout.HelpBox(kBurstCompilationOnMessage, MessageType.Warning);
-                m_IncludeWarnings = true;
 
                 if (GUILayout.Button(Styles.SwitchBurstCompilationOffButton))
                 {
                     CoverageAnalytics.instance.CurrentCoverageEvent.switchBurstOff = true;
                     EditorApplication.ExecuteMenuItem("Jobs/Burst/Enable Compilation");
-                    m_IncludeWarnings = false;
-                    m_DoRepaint = true;
+                    HandleWarningsRepaint();
                 }
 
                 GUILayout.Space(5);
@@ -470,7 +434,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (m_AssembliesToIncludeLength == 0)
             {
                 EditorGUILayout.HelpBox(kNoAssembliesSelectedMessage, MessageType.Warning);
-                m_IncludeWarnings = true;
                 m_WarningsAddedAccumulativeHeight += 40;
             }
         }
@@ -479,11 +442,13 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             GUILayout.BeginHorizontal();
 
-            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning))
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.coverageResultsPath.Length > 0;
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
             {
                 Rect textFieldPosition = EditorGUILayout.GetControlRect();
                 textFieldPosition = EditorGUI.PrefixLabel(textFieldPosition, Styles.CodeCoverageResultsLocationLabel);
-                EditorGUI.SelectableLabel(textFieldPosition, m_CodeCoveragePath, EditorStyles.textField);
+                EditorGUI.SelectableLabel(textFieldPosition, settingPassedInCmdLine ? CommandLineManager.instance.coverageResultsPath : m_CodeCoveragePath, EditorStyles.textField);
 
                 bool autoDetect = !CoverageUtils.IsValidFolder(m_CodeCoveragePath);
 
@@ -511,17 +476,25 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
 
             GUILayout.EndHorizontal();
+
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Results Location", "-coverageResultsPath"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
+            }
         }
 
         void DrawCodeCoverageHistoryLocation()
         {
             GUILayout.BeginHorizontal();
 
-            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning))
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.coverageHistoryPath.Length > 0;
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
             {
                 Rect textFieldPosition = EditorGUILayout.GetControlRect();
                 textFieldPosition = EditorGUI.PrefixLabel(textFieldPosition, Styles.CodeCoverageHistoryLocationLabel);
-                EditorGUI.SelectableLabel(textFieldPosition, m_CodeCoverageHistoryPath, EditorStyles.textField);
+                EditorGUI.SelectableLabel(textFieldPosition, settingPassedInCmdLine ? CommandLineManager.instance.coverageHistoryPath : m_CodeCoverageHistoryPath, EditorStyles.textField);
 
                 bool autoDetect = !CoverageUtils.IsValidFolder(m_CodeCoverageHistoryPath);
 
@@ -549,27 +522,61 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
 
             GUILayout.EndHorizontal();
+
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "History Location", "-coverageHistoryPath"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
+            }
         }
 
         void DrawIncludedAssemblies()
         {
             GUILayout.BeginHorizontal();
 
-            EditorGUILayout.PrefixLabel( Styles.AssembliesToIncludeLabel);
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.assemblyFiltersSpecified;
 
-            Rect buttonRect = EditorGUILayout.GetControlRect(GUILayout.MinWidth(10));
-
-            Styles.AssembliesToIncludeDropdownLabel.text = string.Concat(" ", m_AssembliesToInclude);
-            Styles.AssembliesToIncludeDropdownLabel.tooltip = m_AssembliesToInclude.Replace(",", "\n");
-
-            if (EditorGUI.DropdownButton(buttonRect, m_AssembliesToInclude.Length > 0 ? Styles.AssembliesToIncludeDropdownLabel : Styles.AssembliesToIncludeEmptyDropdownLabel, FocusType.Keyboard, EditorStyles.miniPullDown))
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
             {
-                CoverageAnalytics.instance.CurrentCoverageEvent.enterAssembliesDialog = true;
-                GUI.FocusControl("");
-                PopupWindow.Show(buttonRect, new IncludedAssembliesPopupWindow(this, m_AssembliesToInclude) { Width = buttonRect.width });
+                EditorGUILayout.PrefixLabel(Styles.AssembliesToIncludeLabel);
+
+                Rect buttonRect = EditorGUILayout.GetControlRect(GUILayout.MinWidth(10));
+
+                Styles.AssembliesToIncludeDropdownLabel.text = string.Concat(" ", m_AssembliesToInclude);
+                Styles.AssembliesToIncludeDropdownLabel.tooltip = m_AssembliesToInclude.Replace(",", "\n");
+
+                if (EditorGUI.DropdownButton(buttonRect, m_AssembliesToInclude.Length > 0 ? Styles.AssembliesToIncludeDropdownLabel : Styles.AssembliesToIncludeEmptyDropdownLabel, FocusType.Keyboard, EditorStyles.miniPullDown))
+                {
+                    CoverageAnalytics.instance.CurrentCoverageEvent.enterAssembliesDialog = true;
+                    GUI.FocusControl("");
+                    PopupWindow.Show(buttonRect, new IncludedAssembliesPopupWindow(this, m_AssembliesToInclude) { Width = buttonRect.width });
+                }
             }
 
             GUILayout.EndHorizontal();
+
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Included Assemblies", "-coverageOptions: assemblyFilters"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
+            }
+        }
+
+        void DrawPathFiltering()
+        {
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.pathFiltersSpecified;
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
+            {
+                DrawIncludedPaths();
+                DrawExcludedPaths();
+            }
+
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingsOverriddenMessage, "Included/Excluded Paths", "-coverageOptions: pathFilters"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
+            }
         }
 
         void DrawIncludedPaths()
@@ -726,51 +733,176 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_RemovePathsToExcludeDropDownMenu.Show(rect, m_PathsToExcludeReorderableList, m_PathsToExcludeList);
         }
 
-        void DrawCoverageSettings()
+        void CheckIfCodeCoverageIsDisabled()
         {
-            DrawIncludedAssemblies();
-            CheckIfIncludedAssembliesIsEmpty();
-            DrawIncludedPaths();
-            DrawExcludedPaths();
-
-            // Draw the rest of the settings
-            EditorGUI.BeginChangeCheck();
-            m_GenerateHTMLReport = EditorGUILayout.Toggle(Styles.GenerateHTMLReportLabel, m_GenerateHTMLReport, GUILayout.ExpandWidth(false));
-            if (EditorGUI.EndChangeCheck())
+            if (!m_EnableCodeCoverage)
             {
-                CoveragePreferences.instance.SetBool("GenerateHTMLReport", m_GenerateHTMLReport);
+                EditorGUILayout.HelpBox(kCodeCoverageDisabledNoRestartMessage, MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
             }
-
-            EditorGUI.BeginChangeCheck();
-            m_GenerateBadge = EditorGUILayout.Toggle(Styles.GenerateBadgeReportLabel, m_GenerateBadge, GUILayout.ExpandWidth(false));
-            if (EditorGUI.EndChangeCheck())
+#if !UNITY_2020_2_OR_NEWER
+            if (m_EnableCodeCoverage != Coverage.enabled)
             {
-                CoveragePreferences.instance.SetBool("GenerateBadge", m_GenerateBadge);
+                if (m_EnableCodeCoverage)
+                    EditorGUILayout.HelpBox(kEnablingCodeCoverageMessage, MessageType.Warning);
+                else
+                    EditorGUILayout.HelpBox(kDisablingCodeCoverageMessage, MessageType.Warning);
+
+                m_WarningsAddedAccumulativeHeight += 40;
             }
+#endif
+        }
 
-            EditorGUI.BeginChangeCheck();
-            using (new EditorGUI.DisabledScope(!m_GenerateHTMLReport && !m_GenerateBadge))
+        void DrawEnableCoverageCheckbox()
+        {
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine;
+
+            using (new EditorGUI.DisabledScope(EditorApplication.isCompiling || settingPassedInCmdLine))
             {
-                m_IncludeHistoryInReport = EditorGUILayout.Toggle(Styles.CoverageHistoryLabel, m_IncludeHistoryInReport, GUILayout.ExpandWidth(false));
+                EditorGUI.BeginChangeCheck();
+                m_EnableCodeCoverage = EditorGUILayout.Toggle(Styles.EnableCodeCoverageLabel, m_EnableCodeCoverage, GUILayout.ExpandWidth(false));
                 if (EditorGUI.EndChangeCheck())
                 {
-                    CoveragePreferences.instance.SetBool("IncludeHistoryInReport", m_IncludeHistoryInReport);
+                    CoveragePreferences.instance.SetBool("EnableCodeCoverage", m_EnableCodeCoverage);
+#if UNITY_2020_2_OR_NEWER
+                    Coverage.enabled = m_EnableCodeCoverage;
+#else
+                    EditorPrefs.SetBool("CodeCoverageEnabled", m_EnableCodeCoverage);
+                    EditorPrefs.SetBool("CodeCoverageEnabledMessageShown", false);
+                    SettingsService.NotifySettingsProviderChanged();
+#endif
+                }
+            }
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Enable Code Coverage", "-enableCodeCoverage"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
+            }
+            else
+            {
+                CheckIfCodeCoverageIsDisabled();
+            }
+        }
+
+        void DrawGenerateHTMLReportCheckbox()
+        {
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.generateHTMLReport;
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
+            {
+                EditorGUI.BeginChangeCheck();
+                m_GenerateHTMLReport = EditorGUILayout.Toggle(Styles.GenerateHTMLReportLabel, m_GenerateHTMLReport, GUILayout.ExpandWidth(false));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    CoveragePreferences.instance.SetBool("GenerateHTMLReport", m_GenerateHTMLReport);
                 }
             }
 
-            EditorGUI.BeginChangeCheck();
-            m_GenerateAdditionalMetrics = EditorGUILayout.Toggle(Styles.GenerateAdditionalMetricsLabel, m_GenerateAdditionalMetrics, GUILayout.ExpandWidth(false));
-            if (EditorGUI.EndChangeCheck())
+            if (settingPassedInCmdLine)
             {
-                CoveragePreferences.instance.SetBool("GenerateAdditionalMetrics", m_GenerateAdditionalMetrics);
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Generate HTML Report", "-coverageOptions: generateHtmlReport"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
+            }
+        }
+
+        void DrawGenerateBadgeReportCheckbox()
+        {
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.generateBadgeReport;
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
+            {
+                EditorGUI.BeginChangeCheck();
+                m_GenerateBadge = EditorGUILayout.Toggle(Styles.GenerateBadgeReportLabel, m_GenerateBadge, GUILayout.ExpandWidth(false));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    CoveragePreferences.instance.SetBool("GenerateBadge", m_GenerateBadge);
+                }
             }
 
-            EditorGUI.BeginChangeCheck();
-            m_AutoGenerateReport = EditorGUILayout.Toggle(Styles.AutoGenerateReportLabel, m_AutoGenerateReport, GUILayout.ExpandWidth(false));
-            if (EditorGUI.EndChangeCheck())
+            if (settingPassedInCmdLine)
             {
-                CoveragePreferences.instance.SetBool("AutoGenerateReport", m_AutoGenerateReport);
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Generate Summary Badges", "-coverageOptions: generateBadgeReport"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
             }
+        }
+
+        void DrawGenerateHistoryCheckbox()
+        {
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.generateHTMLReportHistory;
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
+            {
+                EditorGUI.BeginChangeCheck();
+                using (new EditorGUI.DisabledScope(!m_GenerateHTMLReport && !m_GenerateBadge))
+                {
+                    m_IncludeHistoryInReport = EditorGUILayout.Toggle(Styles.CoverageHistoryLabel, m_IncludeHistoryInReport, GUILayout.ExpandWidth(false));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        CoveragePreferences.instance.SetBool("IncludeHistoryInReport", m_IncludeHistoryInReport);
+                    }
+                }
+            }
+
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Generate History", "-coverageOptions: generateHtmlReportHistory"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
+            }
+        }
+
+        void DrawGenerateAdditionalMetricsCheckbox()
+        {
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.generateAdditionalMetrics;
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
+            {
+                EditorGUI.BeginChangeCheck();
+                m_GenerateAdditionalMetrics = EditorGUILayout.Toggle(Styles.GenerateAdditionalMetricsLabel, m_GenerateAdditionalMetrics, GUILayout.ExpandWidth(false));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    CoveragePreferences.instance.SetBool("GenerateAdditionalMetrics", m_GenerateAdditionalMetrics);
+                }
+            }
+
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Generate Additional Metrics", "-coverageOptions: generateAdditionalMetrics"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
+            }
+        }
+
+        void DrawAutoGenerateReportCheckbox()
+        {
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && (CommandLineManager.instance.generateHTMLReport || CommandLineManager.instance.generateBadgeReport);
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
+            {
+                EditorGUI.BeginChangeCheck();
+                m_AutoGenerateReport = EditorGUILayout.Toggle(Styles.AutoGenerateReportLabel, m_AutoGenerateReport, GUILayout.ExpandWidth(false));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    CoveragePreferences.instance.SetBool("AutoGenerateReport", m_AutoGenerateReport);
+                }
+            }
+
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Auto Generate Report", CommandLineManager.instance.generateHTMLReport ? "-coverageOptions: generateHtmlReport" : "-coverageOptions: generateBadgeReport"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
+            }
+        }
+
+        void DrawCoverageSettings()
+        {
+            DrawEnableCoverageCheckbox();
+            DrawIncludedAssemblies();
+            CheckIfIncludedAssembliesIsEmpty();
+            DrawPathFiltering();
+            DrawGenerateHTMLReportCheckbox();
+            DrawGenerateBadgeReportCheckbox();
+            DrawGenerateHistoryCheckbox();
+            DrawGenerateAdditionalMetricsCheckbox();
+            DrawAutoGenerateReportCheckbox();
         }
 
         void DrawFooterButtons()
@@ -801,7 +933,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             GUILayout.FlexibleSpace();
 
             buttonSize = EditorStyles.miniButton.CalcSize(Styles.GenerateReportButtonLabel);
-            using (new EditorGUI.DisabledScope((!m_GenerateHTMLReport && !m_GenerateBadge) || !DoesResultsRootFolderExist() || CoverageRunData.instance.isRunning || m_GenerateReport || m_AssembliesToIncludeLength == 0))
+            using (new EditorGUI.DisabledScope((!m_GenerateHTMLReport && !m_GenerateBadge) || !DoesResultsRootFolderExist() || CoverageRunData.instance.isRunning || m_GenerateReport || m_AssembliesToIncludeLength == 0 || !Coverage.enabled || m_EnableCodeCoverage != Coverage.enabled || EditorApplication.isCompiling))
             {
                 if (EditorGUILayout.DropdownButton(Styles.GenerateReportButtonLabel, FocusType.Keyboard, Styles.largeButton, GUILayout.MaxWidth(buttonSize.x)))
                 {
@@ -813,7 +945,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             bool isRunning = CoverageRunData.instance.isRunning;
             bool isRecording = CoverageRunData.instance.isRecording;
 
-            using (new EditorGUI.DisabledScope((isRunning && !isRecording) || m_StopRecording))
+            using (new EditorGUI.DisabledScope((isRunning && !isRecording) || m_StopRecording || m_AssembliesToIncludeLength == 0 || !Coverage.enabled || m_EnableCodeCoverage != Coverage.enabled || EditorApplication.isCompiling))
             {
                 buttonSize = EditorStyles.miniButton.CalcSize(Styles.StartRecordingButtonLabel);
                 if (EditorGUILayout.DropdownButton(isRecording ? Styles.StopRecordingButtonLabel : Styles.StartRecordingButtonLabel, FocusType.Keyboard, Styles.largeButton, GUILayout.MaxWidth(buttonSize.x)))

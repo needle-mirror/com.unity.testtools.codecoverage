@@ -6,7 +6,7 @@ Once a test run has completed, the Code Coverage package will generate an HTML c
 
 Additionally, the Code Coverage package offers a **Coverage Recording** feature which allows capturing coverage data on demand, in case you do not have tests in your project.
 
-The Code Coverage package is available as a preview package via the Package Manager for Unity 2019.3 and above. Please make sure to enable preview packages, otherwise it won't be listed.
+The Code Coverage package is available as a pre-released package via the Package Manager for Unity 2019.3 and above.
 
 For more information see the [Code Coverage package documentation](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@latest).
 

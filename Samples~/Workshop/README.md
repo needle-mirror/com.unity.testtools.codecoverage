@@ -8,7 +8,7 @@ To start open the **Worksheet** pdf file located under the *Code Coverage Worksh
 
 - What is Code Coverage ​(2 min)
 - Install the Code Coverage package ​(2 min)
-- Enable Code Coverage ​(2 min)
+- Enable Code Coverage ​(1 min)
 - Understanding the game code: Shoot() function​ (4 min)
 - Generate a Coverage report from the PlayMode tests​ (3 min)
 - Add Weapon tests to improve coverage​ (3 min)

@@ -8,7 +8,7 @@ The Code Coverage Workshop will give you an insight into what Code Coverage is a
 
 1. Install the Code Coverage package (see [Installing Code Coverage](InstallingCodeCoverage.md)).
 
-2. While in the **Package Manager** (*Window* > *Package Manager*), select the **Code Coverage** package in the package list (left hand side) or enter **Code Coverage** in the search box.
+2. While in the **Package Manager** (*Window* > *Package Manager*), select the **Code Coverage** package.
 
 3. Find the **Samples** section in the package details (right hand side) and select **Import** next to *Code Coverage Workshop*.<br/><br/>
 ![Import Code Coverage Workshop](images/workshop/import_workshop.png)

@@ -4,6 +4,11 @@ using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using UnityEngine.TestTools;
 
+#if NO_COV_EDITORPREF
+using System.Linq;
+using UnityEditor.PackageManager;
+#endif
+
 namespace UnityEditor.TestTools.CodeCoverage
 {
     internal class CoverageReporterListener : ScriptableObject, ICallbacks
@@ -21,6 +26,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void RunStarted(ITestAdaptor testsToRun)
         {
+            if (!Coverage.enabled)
+                return;
+
             m_IsConnectedToPlayer = CoverageUtils.IsConnectedToPlayer;
 
             if (m_IsConnectedToPlayer)
@@ -29,7 +37,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 return;
             }
 
-            if (CoverageRunData.instance.isRunning)
+            if (CoverageRunData.instance.isRunning || EditorApplication.isCompiling)
                 return;
 
             CoverageRunData.instance.Start();
@@ -41,6 +49,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void RunFinished(ITestResultAdaptor testResults)
         {
+            if (!Coverage.enabled)
+                return;
+
             if (CoverageRunData.instance.isRecording || m_IsConnectedToPlayer)
                 return;
 
@@ -58,6 +69,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void TestStarted(ITestAdaptor test)
         {
+            if (!Coverage.enabled)
+                return;
+
             if (CoverageRunData.instance.HasLastIgnoredSuiteID() || m_IsConnectedToPlayer)
                 return;
 
@@ -80,6 +94,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void TestFinished(ITestResultAdaptor result)
         {
+            if (!Coverage.enabled)
+                return;
+
             if (m_IsConnectedToPlayer)
                 return;
 
@@ -110,6 +127,16 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         static CoverageReporterStarter()
         {
+#if NO_COV_EDITORPREF
+            if (!CommandLineManager.instance.runFromCommandLine)
+            {
+                bool localCoverageEnabled = CoveragePreferences.instance.GetBool("EnableCodeCoverage", false);
+                if (localCoverageEnabled != Coverage.enabled)
+                    Coverage.enabled = localCoverageEnabled;
+
+                PackageManager.Events.registeringPackages += OnRegisteringPackages;
+            } 
+#endif
             if (!Coverage.enabled)
                 return;
 
@@ -154,6 +181,16 @@ namespace UnityEditor.TestTools.CodeCoverage
                 CoverageReporterManager.ReportGenerator.Generate(coverageSettings);
             }
         }
+
+#if NO_COV_EDITORPREF
+        static void OnRegisteringPackages(PackageRegistrationEventArgs args)
+        {
+            if (args.removed.Any(info => info.name == "com.unity.testtools.codecoverage"))
+            {
+                Coverage.enabled = false;
+            }
+        }
+#endif
 
         static void OnBeforeAssemblyReload()
         {
