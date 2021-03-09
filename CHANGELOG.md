@@ -4,10 +4,23 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2021-03-09
+
+### Fixes
+- Fixed issues with Path Filtering (cases [1318896](https://issuetracker.unity3d.com/issues/code-coverage-typing-comma-into-the-included-or-excluded-paths-list-will-start-adding-row-for-each-letter-you-type-afterwards), [1318897](https://issuetracker.unity3d.com/issues/code-coverage-clearing-last-included-paths-row-immediatly-jumps-to-the-first-excluded-paths-row-and-starts-editing-it))
+
+### Improvements
+- Selection/focus is cleared when mouse is clicked outside of the individual settings' areas
+- Added [Quickstart guide](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.0/manual/Quickstart.html) in documentation
+- Renamed the *Code Coverage Workshop* sample to *Code Coverage Tutorial*
+- Updated documentation and workshop to match version 1.0.0
+
+**Note:** In Unity 2019 and 2020 you can enable Code Coverage in [General Preferences](https://docs.unity3d.com/Manual/Preferences.html). This was removed in Unity 2021; the user interface for managing Code Coverage is now entirely inside the Code Coverage package.
+
 ## [1.0.0-pre.4] - 2021-02-26
 
 ### Fixes
-- Fixed assembly version validation error due to internal libraries included in the ReportGeneratorMerged.dll (case 1312121)
+- Fixed assembly version validation error due to internal libraries included in the ReportGeneratorMerged.dll (case [1312121](https://issuetracker.unity3d.com/issues/code-coverage-reportgeneratormerged-cant-be-loaded-due-to-assembly-version-validation-failure))
 
 ### Changes
 - Added *Enable Code Coverage* checkbox under Settings in [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.0/manual/CodeCoverageWindow.html).<br/>**Note:** In Unity 2019 and 2020 you can enable Code Coverage in [General Preferences](https://docs.unity3d.com/Manual/Preferences.html). This was removed in Unity 2021; the user interface for managing Code Coverage is now entirely inside the Code Coverage package.

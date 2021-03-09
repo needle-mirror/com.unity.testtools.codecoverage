@@ -7,6 +7,7 @@ using UnityEditor.TestTools.TestRunner;
 using UnityEditor.TestTools.CodeCoverage.Analytics;
 using UnityEditorInternal;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -41,6 +42,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         private static readonly Vector2 s_WindowMinSizeNormal = new Vector2(445, 385);
         private float m_WarningsAddedAccumulativeHeight = 0;
         private float m_WarningsAddedAccumulativeHeightLast = 0;
+        private bool m_LoseFocus = false; 
 
         private bool m_GenerateReport = false;
         private bool m_StopRecording = false;
@@ -86,6 +88,11 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
         }
 
+        public void LoseFocus()
+        {
+            m_LoseFocus = true;
+        }
+
         public string AssembliesToInclude
         {
             set
@@ -101,10 +108,10 @@ namespace UnityEditor.TestTools.CodeCoverage
             set
             {
                 m_PathsToInclude = value.TrimStart(',').TrimEnd(',');
-                m_PathsToInclude = CoverageUtils.NormaliseFolderSeparators(m_PathsToInclude, true);
+                m_PathsToInclude = CoverageUtils.NormaliseFolderSeparators(m_PathsToInclude, false);
                 CoveragePreferences.instance.SetStringForPaths("PathsToInclude", m_PathsToInclude);
 
-                m_PathsToIncludeList = new List<string>(m_PathsToInclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+                m_PathsToIncludeList = m_PathsToInclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 m_PathsToIncludeReorderableList.list = m_PathsToIncludeList;
 
                 CoverageAnalytics.instance.CurrentCoverageEvent.updateIncludedPaths = true;
@@ -116,7 +123,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             set
             {
                 m_PathsToExclude = value.TrimStart(',').TrimEnd(',');
-                m_PathsToExclude = CoverageUtils.NormaliseFolderSeparators(m_PathsToExclude, true);
+                m_PathsToExclude = CoverageUtils.NormaliseFolderSeparators(m_PathsToExclude, false);
                 CoveragePreferences.instance.SetStringForPaths("PathsToExclude", m_PathsToExclude);
 
                 m_PathsToExcludeList = new List<string>(m_PathsToExclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
@@ -258,7 +265,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 {
                     return s_WindowMinSizeNormal;
                 }
-            }  
+            }
         }
 
         private void UpdateCoverageSettings()
@@ -301,7 +308,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_WindowScrollPosition = GUILayout.BeginScrollView(m_WindowScrollPosition, GUILayout.Height(maxHeight));
 
             GUILayout.BeginVertical(Styles.settings);
-            
+
             ResetIncludeWarnings();
 
             CheckScriptingRuntimeVersion();
@@ -321,7 +328,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 {
                     DrawCoverageSettings();
                 }
-  
+
                 DrawFooterButtons();
             }
 
@@ -331,6 +338,27 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
+
+            HandleFocusRepaint();
+        }
+
+        void HandleFocusRepaint()
+        {
+            Rect r = EditorGUILayout.GetControlRect();
+            // Lose focus if mouse is down outside of UI elements
+            if (Event.current.type == EventType.MouseDown && !r.Contains(Event.current.mousePosition))
+            {
+                m_LoseFocus = true;
+            }
+
+            if (m_LoseFocus)
+            {
+                GUI.FocusControl("");
+                m_PathsToIncludeReorderableList.ReleaseKeyboardFocus();
+                m_PathsToExcludeReorderableList.ReleaseKeyboardFocus();
+                m_LoseFocus = false;
+                Repaint();
+            }
         }
 
         void ResetIncludeWarnings()
@@ -467,6 +495,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                         CoveragePreferences.instance.SetStringForPaths("Path", m_CodeCoveragePath);
 
                         UpdateCoverageSettings();
+                        m_LoseFocus = true;
                     }
 #if UNITY_EDITOR_OSX
                     //After returning from a native dialog on OSX GUILayout gets into a corrupt state, stop rendering UI for this frame.
@@ -513,6 +542,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                         CoveragePreferences.instance.SetStringForPaths("HistoryPath", m_CodeCoverageHistoryPath);
 
                         UpdateCoverageSettings();
+                        m_LoseFocus = true;
                     }
 #if UNITY_EDITOR_OSX
                     //After returning from a native dialog on OSX GUILayout gets into a corrupt state, stop rendering UI for this frame.
@@ -591,12 +621,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             EditorGUI.BeginChangeCheck();
 
             m_PathsToIncludeReorderableList.drawElementCallback = DrawPathsToIncludeListItem;
-            m_PathsToIncludeReorderableList.onChangedCallback = (list) => { PathsToInclude = string.Join(",", m_PathsToIncludeList); };
+            m_PathsToIncludeReorderableList.onChangedCallback = (rl) => { PathsToInclude = string.Join(",", rl.list as List<string>); };
             m_PathsToIncludeReorderableList.DoLayoutList();
 
             if (EditorGUI.EndChangeCheck())
             {
-                PathsToInclude = string.Join(",", m_PathsToIncludeList);
+                OnPathsListChange(m_PathsToIncludeReorderableList, PathFilterType.Include);
             }
 
             GUILayout.Space(2);
@@ -654,12 +684,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             EditorGUI.BeginChangeCheck();
 
             m_PathsToExcludeReorderableList.drawElementCallback = DrawPathsToExcludeListItem;
-            m_PathsToExcludeReorderableList.onChangedCallback = (list) => { PathsToExclude = string.Join(",", m_PathsToExcludeList); };
+            m_PathsToExcludeReorderableList.onChangedCallback = (rl) => { PathsToExclude = string.Join(",", rl.list as List<string>); };
             m_PathsToExcludeReorderableList.DoLayoutList();
 
             if (EditorGUI.EndChangeCheck())
             {
-                PathsToExclude = string.Join(",", m_PathsToExcludeList);
+                OnPathsListChange(m_PathsToExcludeReorderableList, PathFilterType.Exclude);
             }
 
             GUILayout.Space(2);
@@ -709,7 +739,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             if (index >= 0 && index < m_PathsToIncludeList.Count)
             {
-                string pathToInclude = m_PathsToIncludeList[index];
+                string pathToInclude = m_PathsToIncludeList[index].Replace(",", "");
                 m_PathsToIncludeReorderableList.list[index] = EditorGUI.TextField(rect, pathToInclude);
             }
         }
@@ -726,6 +756,30 @@ namespace UnityEditor.TestTools.CodeCoverage
                 string pathToExclude = m_PathsToExcludeList[index];
                 m_PathsToExcludeReorderableList.list[index] = EditorGUI.TextField(rect, pathToExclude);
             }
+        }
+
+        void OnPathsListChange(ReorderableList rl, PathFilterType pathFilterType)
+        {
+            var pathsList = rl.list as List<string>;
+            int listSize = pathsList.Count;
+
+            for (int i = 0; i < listSize; ++i)
+            {
+                var itemStr = pathsList[i];
+                itemStr = itemStr.Replace(",", "");
+
+                if (string.IsNullOrWhiteSpace(itemStr))
+                {
+                    itemStr = "-";
+                }
+
+                pathsList[i] = itemStr;
+            }
+
+            if (pathFilterType == PathFilterType.Include)
+                PathsToInclude = string.Join(",", pathsList);
+            else if (pathFilterType == PathFilterType.Exclude)
+                PathsToExclude = string.Join(",", pathsList);
         }
 
         void RemovePathsToExcludeListItem(Rect rect)

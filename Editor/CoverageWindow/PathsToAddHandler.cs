@@ -72,6 +72,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                 {
                     m_Parent.PathsToExclude = m_PathsToFilter;
                 }
+
+                m_Parent.LoseFocus();
             }
         }
     }

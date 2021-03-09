@@ -1,9 +1,9 @@
 This package contains third-party software components governed by the licenses indicated below:
 ---------
 
-Component Name: ReportGenerator
+Component Name: **ReportGenerator**
 
-License Type: Apache 2.0
+License Type: **Apache 2.0**
 
 Copyright (c) 2018 Daniel Palme
 
@@ -15,9 +15,9 @@ For further details visit https://github.com/danielpalme/ReportGenerator/blob/ma
 
 ---------
 
-Component Name: OpenCover
+Component Name: **OpenCover**
 
-License Type: MIT
+License Type: **MIT**
 
 Copyright (c) 2011-2019 Shaun Wilde
 
@@ -48,9 +48,9 @@ For further details visit https://github.com/OpenCover/opencover/blob/master/LIC
 
 ---------
 
-Component Name: Cyclomatic Complexity calculation from MonoTools
+Component Name: **Cyclomatic Complexity calculation from MonoTools**
 
-License Type: MIT
+License Type: **MIT**
 
 Copyright (c) 2001, 2002, 2003 Ximian, Inc and the individuals listed
 on the ChangeLog entries.
@@ -78,9 +78,9 @@ For further details visit https://github.com/mono/mono-tools/blob/master/LICENSE
 
 ---------
 
-Component Name: Mono.Reflection
+Component Name: **Mono.Reflection**
 
-License Type: MIT
+License Type: **MIT**
 
 Author: Jb Evain (jbevain@novell.com)
 
@@ -109,9 +109,9 @@ For further details visit https://github.com/jbevain/mono.reflection/tree/master
 
 ---------
 
-Component Name: SixLabors.Fonts, SixLabors.ImageSharp 
+Component Name: **SixLabors.Fonts**, **SixLabors.ImageSharp** 
 
-License Type: Apache 2.0
+License Type: **Apache 2.0**
 
 Copyright (c) 2017 Six Labors
 

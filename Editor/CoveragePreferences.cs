@@ -86,7 +86,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public void SetStringForPaths(string key, string value, SettingsScope scope = SettingsScope.Project)
         {
-            value = CoverageUtils.NormaliseFolderSeparators(value, true);
+            value = CoverageUtils.NormaliseFolderSeparators(value, false);
             value = value.Replace(CoverageUtils.GetProjectPath(), k_ProjectPathAlias);
             SetString(key, value, scope);
         }

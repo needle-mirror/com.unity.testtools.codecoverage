@@ -10,9 +10,9 @@ Use the Code Coverage package with the [Test Runner](CoverageTestRunner.md) to g
 
 Once a test run has completed, the Code Coverage package will generate an [HTML coverage report](HowToInterpretResults.md) showing which lines of your code are covered by tests. Code Coverage currently supports  **PlayMode** and **EditMode** tests. It also allows you to track the code coverage changes through time.
 
-Additionally, the Code Coverage package offers a [Coverage Recording](CoverageRecording.md) feature which allows capturing coverage data on demand, in case you do not have tests in your project.
+Additionally, the Code Coverage package offers a [Coverage Recording](CoverageRecording.md) feature which allows capturing coverage data on demand, in case you do not have tests in your project or doing manual testing.
 
-The [Code Coverage Workshop](CodeCoverageWorkshop.md) will give you an insight into the package.
+The [Quickstart](Quickstart.md) guide will give you an insight into the package.
 
 ## Coverage HTML Report
 
@@ -26,15 +26,10 @@ This view shows some brief statistics for the selected class as well as the C# s
 
 ![HTML Report](images/report_code_html.png)
 
-For more information see [How To Interpret Results](HowToInterpretResults.md).
+For more information see [How to interpret the results](HowToInterpretResults.md).
 
 ## Coverage Summary Badges
 
 Additionally, the package can produce simple badges in SVG and PNG format, showing the current percentage of code that is covered.
 
 ![Summary Badge](images/report_badge.png)
-
-<br/>
-
-## Release Candidate package
-Code Coverage is available as a Release Candidate package, aiming to be released within Unity's 2021.1 release cycle. The features and documentation in this package might change before it is released.

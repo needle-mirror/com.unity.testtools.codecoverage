@@ -28,7 +28,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             m_Menu = new GenericMenu();
 
-            if (m_ReorderableList.index >= 0 && m_ReorderableList.index < m_List.Count)
+            if (m_ReorderableList.index >= 0 && m_ReorderableList.index < m_List.Count && m_ReorderableList.HasKeyboardControl())
                 m_Menu.AddItem(Styles.RemoveSelectedLabel, false, () => RemoveSelected());
             else
                 m_Menu.AddDisabledItem(Styles.RemoveSelectedLabel);
@@ -68,6 +68,8 @@ namespace UnityEditor.TestTools.CodeCoverage
             {
                 m_Parent.PathsToExclude = string.Join(",", m_List);
             }
+
+            m_Parent.LoseFocus();
         }
     }
 }

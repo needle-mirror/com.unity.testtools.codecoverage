@@ -41,10 +41,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             string[] excludePathFilters = excludePaths.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             m_IncludePaths = includePathFilters
+                .Where(f => f != "-")
                 .Select(f => CreateFilterRegex(f))
                 .ToArray();
 
             m_ExcludePaths = excludePathFilters
+                .Where(f => f != "-")
                 .Select(f => CreateFilterRegex(f))
                 .ToArray();
 

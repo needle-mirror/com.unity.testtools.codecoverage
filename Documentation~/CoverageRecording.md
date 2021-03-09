@@ -11,8 +11,8 @@ You can also control Coverage Recording via the [CodeCoverage ScriptingAPI](http
 1. Open the [Code Coverage window](CodeCoverageWindow.md) (go to **Window** > **Analysis** > **Code Coverage**).<br/><br/>
 ![Code Coverage Window](images/using_coverage/open_coverage_window.png)
 
-2. Select **Enable Code Coverage** if not already selected, to be able to generate Coverage data and reports.<br/><br/>
-![Enable Code Coverage](images/using_coverage/enable_code_coverage.png)
+2. Select **Enable Code Coverage** if not already selected, to be able to generate Coverage data and reports.<br/>
+![Enable Code Coverage](images/using_coverage/enable_code_coverage.png)<br/>**Note:** Enabling Code Coverage adds some overhead to the editor and can affect the performance.
 
 3. Select the [Assembly Definitions](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) you would like to see the coverage for. In this example we selected `Assembly-CSharp` and `Assembly-CSharp-Editor`. By default, Unity compiles almost all project scripts into the `Assembly-CSharp.dll` managed assembly and all editor scripts into the `Assembly-CSharp-Editor.dll` managed assembly.<br/><br/>
 ![Select Assemblies](images/using_coverage/select_assemblies.png)
