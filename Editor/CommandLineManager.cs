@@ -68,6 +68,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public bool useProjectSettings
+        {
+            get;
+            private set;
+        }
+
         public bool assemblyFiltersSpecified
         {
             get;
@@ -80,6 +86,24 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public bool pathStrippingSpecified
+        {
+            get;
+            private set;
+        }
+
+        public string sourcePaths
+        {
+            get;
+            private set;
+        }
+
+        public bool sourcePathsSpecified
+        {
+            get;
+            private set;
+        }
+
         public AssemblyFiltering assemblyFiltering
         {
             get;
@@ -87,6 +111,11 @@ namespace UnityEditor.TestTools.CodeCoverage
         }
 
         public PathFiltering pathFiltering
+        {
+            get;
+            private set;
+        }
+        public PathStripping pathStripping
         {
             get;
             private set;
@@ -104,28 +133,41 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public bool burstDisabled
+        {
+            get;
+            private set;
+        }
+
         private string m_CoverageOptionsArg;
         private string[] m_CoverageOptions;
         private string m_IncludeAssemblies;
         private string m_ExcludeAssemblies;
         private string m_IncludePaths;
         private string m_ExcludePaths;
+        private string m_PathStrippingPatterns;
 
         public CommandLineManagerImplementation(string[] commandLineArgs)
         {
             runFromCommandLine = false;
             coverageResultsPath = string.Empty;
             coverageHistoryPath = string.Empty;
+            sourcePaths = string.Empty;
             generateAdditionalMetrics = false;
             generateHTMLReportHistory = false;
             generateHTMLReport = false;
             generateBadgeReport = false;
+            useProjectSettings = false;
             assemblyFiltersSpecified = false;
             pathFiltersSpecified = false;
+            pathStrippingSpecified = false;
+            sourcePathsSpecified = false;
             assemblyFiltering = new AssemblyFiltering();
             pathFiltering = new PathFiltering();
+            pathStripping = new PathStripping();
             runTests = false;
             batchmode = false;
+            burstDisabled = false;
 
             m_CoverageOptionsArg = string.Empty;
             m_CoverageOptions = new string[] { };
@@ -133,6 +175,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_ExcludeAssemblies = string.Empty;
             m_IncludePaths = string.Empty;
             m_ExcludePaths = string.Empty;
+            m_PathStrippingPatterns = string.Empty;
 
             CommandLineOptionSet optionSet = new CommandLineOptionSet(
                 new CommandLineOption("enableCodeCoverage", () => { runFromCommandLine = true; }),
@@ -140,14 +183,16 @@ namespace UnityEditor.TestTools.CodeCoverage
                 new CommandLineOption("coverageHistoryPath", filePathArg => { SetCoverageHistoryPath(filePathArg); }),
                 new CommandLineOption("coverageOptions", optionsArg => { AddCoverageOptions(optionsArg); }),
                 new CommandLineOption("runTests", () => { runTests = true; }),
-                new CommandLineOption("batchmode", () => { batchmode = true; })
+                new CommandLineOption("batchmode", () => { batchmode = true; }),
+                new CommandLineOption("burst-disable-compilation", () => { burstDisabled = true; })
             );
             optionSet.Parse(commandLineArgs);
 
             ValidateCoverageResultsPath();
             ValidateCoverageHistoryPath();
 
-            ParseCoverageOptions();
+            if (runFromCommandLine)
+                ParseCoverageOptions();
         }
 
         private void SetCoverageResultsPath(string filePathArg)
@@ -248,6 +293,13 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                     case "GENERATEBADGEREPORT":
                         generateBadgeReport = true;
+                        break;
+
+                    case "USEPROJECTSETTINGS":
+                        if (batchmode)
+                            useProjectSettings = true;
+                        else
+                            ResultsLogger.Log(ResultID.Warning_UseProjectSettingsNonBatchmode);
                         break;
 
                     case "VERBOSITY":
@@ -367,6 +419,29 @@ namespace UnityEditor.TestTools.CodeCoverage
                             }
                         }
                         break;
+
+                    case "PATHSTRIPPINGPATTERNS":
+                        if (optionArgs.Length > 0)
+                        {
+                            pathStrippingSpecified = true;
+                            m_PathStrippingPatterns = optionArgs;
+                        }
+                        break;
+
+                    case "SOURCEPATHS":
+                        if (optionArgs.Length > 0)
+                        {
+                            sourcePathsSpecified = true;
+
+                            string[] rawSourcePaths = optionArgs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                            for (int i = 0; i < rawSourcePaths.Length; ++i)
+                            {
+                                if (sourcePaths.Length > 0)
+                                    sourcePaths += ",";
+                                sourcePaths += CoverageUtils.NormaliseFolderSeparators(rawSourcePaths[i]);
+                            }
+                        }
+                        break;
                 }
             }
 
@@ -389,6 +464,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             assemblyFiltering.Parse(m_IncludeAssemblies, m_ExcludeAssemblies);
             pathFiltering.Parse(m_IncludePaths, m_ExcludePaths);
+            pathStripping.Parse(m_PathStrippingPatterns);
         }
     }
 }

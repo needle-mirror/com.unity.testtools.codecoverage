@@ -31,19 +31,21 @@ namespace UnityEditor.TestTools.CodeCoverage
         [SerializeField]
         private bool m_IsGeneratingReport = false;
 
-        public void Start(bool initAnalytics = true)
+        public void Start(bool setupEvents = true)
         {
             m_LastIgnoredSuite = string.Empty;
             m_IsRunning = true;
             m_FileIndex = 0;
             m_TestRunCount = 0;
 
-            if (initAnalytics)
+            if (setupEvents)
             {
                 CoverageAnalytics.instance.CurrentCoverageEvent.actionID = ActionID.DataOnly;
                 CoverageAnalytics.instance.CurrentCoverageEvent.coverageModeId = CoverageModeID.TestRunner;
                 CoverageAnalytics.instance.StartTimer();
-            } 
+
+                CoverageEventData.instance.StartSession(SessionMode.TestRunner);
+            }
         }
 
         public void Stop()
@@ -52,14 +54,18 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_IsRunning = false;
         }
 
-        public void StartRecording()
+        public void StartRecording(bool setupEvents = true)
         {
-            Start();
+            Start(setupEvents);
             IncrementTestRunCount();
             m_IsRecording = true;
             m_IsRecordingPaused = false;
 
-            CoverageAnalytics.instance.CurrentCoverageEvent.coverageModeId = CoverageModeID.Recording;
+            if (setupEvents)
+            {
+                CoverageAnalytics.instance.CurrentCoverageEvent.coverageModeId = CoverageModeID.Recording;
+                CoverageEventData.instance.StartSession(SessionMode.Recording);
+            }
         }
 
         public void PauseRecording()
@@ -231,11 +237,13 @@ namespace UnityEditor.TestTools.CodeCoverage
         public void PauseRecording()
         {
             m_CoverageRunDataImplementation.PauseRecording();
+            Events.InvokeOnCoverageSessionPaused();
         }
 
         public void UnpauseRecording()
         {
             m_CoverageRunDataImplementation.UnpauseRecording();
+            Events.InvokeOnCoverageSessionUnpaused();
         }
 
         public bool isGeneratingReport

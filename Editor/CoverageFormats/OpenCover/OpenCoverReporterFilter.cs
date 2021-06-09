@@ -7,18 +7,15 @@
 
         public void SetupFiltering()
         {
-            if (CommandLineManager.instance.batchmode)
-                return;
-
-            if (!CommandLineManager.instance.runFromCommandLine || (CommandLineManager.instance.runFromCommandLine && !CommandLineManager.instance.assemblyFiltersSpecified))
+            if (!CommandLineManager.instance.runFromCommandLine || !CommandLineManager.instance.assemblyFiltersSpecified)
             {
                 m_AssemblyFiltering = new AssemblyFiltering();
 
                 string includeAssemblies = CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
                 m_AssemblyFiltering.Parse(includeAssemblies, AssemblyFiltering.kDefaultExcludedAssemblies);
             }
-            
-            if (!CommandLineManager.instance.runFromCommandLine || (CommandLineManager.instance.runFromCommandLine && !CommandLineManager.instance.pathFiltersSpecified))
+
+            if (!CommandLineManager.instance.runFromCommandLine || !CommandLineManager.instance.pathFiltersSpecified)
             {
                 m_PathFiltering = new PathFiltering();
 
@@ -31,25 +28,27 @@
 
         public bool ShouldProcessAssembly(string assemblyName)
         {
-            if (CommandLineManager.instance.batchmode ||
-                (CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.assemblyFiltersSpecified))
+            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
                 return CommandLineManager.instance.assemblyFiltering.IsAssemblyIncluded(assemblyName);
             else
-                return m_AssemblyFiltering.IsAssemblyIncluded(assemblyName);
+                return CommandLineManager.instance.assemblyFiltersSpecified ?
+                    CommandLineManager.instance.assemblyFiltering.IsAssemblyIncluded(assemblyName) :
+                    m_AssemblyFiltering.IsAssemblyIncluded(assemblyName);
         }
 
         public bool ShouldProcessFile(string filename)
         {
-            if (CommandLineManager.instance.batchmode ||
-                (CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.pathFiltersSpecified))
+            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
                 return CommandLineManager.instance.pathFiltering.IsPathIncluded(filename);
             else
-                return m_PathFiltering.IsPathIncluded(filename);
+                return CommandLineManager.instance.pathFiltersSpecified ?
+                    CommandLineManager.instance.pathFiltering.IsPathIncluded(filename) :
+                    m_PathFiltering.IsPathIncluded(filename);
         }
 
         public bool ShouldGenerateAdditionalMetrics()
         {
-            if (CommandLineManager.instance.batchmode)
+            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
                 return CommandLineManager.instance.generateAdditionalMetrics;
             else
                 return CommandLineManager.instance.generateAdditionalMetrics || CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);

@@ -1,6 +1,5 @@
 using System.Xml.Serialization;
 using System.IO;
-using UnityEngine;
 using OpenCover.Framework.Model;
 using UnityEditor.TestTools.CodeCoverage.Utils;
 
@@ -22,6 +21,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             }
 
             ResultsLogger.Log(ResultID.Log_ResultsSaved, fileFullPath);
+            CoverageEventData.instance.AddSessionResultPath(fileFullPath);
 
             base.WriteCoverageSession();
         }

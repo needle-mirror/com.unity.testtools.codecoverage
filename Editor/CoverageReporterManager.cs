@@ -51,26 +51,39 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
         }
 
-        public void GenerateReport()
+        public bool ShouldAutoGenerateReport(bool afterCoverageSession)
         {
-            bool autoGenerateReport, generateHTMLReport, generateBadge;
+            bool shouldAutoGenerateReport, generateHTMLReport, generateBadge;
 
-            if (CommandLineManager.instance.batchmode)
+            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
             {
                 generateHTMLReport = CommandLineManager.instance.generateHTMLReport;
                 generateBadge = CommandLineManager.instance.generateBadgeReport;
-                autoGenerateReport = generateHTMLReport || generateBadge;
+                shouldAutoGenerateReport = generateHTMLReport || generateBadge;
             }
             else
             {
                 generateHTMLReport = CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
                 generateBadge = CoveragePreferences.instance.GetBool("GenerateBadge", true);
-                autoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", true) && (generateHTMLReport || generateBadge);
+                bool autoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", true) && (generateHTMLReport || generateBadge);
                 bool commandLineAutoGenerateReport = CommandLineManager.instance.runFromCommandLine && (CommandLineManager.instance.generateHTMLReport || CommandLineManager.instance.generateBadgeReport);
-                autoGenerateReport = autoGenerateReport || commandLineAutoGenerateReport;
+                shouldAutoGenerateReport = (afterCoverageSession && autoGenerateReport) || commandLineAutoGenerateReport;
             }
 
-            if (!autoGenerateReport)
+            return shouldAutoGenerateReport;
+        }
+
+        public void GenerateReport()
+        {
+            if (ShouldAutoGenerateReport(true))
+            {
+                if (m_CoverageSettings != null)
+                {
+                    CoverageAnalytics.instance.CurrentCoverageEvent.actionID = ActionID.DataReport;
+                    ReportGenerator.Generate(m_CoverageSettings);
+                }
+            }
+            else
             {
                 // Clear ProgressBar left from saving results to file,
                 // otherwise continue on the same ProgressBar
@@ -78,14 +91,6 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                 // Send Analytics event (Data Only)
                 CoverageAnalytics.instance.SendCoverageEvent(true);
-
-                return;
-            }
-
-            if (m_CoverageSettings != null)
-            {
-                CoverageAnalytics.instance.CurrentCoverageEvent.actionID = ActionID.DataReport;
-                ReportGenerator.Generate(m_CoverageSettings);
             }
         }
 

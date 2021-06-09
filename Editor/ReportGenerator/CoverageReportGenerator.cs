@@ -25,7 +25,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
 
             string includeAssemblies = string.Empty;
-            if (CommandLineManager.instance.batchmode)
+            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
                 includeAssemblies = CommandLineManager.instance.assemblyFiltering.includedAssemblies;
             else
                 includeAssemblies = CommandLineManager.instance.assemblyFiltersSpecified ?
@@ -54,7 +54,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string rootFolderPath = coverageSettings.rootFolderPath;
 
-            if (rootFolderPath == null || CoverageUtils.GetNumberOfFilesInFolder(rootFolderPath, "*.xml", SearchOption.AllDirectories) == 0)
+            if (!CoverageUtils.DoesFolderExistAndNotEmpty(rootFolderPath) || CoverageUtils.GetNumberOfFilesInFolder(rootFolderPath, "*.xml", SearchOption.AllDirectories) == 0)
             {
                 EditorUtility.ClearProgressBar();
                 ResultsLogger.Log(ResultID.Error_FailedReportNoTests);
@@ -69,7 +69,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string[] reportFilePatterns = new string[] { testResultsXmlPath, recordingResultsXmlPath };
 
-            bool includeHistoryInReport = CommandLineManager.instance.batchmode ?
+            bool includeHistoryInReport = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
                 CommandLineManager.instance.generateHTMLReportHistory :
                 CommandLineManager.instance.generateHTMLReportHistory || CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
 
@@ -77,16 +77,16 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string targetDirectory = CoverageUtils.JoinPaths(rootFolderPath, CoverageSettings.ReportFolderName);
 
-            string[] sourceDirectories = new string[] { };
+            string[] sourceDirectories = CommandLineManager.instance.sourcePathsSpecified ? CommandLineManager.instance.sourcePaths.Split(',') : new string[] { };
 
-            bool generateHTMLReport = CommandLineManager.instance.batchmode ?
+            bool generateHTMLReport = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
                 CommandLineManager.instance.generateHTMLReport :
                 CommandLineManager.instance.generateHTMLReport || CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
 
             if (coverageSettings.overrideGenerateReport)
                 generateHTMLReport = true;
 
-            bool generateBadge = CommandLineManager.instance.batchmode ?
+            bool generateBadge = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
                 CommandLineManager.instance.generateBadgeReport : 
                 CommandLineManager.instance.generateBadgeReport || CoveragePreferences.instance.GetBool("GenerateBadge", true);
 
@@ -99,7 +99,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             string[] reportTypes = reportTypesString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             string[] plugins = new string[] { };
 
-            bool includeAdditionalMetrics = CommandLineManager.instance.batchmode ?
+            bool includeAdditionalMetrics = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
                 CommandLineManager.instance.generateAdditionalMetrics :
                 CommandLineManager.instance.generateAdditionalMetrics || CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
 
@@ -136,7 +136,6 @@ namespace UnityEditor.TestTools.CodeCoverage
                 if (generator.GenerateReport(config, new Settings() { DisableRiskHotspots = !includeAdditionalMetrics }, new RiskHotspotsAnalysisThresholds()))
                 {
                     ResultsLogger.Log(ResultID.Log_ReportSaved, targetDirectory);
-                    ResultsLogger.LogSessionItem(loggerFactory.Logger.ToString(), LogVerbosityLevel.Info);
 
                     CoverageRunData.instance.ReportGenerationEnd(true);
 
@@ -156,7 +155,6 @@ namespace UnityEditor.TestTools.CodeCoverage
                 else
                 {
                     ResultsLogger.Log(ResultID.Error_FailedReport);
-                    ResultsLogger.LogSessionItem(loggerFactory.Logger.ToString(), LogVerbosityLevel.Error);
 
                     CoverageRunData.instance.ReportGenerationEnd(false);
                 }
@@ -200,6 +198,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Info);
 
             if (!CommandLineManager.instance.batchmode)
             {
@@ -230,6 +229,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Error);
         }
 
         public void Info(string message)
@@ -241,6 +241,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Info);
 
             if (!CommandLineManager.instance.batchmode)
             {
@@ -271,6 +272,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Warning);
         }
 
         public override string ToString()

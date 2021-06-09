@@ -143,10 +143,14 @@ namespace UnityEditor.TestTools.CodeCoverage
 #if CONDITIONAL_IGNORE_SUPPORTED
             ConditionalIgnoreAttribute.AddConditionalIgnoreMapping("IgnoreForCoverage", true);
 #endif
-
-            TestRunnerApi api = ScriptableObject.CreateInstance<TestRunnerApi>();
             CoverageReporterListener listener = ScriptableObject.CreateInstance<CoverageReporterListener>();
+
+#if TEST_FRAMEWORK_1_2_OR_NEWER
+            TestRunnerApi.RegisterTestCallback(listener);
+#else
+            TestRunnerApi api = ScriptableObject.CreateInstance<TestRunnerApi>();
             api.RegisterCallbacks(listener);
+#endif
 
             CoverageSettings coverageSettings = new CoverageSettings()
             {
@@ -163,14 +167,13 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             // Generate a report if running from the command line,
             // generateHTMLReport or generateBadgeReport is passed to -coverageOptions
-            // and -runTests has not been passed to the command line
+            // and -runTests has not been passed to the command line,
+            // regardless if AutoGenerate is selected in the UI
             if (CommandLineManager.instance.runFromCommandLine &&
-                (CommandLineManager.instance.generateHTMLReport || CommandLineManager.instance.generateBadgeReport) &&
-                !CommandLineManager.instance.runTests)
+                CoverageReporterManager.ShouldAutoGenerateReport(false) &&
+                !CommandLineManager.instance.runTests &&
+                !CoverageRunData.instance.reportWasGenerated)
             {
-                if (CoverageRunData.instance.reportWasGenerated)
-                    return;
-
                 // Start the timer for analytics for Report only
                 CoverageAnalytics.instance.StartTimer();
                 CoverageAnalytics.instance.CurrentCoverageEvent.actionID = ActionID.ReportOnly;

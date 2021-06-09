@@ -99,7 +99,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             string rootFolderPath = string.Empty;
             string coverageFolderPath = string.Empty;
 
-            if (CommandLineManager.instance.batchmode)
+            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
             {
                 if (coverageSettings.resultsPathFromCommandLine.Length > 0)
                 {
@@ -122,7 +122,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
 
             string projectPath = GetProjectPath();
 
-            if (IsValidFolder(coverageFolderPath))
+            if (EnsureFolderExists(coverageFolderPath))
             {
                 coverageFolderPath = NormaliseFolderSeparators(coverageFolderPath, true);
 
@@ -146,7 +146,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             string historyFolderPath = string.Empty;
             string rootFolderPath = coverageSettings.rootFolderPath;
 
-            if (CommandLineManager.instance.batchmode)
+            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
             {
                 if (coverageSettings.historyPathFromCommandLine.Length > 0)
                 {
@@ -170,7 +170,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             bool addHistorySubDir = false;
             string projectPath = GetProjectPath();
 
-            if (IsValidFolder(historyFolderPath))
+            if (EnsureFolderExists(historyFolderPath))
             {
                 historyFolderPath = NormaliseFolderSeparators(historyFolderPath, true);
                 
@@ -280,11 +280,14 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
 
         private static HashSet<char> regexSpecialChars = new HashSet<char>(new[] { '[', '\\', '^', '$', '.', '|', '?', '*', '+', '(', ')' });
 
-        public static string GlobToRegex(string glob)
+        public static string GlobToRegex(string glob, bool startEndConstrains = true)
         {
             var regex = new StringBuilder();
             var characterClass = false;
-            regex.Append("^");
+            char prevChar = Char.MinValue;
+
+            if (startEndConstrains)
+                regex.Append("^");
             foreach (var c in glob)
             {
                 if (characterClass)
@@ -299,10 +302,13 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
                 switch (c)
                 {
                     case '*':
-                        regex.Append(".*");
+                        if (prevChar == '*')
+                            regex.Append(".*"); //if it's double * pattern then don't stop at folder separator
+                        else
+                            regex.Append("[^\\n\\r/]*"); //else match everything except folder separator (and new line)
                         break;
                     case '?':
-                        regex.Append(".");
+                        regex.Append("[^\\n\\r/]");
                         break;
                     case '[':
                         characterClass = true;
@@ -316,8 +322,11 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
                         regex.Append(c);
                         break;
                 }
+
+                prevChar = c;
             }
-            regex.Append("$");
+            if (startEndConstrains)
+                regex.Append("$");
             return regex.ToString();
         }
 

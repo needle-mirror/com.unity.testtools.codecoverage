@@ -42,6 +42,11 @@
             "name": "Unity",
             "expression": "2021.1.0b10",
             "define": "NO_COV_EDITORPREF"
+        },
+        {
+            "name": "com.unity.test-framework",
+            "expression": "1.2.0",
+            "define": "TEST_FRAMEWORK_1_2_OR_NEWER"
         }
     ],
     "noEngineReferences": false

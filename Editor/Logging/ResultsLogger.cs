@@ -41,6 +41,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
         Warning_ExcludeAttributeClass = 17,
         Warning_ExcludeAttributeMethod = 18,
         Warning_StandaloneUnsupported = 19,
+        Warning_UseProjectSettingsNonBatchmode = 20,
     }
 
     internal static class ResultsLogger
@@ -56,8 +57,8 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             { ResultID.Error_FailedReportNoAssemblies, new ResultData(LogType.Error, "Failed to generate Code Coverage Report. Make sure you have included at least one assembly before generating a report.") },
             { ResultID.Assert_NullAssemblyTypes, new ResultData(LogType.Assert, "assemblyTypes cannot be null") },
             { ResultID.Warning_DebugCodeOptimization, new ResultData(LogType.Warning, "Code Coverage requires Code Optimization to be set to debug mode in order to obtain accurate coverage information. Switch to debug mode in the Editor (bottom right corner, select the Bug icon > Switch to debug mode), using the CompilationPipeline api by setting 'CompilationPipeline.codeOptimization = CodeOptimization.Debug' or by passing '-debugCodeOptimization' to the command line in batchmode.") },
-            { ResultID.Warning_AssemblyFiltersNotPrefixed, new ResultData(LogType.Warning, "-coverageOptions assemblyFilters argument {0} would not be applied as it is not prefixed with +/-.") },
-            { ResultID.Warning_PathFiltersNotPrefixed, new ResultData(LogType.Warning, "-coverageOptions pathFilters argument {0} would not be applied as it is not prefixed with +/-.") },
+            { ResultID.Warning_AssemblyFiltersNotPrefixed, new ResultData(LogType.Warning, "'-coverageOptions assemblyFilters' argument {0} would not be applied as it is not prefixed with +/-.") },
+            { ResultID.Warning_PathFiltersNotPrefixed, new ResultData(LogType.Warning, "'-coverageOptions pathFilters' argument {0} would not be applied as it is not prefixed with +/-.") },
             { ResultID.Warning_MultipleResultsPaths, new ResultData(LogType.Warning, "'-coverageResultsPath' has already been specified on the command-line. Keeping the original setting: '{0}'.") },
             { ResultID.Warning_MultipleHistoryPaths, new ResultData(LogType.Warning, "'-coverageHistoryPath' has already been specified on the command-line. Keeping the original setting: '{0}'.") },
             { ResultID.Warning_NoCoverageResultsSaved, new ResultData(LogType.Warning, "No coverage results were saved.") },
@@ -69,6 +70,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             { ResultID.Warning_ExcludeAttributeClass, new ResultData(LogType.Warning, "Not able to detect custom attribute ExcludeFromCoverage in Class: {0}, Assembly: {1}") },
             { ResultID.Warning_ExcludeAttributeMethod, new ResultData(LogType.Warning, "Not able to detect custom attribute ExcludeFromCoverage in Method: {0}, Class: {1}, Assembly: {2}") },
             { ResultID.Warning_StandaloneUnsupported, new ResultData(LogType.Warning, "Code Coverage is not supported in standalone currently. Code Coverage Results and Report will not be generated.") },
+            { ResultID.Warning_UseProjectSettingsNonBatchmode, new ResultData(LogType.Warning, "'-coverageOptions useProjectSettings' can only be used in batchmode and it does not take effect when running the editor from the command-line in non-batchmode.") },
         };
 
         public static bool Log(ResultID resultId, params string[] extraParams)

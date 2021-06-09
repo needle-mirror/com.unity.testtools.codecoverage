@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace UnityEditor.TestTools.CodeCoverage.Analytics
 {
@@ -20,6 +19,8 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
         public bool runFromCommandLine;
         // Did the user run the editor in batch mode
         public bool batchmode;
+        // Did the user pass the useProjectSettings option in batch mode (batchmode only)
+        public bool useProjectSettings;
         // Did the user have Generate HTML Report selected  (batchmode compatible)
         public bool generateHTMLReport;
         // Did the user have Generate History selected (batchmode compatible)
@@ -82,6 +83,18 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
         public string[] includedAssemblies;
         // Array of individual excluded assembly names (batchmode only)
         public string[] excludedAssemblies;
+        // Did the user use the onCoverageSessionStarted event (batchmode compatible)
+        public bool useEvent_onCoverageSessionStarted;
+        // Did the user use the onCoverageSessionFinished event (batchmode compatible)
+        public bool useEvent_onCoverageSessionFinished;
+        // Did the user use the onCoverageSessionPaused event (batchmode compatible)
+        public bool useEvent_onCoverageSessionPaused;
+        // Did the user use the onCoverageSessionUnpaused event (batchmode compatible)
+        public bool useEvent_onCoverageSessionUnpaused;
+        // Did the user specify path stripping patterns (command line only)
+        public bool usePathStrippingPatterns;
+        // Did the user specify source paths (command line only)
+        public bool useSourcePaths;
     }
 
     /* Future-proof

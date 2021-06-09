@@ -162,7 +162,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             public static readonly GUIContent GenerateBadgeReportLabel = EditorGUIUtility.TrTextContent("Generate Summary Badges", "Check this to generate coverage summary badges in SVG and PNG format.");
             public static readonly GUIContent AutoGenerateReportLabel = EditorGUIUtility.TrTextContent("Auto Generate Report", "Check this to generate the report automatically after the Test Runner has finished running the tests or the Coverage Recording session has completed.");
             public static readonly GUIContent GenerateReportButtonLabel = EditorGUIUtility.TrTextContent("Generate from Last", "Generates a coverage report from the last set of tests that were run in the Test Runner or from the last Coverage Recording session.");
-            public static readonly GUIContent ClearCoverageButtonLabel = EditorGUIUtility.TrTextContent("Clear Data", "Clears the Coverage data from previous test runs for both EditMode and PlayMode tests or from previous Coverage Recording sessions, for the current project.");
+            public static readonly GUIContent ClearCoverageButtonLabel = EditorGUIUtility.TrTextContent("Clear Data", "Clears the Coverage data from previous test runs or from previous Coverage Recording sessions, for the current project.");
             public static readonly GUIContent ClearHistoryButtonLabel = EditorGUIUtility.TrTextContent("Clear History", "Clears the coverage report history.");
             public static readonly GUIContent StartRecordingButtonLabel = EditorGUIUtility.TrTextContentWithIcon(" Start Recording", "Record coverage data.", "Record Off");
             public static readonly GUIContent StopRecordingButtonLabel = EditorGUIUtility.TrTextContentWithIcon(" Stop Recording", "Stop recording coverage data.", "Record On");
@@ -478,7 +478,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 textFieldPosition = EditorGUI.PrefixLabel(textFieldPosition, Styles.CodeCoverageResultsLocationLabel);
                 EditorGUI.SelectableLabel(textFieldPosition, settingPassedInCmdLine ? CommandLineManager.instance.coverageResultsPath : m_CodeCoveragePath, EditorStyles.textField);
 
-                bool autoDetect = !CoverageUtils.IsValidFolder(m_CodeCoveragePath);
+                bool autoDetect = !CoverageUtils.EnsureFolderExists(m_CodeCoveragePath);
 
                 if (autoDetect)
                 {
@@ -525,7 +525,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 textFieldPosition = EditorGUI.PrefixLabel(textFieldPosition, Styles.CodeCoverageHistoryLocationLabel);
                 EditorGUI.SelectableLabel(textFieldPosition, settingPassedInCmdLine ? CommandLineManager.instance.coverageHistoryPath : m_CodeCoverageHistoryPath, EditorStyles.textField);
 
-                bool autoDetect = !CoverageUtils.IsValidFolder(m_CodeCoverageHistoryPath);
+                bool autoDetect = !CoverageUtils.EnsureFolderExists(m_CodeCoverageHistoryPath);
 
                 if (autoDetect)
                 {
