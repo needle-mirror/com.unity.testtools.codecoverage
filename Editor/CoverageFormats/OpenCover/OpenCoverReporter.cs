@@ -30,6 +30,9 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
         private ICoverageReporterFilter m_ReporterFilter;
         private OpenCoverResultWriter m_Writer;
 
+        private List<MethodBase> m_ExcludedMethods = null;
+        private List<string> m_ExcludedTypes = null;
+
         private static readonly Dictionary<string, string> m_Operators = new Dictionary<string, string>
         {
             { "op_Addition", "operator+" },
@@ -165,17 +168,17 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
         private bool IsPropertySetter(MethodBase methodBase)
         {
-            return IsSpecialMethod(methodBase) && methodBase.Name.Contains("set_");
+            return IsSpecialMethod(methodBase) && methodBase.Name.StartsWith("set_");
         }
 
         private bool IsPropertyGetter(MethodBase methodBase)
         {
-            return IsSpecialMethod(methodBase) && methodBase.Name.Contains("get_");
+            return IsSpecialMethod(methodBase) && methodBase.Name.StartsWith("get_");
         }
 
         private bool IsOperator(MethodBase methodBase)
         {
-            return IsSpecialMethod(methodBase) && methodBase.Name.Contains("op_");
+            return IsSpecialMethod(methodBase) && methodBase.Name.StartsWith("op_");
         }
 
         private bool IsAnonymousOrInnerMethod(MethodBase methodBase)
@@ -410,8 +413,6 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             int genericSeparatorIndex = typeName.LastIndexOf('`');
             if (genericSeparatorIndex != -1)
             {
-                int nestedGenericSeparatorIndex = typeName.LastIndexOf('+');
-
                 sb.Append(typeName.Substring(0, genericSeparatorIndex));
             }
             else
@@ -488,6 +489,8 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                 List<string> filesNotFound = new List<string>();
                 Dictionary<string, UInt32> fileList = new Dictionary<string, UInt32>();
                 Type[] assemblyTypes = null;
+                m_ExcludedMethods = null;
+                m_ExcludedTypes = null;
 
                 try
                 {
@@ -521,9 +524,13 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     try
                     {
                         if (type.GetCustomAttribute<ExcludeFromCoverageAttribute>() != null ||
-                            type.GetCustomAttribute<ExcludeFromCodeCoverageAttribute>() != null)
+                            type.GetCustomAttribute<ExcludeFromCodeCoverageAttribute>() != null ||
+                            CheckIfParentMemberIsExcluded(type))
                         {
                             ResultsLogger.LogSessionItem($"Excluded class (ExcludeFromCoverage): {className}", LogVerbosityLevel.Verbose);
+                            if (m_ExcludedTypes == null)
+                                m_ExcludedTypes = new List<string>();
+                            m_ExcludedTypes.Add(type.FullName);
                             continue;
                         }
                     }
@@ -541,19 +548,25 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
                         foreach (CoveredMethodStats classMethodStats in classMethodStatsArray)
                         {
-                            if (classMethodStats.method == null)
+                            MethodBase method = classMethodStats.method;
+
+                            if (method == null)
                                 continue;
 
-                            string methodName = classMethodStats.method.Name;
+                            string methodName = method.Name;
 
                             ResultsLogger.LogSessionItem($"Processing method: {methodName}", LogVerbosityLevel.Verbose);
 
                             try
                             {
-                                if (classMethodStats.method.GetCustomAttribute<ExcludeFromCoverageAttribute>() != null ||
-                                    classMethodStats.method.GetCustomAttribute<ExcludeFromCodeCoverageAttribute>() != null)
+                                if (method.GetCustomAttribute<ExcludeFromCoverageAttribute>() != null ||
+                                    method.GetCustomAttribute<ExcludeFromCodeCoverageAttribute>() != null ||
+                                    CheckIfParentMemberIsExcluded(method))
                                 {
                                     ResultsLogger.LogSessionItem($"Excluded method (ExcludeFromCoverage): {methodName}", LogVerbosityLevel.Verbose);
+                                    if (m_ExcludedMethods == null)
+                                        m_ExcludedMethods = new List<MethodBase>();
+                                    m_ExcludedMethods.Add(method);
                                     continue;
                                 }
                             }
@@ -562,12 +575,18 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                 ResultsLogger.Log(ResultID.Warning_ExcludeAttributeMethod, methodName, className, assemblyName);
                             }
 
+                            if (IsGetterSetterPropertyExcluded(method, type))
+                            {
+                                ResultsLogger.LogSessionItem($"Excluded method (ExcludeFromCoverage): {methodName}", LogVerbosityLevel.Verbose);
+                                continue;
+                            }
+
                             if (classMethodStats.totalSequencePoints > 0)
                             {
                                 List<SequencePoint> coveredSequencePoints = new List<SequencePoint>();
 
                                 uint fileId = 0;
-                                CoveredSequencePoint[] classMethodSequencePointsArray = Coverage.GetSequencePointsFor(classMethodStats.method);
+                                CoveredSequencePoint[] classMethodSequencePointsArray = Coverage.GetSequencePointsFor(method);
                                 foreach (CoveredSequencePoint classMethodSequencePoint in classMethodSequencePointsArray)
                                 {
                                     string filename = classMethodSequencePoint.filename;
@@ -605,18 +624,17 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                 if (coveredSequencePoints.Count > 0)
                                 {
                                     Method coveredMethod = new Method();
-                                    MethodBase methodBase = classMethodStats.method;
-                                    coveredMethod.MetadataToken = methodBase.MetadataToken;
-                                    coveredMethod.FullName = GenerateMethodName(methodBase);
+                                    coveredMethod.MetadataToken = method.MetadataToken;
+                                    coveredMethod.FullName = GenerateMethodName(method);
                                     coveredMethod.FileRef = new FileRef() { UniqueId = fileId };
-                                    coveredMethod.IsConstructor = IsConstructor(methodBase) || IsStaticConstructor(methodBase);
-                                    coveredMethod.IsStatic = methodBase.IsStatic;
-                                    coveredMethod.IsSetter = IsPropertySetter(methodBase);
-                                    coveredMethod.IsGetter = IsPropertyGetter(methodBase);
+                                    coveredMethod.IsConstructor = IsConstructor(method) || IsStaticConstructor(method);
+                                    coveredMethod.IsStatic = method.IsStatic;
+                                    coveredMethod.IsSetter = IsPropertySetter(method);
+                                    coveredMethod.IsGetter = IsPropertyGetter(method);
                                     coveredMethod.SequencePoints = coveredSequencePoints.ToArray();
                                     if (shouldGenerateAdditionalMetrics)
                                     {
-                                        coveredMethod.CyclomaticComplexity = methodBase.CalculateCyclomaticComplexity();
+                                        coveredMethod.CyclomaticComplexity = method.CalculateCyclomaticComplexity();
                                     }
 
                                     ResultsLogger.LogSessionItem($"Processing included method: {coveredMethod.FullName}", LogVerbosityLevel.Verbose);
@@ -680,6 +698,23 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             ResultsLogger.LogSessionItem("Finished OpenCover Session", LogVerbosityLevel.Info);
 
             return coverageSession;
+        }
+
+        internal bool IsGetterSetterPropertyExcluded(MethodBase method, Type type)
+        {
+            if (IsPropertySetter(method) || IsPropertyGetter(method))
+            {
+                PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                PropertyInfo property = properties.FirstOrDefault(pInfo => pInfo.GetMethod?.Name.Equals(method.Name) == true || pInfo.SetMethod?.Name.Equals(method.Name) == true);
+
+                if (property?.GetCustomAttribute<ExcludeFromCoverageAttribute>() != null ||
+                    property?.GetCustomAttribute<ExcludeFromCodeCoverageAttribute>() != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void UpdateMethodSummary(Method coveredMethod)
@@ -840,6 +875,53 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     }
                 }
             }
+        }
+
+        // Check if the parent member (type or method) is excluded
+        private bool CheckIfParentMemberIsExcluded(MemberInfo member)
+        {
+            if (m_ExcludedMethods == null && m_ExcludedTypes == null)
+            {
+                return false;
+            }
+
+            Type declaringType = member.DeclaringType;
+
+            while (declaringType != null)
+            {
+                // If parent type is excluded return true
+                if (m_ExcludedTypes != null &&
+                    m_ExcludedTypes.Any(typeName => typeName == declaringType.FullName))
+                {
+                    return true;
+                }
+
+                if (m_ExcludedMethods != null)
+                {
+                    // If parent method is excluded return true
+                    foreach (var excludedMethod in m_ExcludedMethods)
+                    {
+                        if (declaringType.FullName == excludedMethod.DeclaringType.FullName &&
+                            CheckIfParentMethodIsExcluded(member.Name, excludedMethod.Name))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                
+                declaringType = declaringType.DeclaringType;
+            }
+
+            return false;
+        }
+
+        private bool CheckIfParentMethodIsExcluded(string methodName, string excludedMethodName)
+        {
+            return
+                // Lambda method
+                methodName.IndexOf($"<{excludedMethodName}>b__") != -1 ||
+                // yield method
+                methodName.IndexOf($"<{excludedMethodName}>d__") != -1;
         }
     }
 }

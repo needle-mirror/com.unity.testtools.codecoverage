@@ -122,7 +122,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
 
             string projectPath = GetProjectPath();
 
-            if (IsValidFolder(coverageFolderPath))
+            if (EnsureFolderExists(coverageFolderPath))
             {
                 coverageFolderPath = NormaliseFolderSeparators(coverageFolderPath, true);
 
@@ -170,7 +170,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             bool addHistorySubDir = false;
             string projectPath = GetProjectPath();
 
-            if (IsValidFolder(historyFolderPath))
+            if (EnsureFolderExists(historyFolderPath))
             {
                 historyFolderPath = NormaliseFolderSeparators(historyFolderPath, true);
                 

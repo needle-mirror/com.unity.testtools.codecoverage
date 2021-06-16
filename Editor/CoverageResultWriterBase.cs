@@ -38,7 +38,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
 #endif
 #if BURST_INSTALLED
-            if (EditorPrefs.GetBool("BurstCompilation", true))
+            if (EditorPrefs.GetBool("BurstCompilation", true) && !CommandLineManager.instance.burstDisabled)
             {
                 ResultsLogger.Log(ResultID.Warning_BurstCompilationEnabled);
             }
@@ -53,7 +53,11 @@ namespace UnityEditor.TestTools.CodeCoverage
             bool isRecording = CoverageRunData.instance.isRecording;
 
             // We want to save in the 'Recording' subdirectory of the results folder when recording
+#if TEST_FRAMEWORK_1_2_OR_NEWER
+            string testSuite = isRecording ? "Recording" : "Automated";
+#else
             string testSuite = isRecording ? "Recording" : TestContext.Parameters.Get("platform");
+#endif
             string directoryName = CoverageUtils.JoinPaths(resultsRootDirectoryName, testSuite != null ? testSuite : "");
 
             m_CoverageSettings.rootFolderPath = CoverageUtils.GetRootFolderPath(m_CoverageSettings);

@@ -136,7 +136,6 @@ namespace UnityEditor.TestTools.CodeCoverage
                 if (generator.GenerateReport(config, new Settings() { DisableRiskHotspots = !includeAdditionalMetrics }, new RiskHotspotsAnalysisThresholds()))
                 {
                     ResultsLogger.Log(ResultID.Log_ReportSaved, targetDirectory);
-                    ResultsLogger.LogSessionItem(loggerFactory.Logger.ToString(), LogVerbosityLevel.Info);
 
                     CoverageRunData.instance.ReportGenerationEnd(true);
 
@@ -156,7 +155,6 @@ namespace UnityEditor.TestTools.CodeCoverage
                 else
                 {
                     ResultsLogger.Log(ResultID.Error_FailedReport);
-                    ResultsLogger.LogSessionItem(loggerFactory.Logger.ToString(), LogVerbosityLevel.Error);
 
                     CoverageRunData.instance.ReportGenerationEnd(false);
                 }
@@ -200,6 +198,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Info);
 
             if (!CommandLineManager.instance.batchmode)
             {
@@ -230,6 +229,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Error);
         }
 
         public void Info(string message)
@@ -241,6 +241,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Info);
 
             if (!CommandLineManager.instance.batchmode)
             {
@@ -271,6 +272,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Warning);
         }
 
         public override string ToString()

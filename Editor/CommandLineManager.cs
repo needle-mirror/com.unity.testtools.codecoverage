@@ -104,6 +104,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public bool burstDisabled
+        {
+            get;
+            private set;
+        }
+
         private string m_CoverageOptionsArg;
         private string[] m_CoverageOptions;
         private string m_IncludeAssemblies;
@@ -126,6 +132,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             pathFiltering = new PathFiltering();
             runTests = false;
             batchmode = false;
+            burstDisabled = false;
 
             m_CoverageOptionsArg = string.Empty;
             m_CoverageOptions = new string[] { };
@@ -140,14 +147,16 @@ namespace UnityEditor.TestTools.CodeCoverage
                 new CommandLineOption("coverageHistoryPath", filePathArg => { SetCoverageHistoryPath(filePathArg); }),
                 new CommandLineOption("coverageOptions", optionsArg => { AddCoverageOptions(optionsArg); }),
                 new CommandLineOption("runTests", () => { runTests = true; }),
-                new CommandLineOption("batchmode", () => { batchmode = true; })
+                new CommandLineOption("batchmode", () => { batchmode = true; }),
+                new CommandLineOption("burst-disable-compilation", () => { burstDisabled = true; })
             );
             optionSet.Parse(commandLineArgs);
 
             ValidateCoverageResultsPath();
             ValidateCoverageHistoryPath();
 
-            ParseCoverageOptions();
+            if (runFromCommandLine)
+                ParseCoverageOptions();
         }
 
         private void SetCoverageResultsPath(string filePathArg)

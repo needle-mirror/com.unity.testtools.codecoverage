@@ -49,7 +49,7 @@ Unity.exe -projectPath <path-to-project> -batchmode -testPlatform playmode -runT
 -coverageOptions generateAdditionalMetrics;assemblyFilters:+my.assembly.*
 
 Unity.exe -projectPath <path-to-project> -batchmode -debugCodeOptimization -enableCodeCoverage -coverageResultsPath <path-to-coverage-results>
--coverageOptions generateHtmlReport;generateBadgeReport -quit
+-coverageOptions generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.* -quit
 ```
 The first will generate the coverage results for the EditMode tests, the second will generate the coverage results for the PlayMode tests and the third will generate the coverage report and summary badges based on both coverage results.
 
@@ -64,6 +64,6 @@ Unity.exe -projectPath <path-to-project-02> -batchmode -testPlatform playmode -r
 -coverageOptions generateAdditionalMetrics;assemblyFilters:+my.assembly.*
 
 Unity.exe -projectPath <path-to-project-01> -batchmode -debugCodeOptimization -enableCodeCoverage -coverageResultsPath <path-to-coverage-results>
--coverageOptions generateHtmlReport;generateBadgeReport -quit
+-coverageOptions generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.* -quit
 ```
 The first run will generate the coverage results for the PlayMode tests for *Project-01* and store these in *path-to-coverage-results/project-01*, the second run will generate the coverage results for the PlayMode tests for *Project-02* and store these in *path-to-coverage-results/project-02* and the third run will generate the coverage report and summary badges based on the results found under the common *path-to-coverage-results* folder.

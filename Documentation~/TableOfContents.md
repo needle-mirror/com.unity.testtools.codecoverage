@@ -24,6 +24,7 @@
   * [Using Code Coverage with Burst compiler](UsingCodeCoverage#using-code-coverage-with-burst-compiler)
   * [Using Code Coverage with Code Optimization](UsingCodeCoverage#using-code-coverage-with-code-optimization)
   * [Excluding code from Code Coverage](UsingCodeCoverage#excluding-code-from-code-coverage)
+  * [Ignoring tests for Code Coverage](UsingCodeCoverage#ignoring-tests-for-code-coverage)
 * [How to interpret the results](HowToInterpretResults)
   * [Summary View](HowToInterpretResults#summary-view)
   * [Class/Struct View](HowToInterpretResults#classstruct-view)

@@ -143,10 +143,14 @@ namespace UnityEditor.TestTools.CodeCoverage
 #if CONDITIONAL_IGNORE_SUPPORTED
             ConditionalIgnoreAttribute.AddConditionalIgnoreMapping("IgnoreForCoverage", true);
 #endif
-
-            TestRunnerApi api = ScriptableObject.CreateInstance<TestRunnerApi>();
             CoverageReporterListener listener = ScriptableObject.CreateInstance<CoverageReporterListener>();
+
+#if TEST_FRAMEWORK_1_2_OR_NEWER
+            TestRunnerApi.RegisterTestCallback(listener);
+#else
+            TestRunnerApi api = ScriptableObject.CreateInstance<TestRunnerApi>();
             api.RegisterCallbacks(listener);
+#endif
 
             CoverageSettings coverageSettings = new CoverageSettings()
             {

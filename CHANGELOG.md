@@ -4,6 +4,24 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2021-06-16
+
+### Fixes
+- Ensure Results and History folders are created if they do not exist (case [1334551](https://issuetracker.unity3d.com/issues/code-coverage-results-slash-history-location-path-is-reset-to-default-if-set-path-no-longer-exists))
+- Added support for [ExcludeFromCoverage/ExcludeFromCodeCoverage](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.0/manual/UsingCodeCoverage.html#excluding-code-from-code-coverage) for lambda expressions and yield statements (case [1338636](https://issuetracker.unity3d.com/issues/code-coverage-excludefromcoverage-attribute-doesnt-exclude-lambda-expressions-and-yield-statements-from-coverage))
+- Added support for [ExcludeFromCodeCoverage](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.0/manual/UsingCodeCoverage.html#excluding-code-from-code-coverage) for getter/setter properties (case [1338665](https://issuetracker.unity3d.com/issues/code-coverage-get-and-set-accessors-are-still-marked-as-coverable-when-property-has-excludefromcodecoverage-attribute))
+- *-coverageOptions* are only parsed when running from the command line ([feedback](https://forum.unity.com/threads/code-coverage-slowing-editor-on-enter-playmode-and-assembly-reload.1121566))
+
+### Changes
+- Updated Report Generator to version 4.8.9
+
+### Improvements
+- Implemented changes to support [Test Framework](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html) package version 1.2
+- Logs while the Report is generated are output per message rather than at the end of the generation
+- Do not log burst warning when `-burst-disable-compilation` is passed in the command line
+- Added [Ignoring tests for Code Coverage](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.0/manual/CoverageBatchmode.html#ignoring-tests-for-code-coverage) section in documentation
+- Updated documentation to match version 1.0.1
+
 ## [1.0.0] - 2021-03-09
 
 ### Fixes

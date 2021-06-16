@@ -18,3 +18,19 @@ Code Optimization was introduced in 2020.1. Code Optimization mode defines wheth
 ## Excluding code from Code Coverage
 
 Any code that should not be contributing to the Code Coverage calculation can be excluded by adding the [`ExcludeFromCoverage`](https://docs.unity3d.com/ScriptReference/TestTools.ExcludeFromCoverageAttribute.html) attribute. This attribute can be added to Assemblies, Classes, Constructors, Methods and Structs. Note that you can also use the .NET [`ExcludeFromCodeCoverage`](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.codeanalysis.excludefromcodecoverageattribute?view=netcore-2.0) attribute.
+
+## Ignoring tests for Code Coverage
+
+To ignore tests when running with Code Coverage, use the [ConditionalIgnore](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html?subfolder=/manual/reference-attribute-conditionalignore.html) attribute, passing the `"IgnoreForCoverage"` ID.
+
+#### Example
+```
+public class MyTestClass
+{
+    [Test, ConditionalIgnore("IgnoreForCoverage", "This test is disabled when ran with code coverage")]
+    public void TestNeverRunningWithCodeCoverage()
+    {
+        Assert.Pass();
+    }
+}
+```
