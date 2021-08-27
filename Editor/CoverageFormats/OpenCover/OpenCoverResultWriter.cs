@@ -11,19 +11,22 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
         {
         }
 
-        public override void WriteCoverageSession()
+        public override void WriteCoverageSession(bool atRoot = false)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(CoverageSession));
-            string fileFullPath = GetNextFullFilePath();
-            using (TextWriter writer = new StreamWriter(fileFullPath))
+            string fileFullPath = GetNextFullFilePath(atRoot);
+            if (!System.IO.File.Exists(fileFullPath))
             {
-                serializer.Serialize(writer, CoverageSession);
+                using (TextWriter writer = new StreamWriter(fileFullPath))
+                {
+                    serializer.Serialize(writer, CoverageSession);
+                }
+
+                ResultsLogger.Log(ResultID.Log_ResultsSaved, fileFullPath);
+                CoverageEventData.instance.AddSessionResultPath(fileFullPath);
+
+                base.WriteCoverageSession(atRoot);
             }
-
-            ResultsLogger.Log(ResultID.Log_ResultsSaved, fileFullPath);
-            CoverageEventData.instance.AddSessionResultPath(fileFullPath);
-
-            base.WriteCoverageSession();
         }
     }
 }

@@ -5,7 +5,7 @@ There are 4 arguments that can be passed in batchmode:
 **-enableCodeCoverage**, to enable code coverage.  
 **-coverageResultsPath** (_optional_), to set the location where the coverage results and report will be saved to. The default location is the project's path.  
 **-coverageHistoryPath** (_optional_), to set the location where the coverage report history will be saved to. The default location is the project's path.  
-**-coverageOptions** (_optional_), to pass extra options. This is semicolon separated.   
+**-coverageOptions** (_optional_), to pass extra options. Options are separated by semicolon. Some shells use semicolons to separate commands. Therefore, to ensure that coverage options are parsed correctly, enclose them in quotation marks.
 
 |Coverage Option|Description|
 |:---|:---|
@@ -28,10 +28,10 @@ Unity.exe -projectPath <path-to-project> -batchmode -testPlatform editmode -runT
 -enableCodeCoverage
 -coverageResultsPath <path-to-coverage-results>
 -coverageHistoryPath <path-to-coverage-history>
--coverageOptions generateAdditionalMetrics;generateHtmlReport;generateHtmlReportHistory;generateBadgeReport;
+-coverageOptions "generateAdditionalMetrics;generateHtmlReport;generateHtmlReportHistory;generateBadgeReport;
 assemblyFilters:+my.assembly.*,+<packages>;
 pathFilters:-*/Tests/*,-*/BuiltInPackages/*;
-verbosity:verbose
+verbosity:verbose"
 ```
 The example above will open the project at _\<path-to-project\>_, run the _EditMode_ tests and produce an HTML coverage report and coverage summary badges in _\<path-to-coverage-results\>_. The report will include the coverage history, Cyclomatic Complexity and Crap Score calculations. The coverage history files will be saved in _\<path-to-coverage-history\>_.
 
@@ -44,13 +44,13 @@ Additionally, the report will include code from any assembly whose name starts w
 To get coverage information for both EditMode and PlayMode tests, run the editor three times as shown in the example below:
 ```
 Unity.exe -projectPath <path-to-project> -batchmode -testPlatform editmode -runTests -debugCodeOptimization -enableCodeCoverage -coverageResultsPath <path-to-coverage-results>
--coverageOptions generateAdditionalMetrics;assemblyFilters:+my.assembly.*
+-coverageOptions "generateAdditionalMetrics;assemblyFilters:+my.assembly.*"
 
 Unity.exe -projectPath <path-to-project> -batchmode -testPlatform playmode -runTests -debugCodeOptimization -enableCodeCoverage -coverageResultsPath <path-to-coverage-results>
--coverageOptions generateAdditionalMetrics;assemblyFilters:+my.assembly.*
+-coverageOptions "generateAdditionalMetrics;assemblyFilters:+my.assembly.*"
 
 Unity.exe -projectPath <path-to-project> -batchmode -debugCodeOptimization -enableCodeCoverage -coverageResultsPath <path-to-coverage-results>
--coverageOptions generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.* -quit
+-coverageOptions "generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*" -quit
 ```
 The first will generate the coverage results for the EditMode tests, the second will generate the coverage results for the PlayMode tests and the third will generate the coverage report and summary badges based on both coverage results.
 
@@ -59,12 +59,12 @@ The first will generate the coverage results for the EditMode tests, the second 
 To get a coverage report for your shared code which is used on separate projects, run the tests for each project making sure the *-coverageResultsPath* points to a separate location inside a shared root folder as shown in the example below:
 ```
 Unity.exe -projectPath C:/MyProject -batchmode -testPlatform playmode -runTests -debugCodeOptimization -enableCodeCoverage -coverageResultsPath C:/CoverageResults/MyProject
--coverageOptions generateAdditionalMetrics;assemblyFilters:+my.assembly.*;pathStrippingPatterns:C:/MyProject/
+-coverageOptions "generateAdditionalMetrics;assemblyFilters:+my.assembly.*;pathStrippingPatterns:C:/MyProject/"
 
 Unity.exe -projectPath C:/MyOtherProject -batchmode -testPlatform playmode -runTests -debugCodeOptimization -enableCodeCoverage -coverageResultsPath C:/CoverageResults/MyOtherProject
--coverageOptions generateAdditionalMetrics;assemblyFilters:+my.assembly.*;pathStrippingPatterns:C:/MyOtherProject/
+-coverageOptions "generateAdditionalMetrics;assemblyFilters:+my.assembly.*;pathStrippingPatterns:C:/MyOtherProject/"
 
 Unity.exe -projectPath C:/MyProject -batchmode -debugCodeOptimization -enableCodeCoverage -coverageResultsPath C:/CoverageResults
--coverageOptions generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*;sourcePaths:C:/MyProject -quit
+-coverageOptions "generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*;sourcePaths:C:/MyProject" -quit
 ```
 The first run generates the coverage results for the PlayMode tests for *MyProject* and stores these in *C:/CoverageResults/MyProject*. The second run generates the coverage results for the PlayMode tests for *MyOtherProject* and stores these in *C:/CoverageResults/MyOtherProject*. The third run generates the coverage report and summary badges based on the results found under the common *C:/CoverageResults* folder.

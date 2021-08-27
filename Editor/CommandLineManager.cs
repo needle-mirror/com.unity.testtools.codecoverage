@@ -74,6 +74,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public bool generateRootEmptyReport
+        {
+            get;
+            private set;
+        }
+
         public bool assemblyFiltersSpecified
         {
             get;
@@ -158,6 +164,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             generateHTMLReport = false;
             generateBadgeReport = false;
             useProjectSettings = false;
+            generateRootEmptyReport = false;
             assemblyFiltersSpecified = false;
             pathFiltersSpecified = false;
             pathStrippingSpecified = false;
@@ -293,6 +300,10 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                     case "GENERATEBADGEREPORT":
                         generateBadgeReport = true;
+                        break;
+
+                    case "GENERATEROOTEMPTYREPORT":
+                        generateRootEmptyReport = true;
                         break;
 
                     case "USEPROJECTSETTINGS":

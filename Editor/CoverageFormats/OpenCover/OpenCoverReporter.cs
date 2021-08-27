@@ -23,6 +23,13 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             public static GUIContent ProgressGatheringResults = EditorGUIUtility.TrTextContent("Gathering Coverage results..");
             public static GUIContent ProgressWritingFile = EditorGUIUtility.TrTextContent("Writing Coverage results to file..");
         }
+        
+        public enum ReportType
+        {
+            Full,
+            FullEmpty,
+            CoveredMethodsOnly
+        }
 
         private bool m_OutputPerTest = false;
 
@@ -72,12 +79,12 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
         public void OnBeforeAssemblyReload()
         {
-            OutputCoverageReport();
+            OutputCoverageReport(ReportType.CoveredMethodsOnly);
         }
 
         public void OnCoverageRecordingPaused()
         {
-            OutputCoverageReport();
+            OutputCoverageReport(ReportType.CoveredMethodsOnly);
         }
 
         public void OnInitialise(CoverageSettings settings)
@@ -111,17 +118,22 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
         public void OnRunFinished(ITestResultAdaptor testResults)
         {
+            bool outputSingleReportFile = CoverageRunData.instance.hasSingleFileCount;
+
             if (!m_OutputPerTest)
             {
-                OutputCoverageReport(testResults, false);
+                OutputCoverageReport(outputSingleReportFile && !CommandLineManager.instance.generateRootEmptyReport ? ReportType.Full : ReportType.CoveredMethodsOnly, false);
             }
+
+            if (!outputSingleReportFile || CommandLineManager.instance.generateRootEmptyReport)
+                OutputFullEmptyReport();
 
             Events.InvokeOnCoverageSessionFinished();
         }
 
         public void OnTestStarted(ITestAdaptor test)
         {
-            if (m_OutputPerTest && m_CoverageSettings.resetCoverageData)
+            if (m_OutputPerTest)
             {
                 Coverage.ResetAll();
             }
@@ -131,16 +143,41 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
         {
             if (m_OutputPerTest)
             {
-                OutputCoverageReport(result);
+                OutputCoverageReport(ReportType.CoveredMethodsOnly, false, result);
             }
         }
 
-        public void OutputCoverageReport(ITestResultAdaptor testResults = null, bool clearProgressBar = true)
+        private void OutputFullEmptyReport()
+        {
+            if (m_Writer != null)
+            {
+                if (!CommandLineManager.instance.batchmode)
+                    EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressWritingFile.text, 0.95f);
+
+                CoverageSession coverageSession = GenerateOpenCoverSession(ReportType.FullEmpty);
+                if (coverageSession != null)
+                {
+                    m_Writer.CoverageSession = coverageSession;
+                    m_Writer.WriteCoverageSession(CommandLineManager.instance.generateRootEmptyReport);
+                }
+                else
+                {
+                    ResultsLogger.Log(ResultID.Warning_NoCoverageResultsSaved);
+                }
+
+                if (!CommandLineManager.instance.batchmode)
+                    EditorUtility.ClearProgressBar();
+            }
+        }
+
+        public void OutputCoverageReport(ReportType reportType, bool clearProgressBar = true, ITestResultAdaptor testResults = null)
         {
             if (!CommandLineManager.instance.batchmode)
                 EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressWritingFile.text, 0.95f);
 
-            CoverageSession coverageSession = GenerateOpenCoverSession();
+            MethodInfo testMethodInfo = testResults != null ? testResults.Test.Method.MethodInfo : null;
+
+            CoverageSession coverageSession = GenerateOpenCoverSession(reportType, testMethodInfo);
             if (coverageSession != null && m_Writer != null)
             {
                 m_Writer.CoverageSession = coverageSession;
@@ -444,7 +481,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             return sb.ToString();
         }
 
-        internal CoverageSession GenerateOpenCoverSession()
+        internal CoverageSession GenerateOpenCoverSession(ReportType reportType, MethodInfo testMethodInfo = null)
         {
             ResultsLogger.LogSessionItem("Started OpenCover Session", LogVerbosityLevel.Info);
             CoverageSession coverageSession = null;
@@ -590,6 +627,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                 List<SequencePoint> coveredSequencePoints = new List<SequencePoint>();
 
                                 uint fileId = 0;
+                                int totalVisitCount = 0;
                                 CoveredSequencePoint[] classMethodSequencePointsArray = Coverage.GetSequencePointsFor(method);
                                 foreach (CoveredSequencePoint classMethodSequencePoint in classMethodSequencePointsArray)
                                 {
@@ -620,12 +658,30 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                     coveredSequencePoint.StartColumn = (int)classMethodSequencePoint.column;
                                     coveredSequencePoint.EndLine = (int)classMethodSequencePoint.line;
                                     coveredSequencePoint.EndColumn = (int)classMethodSequencePoint.column;
-                                    coveredSequencePoint.VisitCount = (int)classMethodSequencePoint.hitCount;
+                                    coveredSequencePoint.VisitCount = reportType == ReportType.FullEmpty ? 0 : (int)classMethodSequencePoint.hitCount;
+                                    totalVisitCount += coveredSequencePoint.VisitCount;
                                     coveredSequencePoint.Offset = (int)classMethodSequencePoint.ilOffset;
+
+                                    if (testMethodInfo != null)
+                                    {
+                                        SetupTrackedMethod(coveredSequencePoint, testMethodInfo);
+                                    }
+
                                     coveredSequencePoints.Add(coveredSequencePoint);
                                 }
 
-                                if (coveredSequencePoints.Count > 0)
+                                bool includeMethod = true;
+
+                                if (reportType == ReportType.CoveredMethodsOnly && totalVisitCount == 0)
+                                {
+                                    includeMethod = false;
+                                }
+                                else if (coveredSequencePoints.Count == 0)
+                                {
+                                    includeMethod = false;
+                                }
+
+                                if (includeMethod)
                                 {
                                     Method coveredMethod = new Method();
                                     coveredMethod.MetadataToken = method.MetadataToken;
@@ -662,6 +718,12 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                 {
                     Module module = new Module();
                     module.ModuleName = assembly.GetName().Name;
+
+                    if (testMethodInfo != null && testMethodInfo.Module.Assembly == assembly)
+                    {
+                        SetupTrackedMethod(module, testMethodInfo);
+                    }
+
                     List<ModelFile> coveredFileList = new List<ModelFile>();
                     foreach (KeyValuePair<string, UInt32> fileEntry in fileList)
                     {
@@ -683,7 +745,9 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             {
                 coverageSession = new CoverageSession();
                 coverageSession.Modules = moduleList.ToArray();
-                ProcessGenericMethods(coverageSession);
+                
+                if (reportType != ReportType.FullEmpty)
+                    ProcessGenericMethods(coverageSession);
 
                 foreach (Module coveredModule in moduleList)
                 {
@@ -721,6 +785,30 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             }
 
             return false;
+        }
+
+        private void SetupTrackedMethod(SequencePoint sequencePoint, MethodInfo testMethodInfo)
+        {
+            TrackedMethodRef trackedMethodRef = new TrackedMethodRef();
+            trackedMethodRef.UniqueId = 1;
+            trackedMethodRef.VisitCount = sequencePoint.VisitCount;
+            TrackedMethodRef[] trackedMethodRefs = new TrackedMethodRef[1];
+            trackedMethodRefs[0] = trackedMethodRef;
+            sequencePoint.TrackedMethodRefs = trackedMethodRefs;
+        }
+
+        private void SetupTrackedMethod(Module module, MethodInfo testMethodInfo)
+        {
+            if (module.TrackedMethods == null)
+            {
+                TrackedMethod trackedMethod = new TrackedMethod();
+                trackedMethod.UniqueId = 1;
+                trackedMethod.MetadataToken = testMethodInfo.MetadataToken;
+                trackedMethod.FullName = GenerateMethodName(testMethodInfo);
+                trackedMethod.Strategy = "Test";
+                module.TrackedMethods = new TrackedMethod[1];
+                module.TrackedMethods[0] = trackedMethod;
+            }
         }
 
         private void UpdateMethodSummary(Method coveredMethod)
@@ -875,6 +963,10 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                 if (targetSequencePoint != null)
                                 {
                                     targetSequencePoint.VisitCount += (int)coveredSequencePoint.hitCount;
+                                    if (targetSequencePoint.TrackedMethodRefs != null && targetSequencePoint.TrackedMethodRefs.Length > 0)
+                                    {
+                                        targetSequencePoint.TrackedMethodRefs[0].VisitCount += (int)coveredSequencePoint.hitCount;
+                                    }
                                 }
                             }
                         }

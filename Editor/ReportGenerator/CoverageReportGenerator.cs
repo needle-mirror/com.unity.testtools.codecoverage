@@ -66,8 +66,9 @@ namespace UnityEditor.TestTools.CodeCoverage
             string sourceXmlPath = CoverageUtils.JoinPaths(rootFolderPath, "**");       
             string testResultsXmlPath = CoverageUtils.JoinPaths(sourceXmlPath, "TestCoverageResults_????.xml");
             string recordingResultsXmlPath = CoverageUtils.JoinPaths(sourceXmlPath, "RecordingCoverageResults_????.xml");
+            string rootFullEmptyResultsXmlPath = CoverageUtils.JoinPaths(rootFolderPath, "TestCoverageResults_fullEmpty.xml");
 
-            string[] reportFilePatterns = new string[] { testResultsXmlPath, recordingResultsXmlPath };
+            string[] reportFilePatterns = new string[] { testResultsXmlPath, recordingResultsXmlPath, rootFullEmptyResultsXmlPath };
 
             bool includeHistoryInReport = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
                 CommandLineManager.instance.generateHTMLReportHistory :

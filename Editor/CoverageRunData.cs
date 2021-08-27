@@ -127,6 +127,11 @@ namespace UnityEditor.TestTools.CodeCoverage
             return m_FileIndex++;
         }
 
+        public bool hasSingleFileCount
+        {
+            get { return m_FileIndex == 0; }
+        }
+
         public void IncrementTestRunCount()
         {
             m_TestRunCount++;
@@ -187,6 +192,11 @@ namespace UnityEditor.TestTools.CodeCoverage
         public int GetNextFileIndex()
         {
             return m_CoverageRunDataImplementation.GetNextFileIndex();
+        }
+
+        public bool hasSingleFileCount
+        {
+            get { return m_CoverageRunDataImplementation.hasSingleFileCount; }
         }
 
         public void IncrementTestRunCount()
