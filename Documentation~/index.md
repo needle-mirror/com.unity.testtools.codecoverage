@@ -1,3 +1,7 @@
+</br>
+>[!NOTE]
+>This package version is available as an experimental package, so it is not ready for production use. The features and documentation in this package version might change before it is verified for release.
+
 # About Code Coverage
 
 [Code Coverage](https://en.wikipedia.org/wiki/Code_coverage) is a measure of how much of your code has been executed. It is normally associated with automated tests, but you can gather coverage data in Unity at any time when the Editor is running.

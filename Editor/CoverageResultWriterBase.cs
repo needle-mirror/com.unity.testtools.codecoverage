@@ -78,12 +78,15 @@ namespace UnityEditor.TestTools.CodeCoverage
             CoverageUtils.ClearFolderIfExists(m_CoverageSettings.resultsFolderPath, "*.xml");
         }
 
-        protected string GetNextFullFilePath(bool atRoot = false)
+        public string GetRootFullEmptyPath()
+        {
+            return CoverageUtils.JoinPaths(m_CoverageSettings.rootFolderPath, m_CoverageSettings.resultsFileName + "_fullEmpty" + "." + m_CoverageSettings.resultsFileExtension);
+        }
+
+        protected string GetNextFullFilePath()
         {
             int nextFileIndex = m_CoverageSettings.hasPersistentRunData ? CoverageRunData.instance.GetNextFileIndex() : 0;
-            string fullFilePath = atRoot ?
-                CoverageUtils.JoinPaths(m_CoverageSettings.rootFolderPath, m_CoverageSettings.resultsFileName + "_fullEmpty" + "." + m_CoverageSettings.resultsFileExtension) : 
-                m_CoverageSettings.resultsFilePath + "_" + nextFileIndex.ToString("D4") + "." + m_CoverageSettings.resultsFileExtension;
+            string fullFilePath = m_CoverageSettings.resultsFilePath + "_" + nextFileIndex.ToString("D4") + "." + m_CoverageSettings.resultsFileExtension;
             return fullFilePath;
         }
     }

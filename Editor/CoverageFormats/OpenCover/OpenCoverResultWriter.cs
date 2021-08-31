@@ -14,7 +14,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
         public override void WriteCoverageSession(bool atRoot = false)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(CoverageSession));
-            string fileFullPath = GetNextFullFilePath(atRoot);
+            string fileFullPath = atRoot ? GetRootFullEmptyPath() : GetNextFullFilePath();
             if (!System.IO.File.Exists(fileFullPath))
             {
                 using (TextWriter writer = new StreamWriter(fileFullPath))

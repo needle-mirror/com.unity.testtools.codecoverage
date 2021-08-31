@@ -4,13 +4,14 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.2.0-exp.1] - 2021-08-27
+## [1.2.0-exp.2] - 2021-08-31
 
 ### Changes
 - Updated Report Generator to version 4.8.12
 
 ### Improvements
-- The size of the coverage result files and the Code Coverage session duration have been optimized. When more than one coverage xml result files are generated within a Code Coverage session, these files now include only the coverage data of the visited lines. Then, at the end of the session (OnRunFinished) a final coverage xml result file is generated which includes all the lines but with zero coverage.
+- The size of the coverage result files and the Code Coverage session duration have been optimized. When more than one coverage xml result files are generated within a Code Coverage session, these files now include only the coverage data of the visited lines. Then, at the end of the session a final coverage xml result file is generated which includes all the lines but with zero coverage.
+- Added Help IconButton in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html)
 
 ## [1.1.0] - 2021-06-09
 

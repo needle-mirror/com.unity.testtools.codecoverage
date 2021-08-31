@@ -40,6 +40,12 @@ namespace UnityEditor.TestTools.CodeCoverage
         private bool m_DoRepaint;
         private bool m_IncludeWarnings;
         private static readonly Vector2 s_WindowMinSizeNormal = new Vector2(445, 385);
+
+#if ICONBUTTON_SUPPORTED
+        private static readonly GUIContent HelpIcon = EditorGUIUtility.IconContent("_Help");
+        const string kCoverageManualPage = "https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@latest";
+#endif
+
         private float m_WarningsAddedAccumulativeHeight = 0;
         private float m_WarningsAddedAccumulativeHeightLast = 0;
         private bool m_LoseFocus = false; 
@@ -166,6 +172,9 @@ namespace UnityEditor.TestTools.CodeCoverage
             public static readonly GUIContent ClearHistoryButtonLabel = EditorGUIUtility.TrTextContent("Clear History", "Clears the coverage report history.");
             public static readonly GUIContent StartRecordingButtonLabel = EditorGUIUtility.TrTextContentWithIcon(" Start Recording", "Record coverage data.", "Record Off");
             public static readonly GUIContent StopRecordingButtonLabel = EditorGUIUtility.TrTextContentWithIcon(" Stop Recording", "Stop recording coverage data.", "Record On");
+#if ICONBUTTON_SUPPORTED
+            public static readonly GUIContent HelpIcon = EditorGUIUtility.IconContent("_Help");
+#endif
 
             public static readonly GUIStyle largeButton = "LargeButton";
 
@@ -180,7 +189,11 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                 settings = new GUIStyle()
                 {
+#if ICONBUTTON_SUPPORTED
+                    margin = new RectOffset(8, 4, 4, 4)
+#else
                     margin = new RectOffset(8, 4, 18, 4)
+#endif
                 };
             }
         }
@@ -309,6 +322,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             GUILayout.BeginVertical(Styles.settings);
 
+#if ICONBUTTON_SUPPORTED
+            DrawTopBarGUI();
+#endif
             ResetIncludeWarnings();
 
             CheckScriptingRuntimeVersion();
@@ -465,6 +481,31 @@ namespace UnityEditor.TestTools.CodeCoverage
                 m_WarningsAddedAccumulativeHeight += 40;
             }
         }
+
+#if ICONBUTTON_SUPPORTED
+        void DrawHelpGUI()
+        {
+            var iconSize = EditorStyles.iconButton.CalcSize(Styles.HelpIcon);
+
+            var rect = GUILayoutUtility.GetRect(iconSize.x, iconSize.y);
+
+            if (GUI.Button(rect, Styles.HelpIcon, EditorStyles.iconButton))
+            {
+                Help.ShowHelpPage(kCoverageManualPage);
+            }
+        }
+
+        void DrawTopBarGUI()
+        {
+            GUILayout.BeginHorizontal();
+
+            GUILayout.FlexibleSpace();
+
+            DrawHelpGUI();
+
+            GUILayout.EndHorizontal();
+        }
+#endif
 
         void DrawCodeCoverageLocation()
         {

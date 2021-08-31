@@ -47,6 +47,11 @@
             "name": "com.unity.test-framework",
             "expression": "1.2.0",
             "define": "TEST_FRAMEWORK_1_2_OR_NEWER"
+        },
+        {
+            "name": "Unity",
+            "expression": "2022.1.0a4",
+            "define": "ICONBUTTON_SUPPORTED"
         }
     ],
     "noEngineReferences": false

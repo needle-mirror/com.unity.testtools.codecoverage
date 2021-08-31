@@ -151,6 +151,14 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
         {
             if (m_Writer != null)
             {
+                // Exit if generateRootEmptyReport arg is passed and a root fullEmpty report has already been generated 
+                if (CommandLineManager.instance.generateRootEmptyReport)
+                {
+                    string rootFullEmptyPath = m_Writer.GetRootFullEmptyPath();
+                    if (File.Exists(rootFullEmptyPath))
+                        return;
+                }
+                
                 if (!CommandLineManager.instance.batchmode)
                     EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressWritingFile.text, 0.95f);
 
