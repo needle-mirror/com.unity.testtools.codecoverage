@@ -4,7 +4,7 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.2.0-exp.2] - 2021-08-31
+## [1.2.0-exp.3] - 2021-09-17
 
 ### Changes
 - Updated Report Generator to version 4.8.12
@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Improvements
 - The size of the coverage result files and the Code Coverage session duration have been optimized. When more than one coverage xml result files are generated within a Code Coverage session, these files now include only the coverage data of the visited lines. Then, at the end of the session a final coverage xml result file is generated which includes all the lines but with zero coverage.
 - Added Help IconButton in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html)
+- Refactored the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) UI to include a new Report Options section and removing the word 'Generate' from options
+
+### Features
+- Added `Test Runner References` coverage report option in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) which if checked generates references to tests allowing viewing coverage per test. Note that this option affects Test Runner Coverage sessions only.
+- Added `generateTestReferences` in *-coverageOptions* for [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html) which allows viewing coverage per test
 
 ## [1.1.0] - 2021-06-09
 

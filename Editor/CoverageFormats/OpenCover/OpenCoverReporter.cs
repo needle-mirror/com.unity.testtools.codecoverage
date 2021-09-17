@@ -31,14 +31,14 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             CoveredMethodsOnly
         }
 
-        private bool m_OutputPerTest = false;
-
         private CoverageSettings m_CoverageSettings;
         private ICoverageReporterFilter m_ReporterFilter;
         private OpenCoverResultWriter m_Writer;
 
         private List<MethodBase> m_ExcludedMethods = null;
         private List<string> m_ExcludedTypes = null;
+
+        private ITestAdaptor m_CurrentTestData;
 
         private static readonly Dictionary<string, string> m_Operators = new Dictionary<string, string>
         {
@@ -79,7 +79,14 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
         public void OnBeforeAssemblyReload()
         {
-            OutputCoverageReport(ReportType.CoveredMethodsOnly);
+            if (m_CurrentTestData != null && m_ReporterFilter.ShouldGenerateTestReferences())
+            {
+                OutputCoverageReport(ReportType.CoveredMethodsOnly, false, m_CurrentTestData);
+            }
+            else
+            {
+                OutputCoverageReport(ReportType.CoveredMethodsOnly);
+            }   
         }
 
         public void OnCoverageRecordingPaused()
@@ -91,7 +98,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
         {
             m_CoverageSettings = settings;
 
-            if (!m_OutputPerTest && m_CoverageSettings.resetCoverageData)
+            if (!m_ReporterFilter.ShouldGenerateTestReferences() && m_CoverageSettings.resetCoverageData)
             {
                 Coverage.ResetAll();
             }
@@ -120,7 +127,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
         {
             bool outputSingleReportFile = CoverageRunData.instance.hasSingleFileCount;
 
-            if (!m_OutputPerTest)
+            if (!m_ReporterFilter.ShouldGenerateTestReferences())
             {
                 OutputCoverageReport(outputSingleReportFile && !CommandLineManager.instance.generateRootEmptyReport ? ReportType.Full : ReportType.CoveredMethodsOnly, false);
             }
@@ -133,17 +140,18 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
         public void OnTestStarted(ITestAdaptor test)
         {
-            if (m_OutputPerTest)
+            if (m_ReporterFilter.ShouldGenerateTestReferences())
             {
+                m_CurrentTestData = test;
                 Coverage.ResetAll();
             }
         }
 
         public void OnTestFinished(ITestResultAdaptor result)
         {
-            if (m_OutputPerTest)
+            if (m_ReporterFilter.ShouldGenerateTestReferences())
             {
-                OutputCoverageReport(ReportType.CoveredMethodsOnly, false, result);
+                OutputCoverageReport(ReportType.CoveredMethodsOnly, false, result.Test);
             }
         }
 
@@ -178,12 +186,12 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             }
         }
 
-        public void OutputCoverageReport(ReportType reportType, bool clearProgressBar = true, ITestResultAdaptor testResults = null)
+        public void OutputCoverageReport(ReportType reportType, bool clearProgressBar = true, ITestAdaptor testData = null)
         {
             if (!CommandLineManager.instance.batchmode)
                 EditorUtility.DisplayProgressBar(Styles.ProgressTitle.text, Styles.ProgressWritingFile.text, 0.95f);
 
-            MethodInfo testMethodInfo = testResults != null ? testResults.Test.Method.MethodInfo : null;
+            MethodInfo testMethodInfo = testData != null ? testData.Method.MethodInfo : null;
 
             CoverageSession coverageSession = GenerateOpenCoverSession(reportType, testMethodInfo);
             if (coverageSession != null && m_Writer != null)
@@ -672,7 +680,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
                                     if (testMethodInfo != null)
                                     {
-                                        SetupTrackedMethod(coveredSequencePoint, testMethodInfo);
+                                        SetupTrackedMethod(coveredSequencePoint);
                                     }
 
                                     coveredSequencePoints.Add(coveredSequencePoint);
@@ -795,7 +803,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
             return false;
         }
 
-        private void SetupTrackedMethod(SequencePoint sequencePoint, MethodInfo testMethodInfo)
+        private void SetupTrackedMethod(SequencePoint sequencePoint)
         {
             TrackedMethodRef trackedMethodRef = new TrackedMethodRef();
             trackedMethodRef.UniqueId = 1;

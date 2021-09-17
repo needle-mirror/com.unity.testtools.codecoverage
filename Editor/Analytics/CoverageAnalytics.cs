@@ -83,6 +83,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
                 CurrentCoverageEvent.generateHistory = CommandLineManager.instance.generateHTMLReportHistory;
                 CurrentCoverageEvent.generateHTMLReport = CommandLineManager.instance.generateHTMLReport;
                 CurrentCoverageEvent.generateMetrics = CommandLineManager.instance.generateAdditionalMetrics;
+                CurrentCoverageEvent.generateTestReferences = CommandLineManager.instance.generateTestReferences;
                 CurrentCoverageEvent.useDefaultAssemblyFilters = !CommandLineManager.instance.assemblyFiltersSpecified;
                 CurrentCoverageEvent.useDefaultPathFilters = !CommandLineManager.instance.pathFiltersSpecified;
                 CurrentCoverageEvent.useDefaultResultsLoc = CommandLineManager.instance.coverageResultsPath.Length == 0;
@@ -97,6 +98,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
                 CurrentCoverageEvent.generateHistory = CommandLineManager.instance.generateHTMLReportHistory || CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
                 CurrentCoverageEvent.generateHTMLReport = CommandLineManager.instance.generateHTMLReport || CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
                 CurrentCoverageEvent.generateMetrics = CommandLineManager.instance.generateAdditionalMetrics || CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
+                CurrentCoverageEvent.generateTestReferences = CommandLineManager.instance.generateTestReferences || CoveragePreferences.instance.GetBool("GenerateTestReferences", false);
                 CurrentCoverageEvent.usePathStrippingPatterns = CommandLineManager.instance.pathStrippingSpecified;
                 CurrentCoverageEvent.useSourcePaths = CommandLineManager.instance.sourcePathsSpecified;
 

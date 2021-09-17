@@ -89,7 +89,7 @@ If Weapon is Laser, the Prefabs/Weapons/Laser prefab is instantiated
 `Unity.TestTools.CodeCoverage.Sample.Asteroids.Tests` are selected.<br/><br/>
 ![Included Assemblies](images/quickguide/included_assemblies.png)
 
-4. Make sure **Generate HTML Report**, **Generate History** and **Auto Generate Report** are all checked.
+4. Make sure **HTML Report**, **History** and **Auto Generate Report** are all checked.
 ![Auto Generate Report](images/quickguide/auto_generate_report.png)
 
 5. Switch to the [Test Runner](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html?subfolder=/manual/workflow-run-test.html) window, select the **PlayMode** tab and hit **Run All** tests.<br/><br/>
@@ -152,7 +152,7 @@ Complete the [Bonus Task](#11-bonus-task-sub5-8-minsub) at the end of the tutori
 
 1. Go to `Asteroids/Scenes` in Project View and open the **Asteroids** scene, if not opened already.
 
-2. Open the [Code Coverage window](CodeCoverageWindow.md). Make sure **Generate HTML Report**, **Generate History** and **Auto Generate Report** all are checked.<br/>
+2. Open the [Code Coverage window](CodeCoverageWindow.md). Make sure **HTML Report**, **History** and **Auto Generate Report** all are checked.<br/>
 ![Auto Generate Report](images/quickguide/auto_generate_report.png)
 
 3. Select **Start Recording**.<br/>

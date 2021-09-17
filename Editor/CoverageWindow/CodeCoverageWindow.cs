@@ -33,16 +33,16 @@ namespace UnityEditor.TestTools.CodeCoverage
         private bool m_GenerateHTMLReport;
         private bool m_GenerateBadge;
         private bool m_GenerateAdditionalMetrics;
+        private bool m_GenerateTestReferences;
         private bool m_AutoGenerateReport;
 
         private CoverageSettings m_CoverageSettings;
 
         private bool m_DoRepaint;
         private bool m_IncludeWarnings;
-        private static readonly Vector2 s_WindowMinSizeNormal = new Vector2(445, 385);
+        private static readonly Vector2 s_WindowMinSizeNormal = new Vector2(445, 435);
 
 #if ICONBUTTON_SUPPORTED
-        private static readonly GUIContent HelpIcon = EditorGUIUtility.IconContent("_Help");
         const string kCoverageManualPage = "https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@latest";
 #endif
 
@@ -148,10 +148,11 @@ namespace UnityEditor.TestTools.CodeCoverage
             public static readonly GUIContent CodeCoverageResultsLocationLabel = EditorGUIUtility.TrTextContent("Results Location", "Click the Browse button to specify the folder where the coverage results and report will be saved to. The default location is the Project's folder.");
             public static readonly GUIContent CodeCoverageHistoryLocationLabel = EditorGUIUtility.TrTextContent("History Location", "Click the Browse button to specify the folder where the coverage report history will be saved to. The default location is the Project's folder.");
             public static readonly GUIContent CoverageSettingsLabel = EditorGUIUtility.TrTextContent("Settings");
+            public static readonly GUIContent CoverageReportOptionsLabel = EditorGUIUtility.TrTextContent("Report Options");
             public static readonly GUIContent EnableCodeCoverageLabel = EditorGUIUtility.TrTextContent("Enable Code Coverage", "Check this to enable Code Coverage. This is required in order to generate Coverage data and reports. Note that Code Coverage can affect the Editor performance.");
             public static readonly GUIContent CodeCoverageFormat = EditorGUIUtility.TrTextContent("Coverage Format", "The Code Coverage format used when saving the results.");
-            public static readonly GUIContent GenerateAdditionalMetricsLabel = EditorGUIUtility.TrTextContent("Generate Additional Metrics", "Check this to generate and include additional metrics in the HTML report. These currently include Cyclomatic Complexity and Crap Score calculations for each method.");
-            public static readonly GUIContent CoverageHistoryLabel = EditorGUIUtility.TrTextContent("Generate History", "Check this to generate and include the coverage history in the HTML report.");
+            public static readonly GUIContent GenerateAdditionalMetricsLabel = EditorGUIUtility.TrTextContent("Additional Metrics", "Check this to generate and include additional metrics in the HTML report. These currently include Cyclomatic Complexity and Crap Score calculations for each method.");
+            public static readonly GUIContent CoverageHistoryLabel = EditorGUIUtility.TrTextContent("History", "Check this to generate and include the coverage history in the HTML report.");
             public static readonly GUIContent AssembliesToIncludeLabel = EditorGUIUtility.TrTextContent("Included Assemblies", "Specify the assemblies that will be included in the coverage results.\n\nClick the dropdown to view and select or deselect the assemblies.");
             public static GUIContent AssembliesToIncludeDropdownLabel = EditorGUIUtility.TrTextContent("<this will contain a list of the assemblies>", "<this will contain a list of the assemblies>");
             public static readonly GUIContent AssembliesToIncludeEmptyDropdownLabel = EditorGUIUtility.TrTextContent(" Select", "Click this to view and select or deselect the assemblies.");
@@ -164,8 +165,9 @@ namespace UnityEditor.TestTools.CodeCoverage
             public static readonly GUIContent PathsToExcludeAddFileLabel = EditorGUIUtility.TrTextContent("Add File", "Click this to add files that will be excluded from the coverage results.");
             public static readonly GUIContent PathsToExcludeRemoveLabel = EditorGUIUtility.TrTextContent("Remove", "Click this to remove entries in the list.");
             public static readonly GUIContent BrowseButtonLabel = EditorGUIUtility.TrTextContent("Browse", "Click this to specify the folder where the coverage results and report will be saved to.");
-            public static readonly GUIContent GenerateHTMLReportLabel = EditorGUIUtility.TrTextContent("Generate HTML Report", "Check this to generate an HTML version of the report.");
-            public static readonly GUIContent GenerateBadgeReportLabel = EditorGUIUtility.TrTextContent("Generate Summary Badges", "Check this to generate coverage summary badges in SVG and PNG format.");
+            public static readonly GUIContent GenerateHTMLReportLabel = EditorGUIUtility.TrTextContent("HTML Report", "Check this to generate an HTML version of the report.");
+            public static readonly GUIContent GenerateBadgeReportLabel = EditorGUIUtility.TrTextContent("Summary Badges", "Check this to generate coverage summary badges in SVG and PNG format.");
+            public static readonly GUIContent GenerateTestRunnerReferencesLabel = EditorGUIUtility.TrTextContent("Test Runner References", "Check this to generate references to tests which allows viewing coverage per test. Note that this option affects Test Runner Coverage sessions only.");
             public static readonly GUIContent AutoGenerateReportLabel = EditorGUIUtility.TrTextContent("Auto Generate Report", "Check this to generate the report automatically after the Test Runner has finished running the tests or the Coverage Recording session has completed.");
             public static readonly GUIContent GenerateReportButtonLabel = EditorGUIUtility.TrTextContent("Generate from Last", "Generates a coverage report from the last set of tests that were run in the Test Runner or from the last Coverage Recording session.");
             public static readonly GUIContent ClearCoverageButtonLabel = EditorGUIUtility.TrTextContent("Clear Data", "Clears the Coverage data from previous test runs or from previous Coverage Recording sessions, for the current project.");
@@ -223,6 +225,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_CodeCoverageHistoryPath = CoveragePreferences.instance.GetStringForPaths("HistoryPath", string.Empty);
             m_CodeCoverageFormat = (CoverageFormat)CoveragePreferences.instance.GetInt("Format", 0);
             m_GenerateAdditionalMetrics = CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
+            m_GenerateTestReferences = CoveragePreferences.instance.GetBool("GenerateTestReferences", false);
             m_IncludeHistoryInReport = CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
             m_AssembliesToInclude = CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
             m_AssembliesToIncludeLength = m_AssembliesToInclude.Length;
@@ -343,6 +346,14 @@ namespace UnityEditor.TestTools.CodeCoverage
                 using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning))
                 {
                     DrawCoverageSettings();
+                }
+
+                // Draw Coverage Report Options
+                GUILayout.Space(10);
+                EditorGUILayout.LabelField(Styles.CoverageReportOptionsLabel, EditorStyles.boldLabel);
+                using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning))
+                {
+                    DrawCoverageReportOptions();
                 }
 
                 DrawFooterButtons();
@@ -895,7 +906,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (settingPassedInCmdLine)
             {
-                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Generate HTML Report", "-coverageOptions: generateHtmlReport"), MessageType.Warning);
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "HTML Report", "-coverageOptions: generateHtmlReport"), MessageType.Warning);
                 m_WarningsAddedAccumulativeHeight += 40;
             }
         }
@@ -916,7 +927,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (settingPassedInCmdLine)
             {
-                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Generate Summary Badges", "-coverageOptions: generateBadgeReport"), MessageType.Warning);
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Summary Badges", "-coverageOptions: generateBadgeReport"), MessageType.Warning);
                 m_WarningsAddedAccumulativeHeight += 40;
             }
         }
@@ -940,7 +951,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (settingPassedInCmdLine)
             {
-                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Generate History", "-coverageOptions: generateHtmlReportHistory"), MessageType.Warning);
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "History", "-coverageOptions: generateHtmlReportHistory"), MessageType.Warning);
                 m_WarningsAddedAccumulativeHeight += 40;
             }
         }
@@ -961,7 +972,28 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (settingPassedInCmdLine)
             {
-                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Generate Additional Metrics", "-coverageOptions: generateAdditionalMetrics"), MessageType.Warning);
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Additional Metrics", "-coverageOptions: generateAdditionalMetrics"), MessageType.Warning);
+                m_WarningsAddedAccumulativeHeight += 40;
+            }
+        }
+
+        void DrawGenerateTestRunnerReferencesCheckbox()
+        {
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.generateTestReferences;
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
+            {
+                EditorGUI.BeginChangeCheck();
+                m_GenerateTestReferences = EditorGUILayout.Toggle(Styles.GenerateTestRunnerReferencesLabel, m_GenerateTestReferences, GUILayout.ExpandWidth(false));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    CoveragePreferences.instance.SetBool("GenerateTestReferences", m_GenerateTestReferences);
+                }
+            }
+
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Test Runner References", "-coverageOptions: generateTestReferences"), MessageType.Warning);
                 m_WarningsAddedAccumulativeHeight += 40;
             }
         }
@@ -993,10 +1025,15 @@ namespace UnityEditor.TestTools.CodeCoverage
             DrawIncludedAssemblies();
             CheckIfIncludedAssembliesIsEmpty();
             DrawPathFiltering();
+        }
+
+        void DrawCoverageReportOptions()
+        {
             DrawGenerateHTMLReportCheckbox();
             DrawGenerateBadgeReportCheckbox();
             DrawGenerateHistoryCheckbox();
             DrawGenerateAdditionalMetricsCheckbox();
+            DrawGenerateTestRunnerReferencesCheckbox();
             DrawAutoGenerateReportCheckbox();
         }
 

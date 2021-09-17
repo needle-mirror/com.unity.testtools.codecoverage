@@ -13,6 +13,7 @@ There are 4 arguments that can be passed in batchmode:
 |`generateHtmlReportHistory`|Add this to generate and include the coverage history in the HTML report.|
 |`generateBadgeReport`|Add this to generate coverage summary badges in SVG and PNG format.|
 |`generateAdditionalMetrics`|Add this to generate and include additional metrics in the HTML report. These currently include Cyclomatic Complexity and Crap Score calculations for each method. See the [Risk Hotspots](HowToInterpretResults.md#risk-hotspots) section for more information.|
+|`generateTestReferences`|Add this to generate references to tests which allows viewing coverage per test.|
 |`verbosity`|Add this to set the verbosity level of the log messages. The default value is `info`.<br/>**Values:** `verbose`, `info`, `warning`, `error`, `off`|
 |`useProjectSettings`|Add this to use the settings specified in `ProjectSettings/Settings.json` instead. Any options passed in the command line will override this. This option can only be used in batchmode and it does not take effect when running the editor from the command line in non-batchmode.|
 |`sourcePaths`|Add this to specify the source directories which contain the corresponding source code. The source directories are used by the report generator when the path information of classes cannot be determined. This is a comma separated string. Globbing is not supported.<br/><br/>**Example:** See [Generate combined report from separate projects](#generate-combined-report-from-separate-projects).|

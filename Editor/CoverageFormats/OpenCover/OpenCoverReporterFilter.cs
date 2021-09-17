@@ -53,5 +53,13 @@
             else
                 return CommandLineManager.instance.generateAdditionalMetrics || CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
         }
+
+        public bool ShouldGenerateTestReferences()
+        {
+            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
+                return CommandLineManager.instance.generateTestReferences;
+            else
+                return CommandLineManager.instance.generateTestReferences || CoveragePreferences.instance.GetBool("GenerateTestReferences", false);
+        }
     }
 }

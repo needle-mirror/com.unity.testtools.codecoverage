@@ -50,6 +50,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public bool generateTestReferences
+        {
+            get;
+            private set;
+        }
+
         public bool generateHTMLReportHistory
         {
             get;
@@ -160,6 +166,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             coverageHistoryPath = string.Empty;
             sourcePaths = string.Empty;
             generateAdditionalMetrics = false;
+            generateTestReferences = false;
             generateHTMLReportHistory = false;
             generateHTMLReport = false;
             generateBadgeReport = false;
@@ -304,6 +311,10 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                     case "GENERATEROOTEMPTYREPORT":
                         generateRootEmptyReport = true;
+                        break;
+
+                    case "GENERATETESTREFERENCES":
+                        generateTestReferences = true;
                         break;
 
                     case "USEPROJECTSETTINGS":

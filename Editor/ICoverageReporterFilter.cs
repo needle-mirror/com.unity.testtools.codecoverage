@@ -6,5 +6,6 @@
         bool ShouldProcessAssembly(string assemblyName);
         bool ShouldProcessFile(string filename);
         bool ShouldGenerateAdditionalMetrics();
+        bool ShouldGenerateTestReferences();
     }
 }

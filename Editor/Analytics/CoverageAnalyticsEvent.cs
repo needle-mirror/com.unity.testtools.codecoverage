@@ -29,6 +29,8 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
         public bool createBadges;
         // Did the user have Generate Additional Metrics selected (batchmode compatible)
         public bool generateMetrics;
+        // Did the user have Generate Test Runner References selected (batchmode compatible)
+        public bool generateTestReferences;
         // Did the user have Autogenerate Report selected (batchmode compatible)
         public bool autogenerate;
         // Did the user select the Clear Data button
