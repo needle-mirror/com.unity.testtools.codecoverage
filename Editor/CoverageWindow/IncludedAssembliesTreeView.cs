@@ -85,6 +85,40 @@ namespace UnityEditor.TestTools.CodeCoverage
             ToggleAll(false);
         }
 
+        public void SelectAssets()
+        {
+            m_AssembliesToInclude = AssemblyFiltering.GetUserOnlyAssembliesString();
+            SelectFromString(m_AssembliesToInclude);
+        }
+
+        public void SelectPackages()
+        {
+            m_AssembliesToInclude = AssemblyFiltering.GetPackagesOnlyAssembliesString();
+            SelectFromString(m_AssembliesToInclude);
+        }
+
+        private void SelectFromString(string assembliesToInclude)
+        {
+            string[] includeAssemblyFilters = assembliesToInclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            Regex[] includeAssemblies = includeAssemblyFilters
+                .Select(f => AssemblyFiltering.CreateFilterRegex(f))
+                .ToArray();
+
+            foreach (var child in rootItem.children)
+            {
+                AssembliesTreeViewItem childItem = child as AssembliesTreeViewItem;
+
+                bool enabled = includeAssemblies.Any(f => f.IsMatch(childItem.displayName.ToLowerInvariant()));
+                if (searchString == null)
+                    childItem.Enabled = enabled;
+                else if (DoesItemMatchSearch(child, searchString))
+                    childItem.Enabled = enabled;
+            }
+
+            ApplyChanges();
+        }
+
         private void ToggleAll(bool enabled)
         {
             foreach (var child in rootItem.children)

@@ -168,9 +168,8 @@ namespace UnityEditor.TestTools.CodeCoverage
             // Generate a report if running from the command line,
             // generateHTMLReport or generateBadgeReport is passed to -coverageOptions
             // and -runTests has not been passed to the command line,
-            // regardless if AutoGenerate is selected in the UI
             if (CommandLineManager.instance.runFromCommandLine &&
-                CoverageReporterManager.ShouldAutoGenerateReport(false) &&
+                CoverageReporterManager.ShouldAutoGenerateReport() &&
                 !CommandLineManager.instance.runTests &&
                 !CoverageRunData.instance.reportWasGenerated)
             {

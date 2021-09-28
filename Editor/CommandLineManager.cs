@@ -367,14 +367,12 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                                     if (filterBody.StartsWith("<", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        if (string.Equals(filterBody, AssemblyFiltering.kUserAlias, StringComparison.OrdinalIgnoreCase))
+                                        if (string.Equals(filterBody, AssemblyFiltering.kAssetsAlias, StringComparison.OrdinalIgnoreCase))
                                             m_IncludeAssemblies += AssemblyFiltering.GetUserOnlyAssembliesString();
-                                        else if (string.Equals(filterBody, AssemblyFiltering.kProjectAlias, StringComparison.OrdinalIgnoreCase))
+                                        else if (string.Equals(filterBody, AssemblyFiltering.kAllAlias, StringComparison.OrdinalIgnoreCase))
                                             m_IncludeAssemblies += AssemblyFiltering.GetAllProjectAssembliesString();
                                         else if (string.Equals(filterBody, AssemblyFiltering.kPackagesAlias, StringComparison.OrdinalIgnoreCase))
                                             m_IncludeAssemblies += AssemblyFiltering.GetPackagesOnlyAssembliesString();
-                                        else if (string.Equals(filterBody, AssemblyFiltering.kAllAlias, StringComparison.OrdinalIgnoreCase))
-                                            m_IncludeAssemblies += "*";
                                     }
                                     else
                                     {
@@ -388,14 +386,12 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                                     if (filterBody.StartsWith("<", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        if (string.Equals(filterBody, AssemblyFiltering.kUserAlias, StringComparison.OrdinalIgnoreCase))
+                                        if (string.Equals(filterBody, AssemblyFiltering.kAssetsAlias, StringComparison.OrdinalIgnoreCase))
                                             m_ExcludeAssemblies += AssemblyFiltering.GetUserOnlyAssembliesString();
-                                        else if (string.Equals(filterBody, AssemblyFiltering.kProjectAlias, StringComparison.OrdinalIgnoreCase))
+                                        else if (string.Equals(filterBody, AssemblyFiltering.kAllAlias, StringComparison.OrdinalIgnoreCase))
                                             m_ExcludeAssemblies += AssemblyFiltering.GetAllProjectAssembliesString();
                                         else if (string.Equals(filterBody, AssemblyFiltering.kPackagesAlias, StringComparison.OrdinalIgnoreCase))
                                             m_ExcludeAssemblies += AssemblyFiltering.GetPackagesOnlyAssembliesString();
-                                        else if (string.Equals(filterBody, AssemblyFiltering.kAllAlias, StringComparison.OrdinalIgnoreCase))
-                                            m_ExcludeAssemblies += "*";
                                     }
                                     else
                                     {

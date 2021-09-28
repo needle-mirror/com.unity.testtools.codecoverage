@@ -4,15 +4,17 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.2.0-exp.3] - 2021-09-17
+## [1.2.0-exp.4] - 2021-09-28
 
 ### Changes
-- Updated Report Generator to version 4.8.12
+- Updated Report Generator to version 4.8.13
+- Renamed *assemblyFilters* aliases in [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html); `<user>` was renamed to `<assets>` and `<project>` was renamed to `<all>`.
 
 ### Improvements
 - The size of the coverage result files and the Code Coverage session duration have been optimized. When more than one coverage xml result files are generated within a Code Coverage session, these files now include only the coverage data of the visited lines. Then, at the end of the session a final coverage xml result file is generated which includes all the lines but with zero coverage.
 - Added Help IconButton in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html)
-- Refactored the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) UI to include a new Report Options section and removing the word 'Generate' from options
+- Refactored the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) UI to include a new *Report Options* section and removing the word 'Generate' from options
+- Introduced new selection buttons under the *Included Assemblies* dropdown in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html); use the *All* button to select all the assemblies in the project. Use the *Assets* button to select only the assemblies under the `Assets` folder. Use the *Packages* button to select only the Packages' assemblies. If searching, the buttons will apply only to the assemblies visible in the list.
 
 ### Features
 - Added `Test Runner References` coverage report option in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) which if checked generates references to tests allowing viewing coverage per test. Note that this option affects Test Runner Coverage sessions only.
