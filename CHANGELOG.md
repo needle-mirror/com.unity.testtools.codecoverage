@@ -4,7 +4,7 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.2.0-exp.4] - 2021-09-28
+## [1.2.0-exp.5] - 2021-10-26
 
 ### Changes
 - Updated Report Generator to version 4.8.13
@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Features
 - Added `Test Runner References` coverage report option in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) which if checked generates references to tests allowing viewing coverage per test. Note that this option affects Test Runner Coverage sessions only.
 - Added `generateTestReferences` in *-coverageOptions* for [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html) which allows viewing coverage per test
+- Added `pathFiltersFromFile` in *-coverageOptions* for [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html) which allows specifying an external file which contains a list of path filters. When this file contains relative paths, the `sourcePaths` option can be used to specify the source directories.  
 
 ## [1.1.0] - 2021-06-09
 

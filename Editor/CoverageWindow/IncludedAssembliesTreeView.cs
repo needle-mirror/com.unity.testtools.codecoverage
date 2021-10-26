@@ -42,22 +42,58 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             TreeViewItem root = new TreeViewItem(-1, -1);
 
-            Assembly[] assemblies = CompilationPipeline.GetAssemblies();
-            Array.Sort(assemblies, (x, y) => String.Compare(x.name, y.name));
+            bool developerMode = EditorPrefs.GetBool("DeveloperMode", false);
 
-            int assembliesLength = assemblies.Length;
-
-            GUIContent textContent = new GUIContent();
-            for (int i = 0; i < assembliesLength; ++i)
+            if (developerMode)
             {
-                Assembly assembly = assemblies[i];
-                bool enabled = includeAssemblies.Any(f => f.IsMatch(assembly.name.ToLowerInvariant()));
-                root.AddChild(new AssembliesTreeViewItem() { id = i+1, displayName = assembly.name, Enabled = enabled });
+                string allAssemblyFiltersString = AssemblyFiltering.GetAllProjectAssembliesString() + ",unityeditor*,unityengine*,unity.*";
+                string[] allAssemblyFilters = allAssemblyFiltersString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                
+                Regex[] allAssemblies = allAssemblyFilters
+                .Select(f => AssemblyFiltering.CreateFilterRegex(f))
+                .ToArray();
 
-                textContent.text = assembly.name;
-                float itemWidth = TreeView.DefaultStyles.label.CalcSize(textContent).x + kCheckBoxWidth;
-                if (Width < itemWidth)
-                    Width = itemWidth;
+                System.Reflection.Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                Array.Sort(assemblies, (x, y) => String.Compare(x.GetName().Name, y.GetName().Name));
+
+                int assembliesLength = assemblies.Length;
+
+                GUIContent textContent = new GUIContent();
+                for (int i = 0; i < assembliesLength; ++i)
+                {
+                    System.Reflection.Assembly assembly = assemblies[i];
+
+                    if (allAssemblies.Any(f => f.IsMatch(assembly.GetName().Name.ToLowerInvariant())))
+                    {
+                        bool enabled = includeAssemblies.Any(f => f.IsMatch(assembly.GetName().Name.ToLowerInvariant()));
+                        root.AddChild(new AssembliesTreeViewItem() { id = i + 1, displayName = assembly.GetName().Name, Enabled = enabled });
+
+                        textContent.text = assembly.GetName().Name;
+                        float itemWidth = TreeView.DefaultStyles.label.CalcSize(textContent).x + kCheckBoxWidth;
+                        if (Width < itemWidth)
+                            Width = itemWidth;
+                    }
+                }
+            }
+            else
+            {
+                Assembly[] assemblies = CompilationPipeline.GetAssemblies();
+                Array.Sort(assemblies, (x, y) => String.Compare(x.name, y.name));
+
+                int assembliesLength = assemblies.Length;
+
+                GUIContent textContent = new GUIContent();
+                for (int i = 0; i < assembliesLength; ++i)
+                {
+                    Assembly assembly = assemblies[i];
+                    bool enabled = includeAssemblies.Any(f => f.IsMatch(assembly.name.ToLowerInvariant()));
+                    root.AddChild(new AssembliesTreeViewItem() { id = i + 1, displayName = assembly.name, Enabled = enabled });
+
+                    textContent.text = assembly.name;
+                    float itemWidth = TreeView.DefaultStyles.label.CalcSize(textContent).x + kCheckBoxWidth;
+                    if (Width < itemWidth)
+                        Width = itemWidth;
+                }
             }
 
             return root;

@@ -11,9 +11,11 @@ namespace UnityEditor.TestTools.CodeCoverage
     internal class AssemblyFiltering
     {
         public const string kDefaultExcludedAssemblies = "system*,mono*,nunit*,microsoft*,mscorlib*,roslyn*";
+        public const string kCoreAssemblies = "unityeditor*,unityengine*";
         public const string kAssetsAlias = "<assets>";
         public const string kPackagesAlias = "<packages>";
         public const string kAllAlias = "<all>";
+        public const string kCoreAlias = "<core>";
 
         public string includedAssemblies
         {

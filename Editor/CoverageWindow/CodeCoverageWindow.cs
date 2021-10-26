@@ -42,10 +42,6 @@ namespace UnityEditor.TestTools.CodeCoverage
         private bool m_IncludeWarnings;
         private static readonly Vector2 s_WindowMinSizeNormal = new Vector2(445, 435);
 
-#if ICONBUTTON_SUPPORTED
-        const string kCoverageManualPage = "https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@latest";
-#endif
-
         private float m_WarningsAddedAccumulativeHeight = 0;
         private float m_WarningsAddedAccumulativeHeightLast = 0;
         private bool m_LoseFocus = false; 
@@ -502,7 +498,13 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (GUI.Button(rect, Styles.HelpIcon, EditorStyles.iconButton))
             {
-                Help.ShowHelpPage(kCoverageManualPage);
+                PackageManager.PackageInfo packageInfo = PackageManager.PackageInfo.FindForAssetPath("Packages/com.unity.testtools.codecoverage");
+                if (packageInfo != null)
+                {
+                    string shortVersion = packageInfo.version.Substring(0, packageInfo.version.IndexOf('.', packageInfo.version.IndexOf('.') + 1));
+                    string documentationUrl = $"https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@{shortVersion}";
+                    Help.ShowHelpPage(documentationUrl);
+                }
             }
         }
 
@@ -656,7 +658,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (settingPassedInCmdLine)
             {
-                EditorGUILayout.HelpBox(string.Format(kSettingsOverriddenMessage, "Included/Excluded Paths", "-coverageOptions: pathFilters"), MessageType.Warning);
+                EditorGUILayout.HelpBox(string.Format(kSettingsOverriddenMessage, "Included/Excluded Paths", "-coverageOptions: pathFilters/pathFiltersFromFile"), MessageType.Warning);
                 m_WarningsAddedAccumulativeHeight += 40;
             }
         }

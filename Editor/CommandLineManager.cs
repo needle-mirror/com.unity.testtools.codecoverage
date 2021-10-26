@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using UnityEditor.TestTools.CodeCoverage.CommandLineParser;
 using UnityEditor.TestTools.CodeCoverage.Utils;
 
@@ -274,7 +277,25 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         private void ParseCoverageOptions()
         {
-            m_CoverageOptions = m_CoverageOptionsArg.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            // Make sure there is no trailing quotes at the end of the options
+            m_CoverageOptionsArg = m_CoverageOptionsArg.TrimEnd('"');
+
+            // 'sourcePaths' option is moved at the beginning to ensure it is handled first,
+            // since it may be needed for other options
+            var options = m_CoverageOptionsArg.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            if (options.Count > 1)
+            {
+                var sourcePath = options.FirstOrDefault(option => option.StartsWith("SOURCEPATHS:", StringComparison.InvariantCultureIgnoreCase));
+                if (sourcePath != null)
+                {
+                    var sourcePathIndex = options.IndexOf(sourcePath);
+                    var firstElement = options[0];
+                    options[sourcePathIndex] = firstElement;
+                    options[0] = sourcePath;
+                }
+            }
+
+            m_CoverageOptions = options.ToArray();
 
             foreach (string optionArgsStr in m_CoverageOptions)
             {
@@ -289,7 +310,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 {
                     optionName = optionArgsStr.Substring(0, indexOfColon);
                     optionArgs = optionArgsStr.Substring(indexOfColon+1);
-                }        
+                }
 
                 switch (optionName.ToUpperInvariant())
                 {
@@ -373,6 +394,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                                             m_IncludeAssemblies += AssemblyFiltering.GetAllProjectAssembliesString();
                                         else if (string.Equals(filterBody, AssemblyFiltering.kPackagesAlias, StringComparison.OrdinalIgnoreCase))
                                             m_IncludeAssemblies += AssemblyFiltering.GetPackagesOnlyAssembliesString();
+                                        else if (string.Equals(filterBody, AssemblyFiltering.kCoreAlias, StringComparison.OrdinalIgnoreCase))
+                                            m_IncludeAssemblies += AssemblyFiltering.kCoreAssemblies;
                                     }
                                     else
                                     {
@@ -392,6 +415,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                                             m_ExcludeAssemblies += AssemblyFiltering.GetAllProjectAssembliesString();
                                         else if (string.Equals(filterBody, AssemblyFiltering.kPackagesAlias, StringComparison.OrdinalIgnoreCase))
                                             m_ExcludeAssemblies += AssemblyFiltering.GetPackagesOnlyAssembliesString();
+                                        else if (string.Equals(filterBody, AssemblyFiltering.kCoreAlias, StringComparison.OrdinalIgnoreCase))
+                                            m_ExcludeAssemblies += AssemblyFiltering.kCoreAssemblies;
                                     }
                                     else
                                     {
@@ -406,35 +431,29 @@ namespace UnityEditor.TestTools.CodeCoverage
                         }
                         break;
 
+                    case "PATHFILTERSFROMFILE":
+                        if (optionArgs.Length > 0)
+                        {
+                            if (File.Exists(optionArgs))
+                            {
+                                try
+                                {
+                                    ParsePathFilters( GetPathFiltersFromFile(optionArgs) );
+                                }
+                                catch (Exception e)
+                                {
+                                    ResultsLogger.Log(ResultID.Warning_FailedToExtractPathFiltersFromFile, $"Exception '{e.Message}' while reading '{optionArgs}'");
+                                }
+                            }
+                        }
+                        break;
+
                     case "PATHFILTERS":
                         if (optionArgs.Length > 0)
                         {
-                            pathFiltersSpecified = true;
-
                             string[] pathFilters = optionArgs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                            for (int i = 0; i < pathFilters.Length; ++i)
-                            {
-                                string filter = pathFilters[i];
-                                string filterBody = filter.Length > 1 ? filter.Substring(1) : string.Empty;
-
-                                if (filter.StartsWith("+", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    if (m_IncludePaths.Length > 0)
-                                        m_IncludePaths += ",";
-                                    m_IncludePaths += filterBody;
-                                }
-                                else if (filter.StartsWith("-", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    if (m_ExcludePaths.Length > 0)
-                                        m_ExcludePaths += ",";
-                                    m_ExcludePaths += filterBody;
-                                }
-                                else
-                                {
-                                    ResultsLogger.Log(ResultID.Warning_PathFiltersNotPrefixed, filter);
-                                }
-                            }
+                            ParsePathFilters(pathFilters);
                         }
                         break;
 
@@ -449,8 +468,6 @@ namespace UnityEditor.TestTools.CodeCoverage
                     case "SOURCEPATHS":
                         if (optionArgs.Length > 0)
                         {
-                            sourcePathsSpecified = true;
-
                             string[] rawSourcePaths = optionArgs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                             for (int i = 0; i < rawSourcePaths.Length; ++i)
                             {
@@ -458,6 +475,9 @@ namespace UnityEditor.TestTools.CodeCoverage
                                     sourcePaths += ",";
                                 sourcePaths += CoverageUtils.NormaliseFolderSeparators(rawSourcePaths[i]);
                             }
+
+                            if (sourcePaths.Length > 0)
+                                sourcePathsSpecified = true;
                         }
                         break;
                 }
@@ -468,7 +488,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 // If there are no inlcudedAssemblies specified but there are includedPaths specified
                 // then include all project assemblies so path filtering can take precedence over assembly filtering,
                 // othewise if there are no includedPaths specified neither then inlcude just the user assemblies (found under the Assets folder)
-                
+
                 if (m_IncludePaths.Length > 0)
                     m_IncludeAssemblies = AssemblyFiltering.GetAllProjectAssembliesString();
                 else
@@ -483,6 +503,88 @@ namespace UnityEditor.TestTools.CodeCoverage
             assemblyFiltering.Parse(m_IncludeAssemblies, m_ExcludeAssemblies);
             pathFiltering.Parse(m_IncludePaths, m_ExcludePaths);
             pathStripping.Parse(m_PathStrippingPatterns);
+        }
+
+        private void ParsePathFilters(string[] pathFilters)
+        {
+            for (int i = 0; i < pathFilters.Length; ++i)
+            {
+                string filter = pathFilters[i];
+                string filterBody = filter.Length > 1 ? filter.Substring(1) : string.Empty;
+
+                if (filter.StartsWith("+", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (m_IncludePaths.Length > 0)
+                        m_IncludePaths += ",";
+                    m_IncludePaths += filterBody;
+                }
+                else if (filter.StartsWith("-", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (m_ExcludePaths.Length > 0)
+                        m_ExcludePaths += ",";
+                    m_ExcludePaths += filterBody;
+                }
+                else
+                {
+                    ResultsLogger.Log(ResultID.Warning_PathFiltersNotPrefixed, filter);
+                }
+            }
+
+            if (m_IncludePaths.Length > 0 || m_ExcludePaths.Length > 0)
+                pathFiltersSpecified = true;
+        }
+
+        private string[] GetPathFiltersFromFile(string path)
+        {
+            var absolutePaths = new List<string>();
+            var sources = new string[0];
+            if (sourcePathsSpecified)
+                sources = sourcePaths.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var line in File.ReadAllLines(path))
+            {
+                var entry = line.Trim();
+                if (!entry.StartsWith("+") && !entry.StartsWith("-"))
+                {
+                    ResultsLogger.Log(ResultID.Warning_PathFiltersNotPrefixed, entry);
+                    continue;
+                }
+
+                var prefix = entry[0];
+                var pathWithoutPrefix = entry.Substring(1, entry.Length - 1).TrimStart();
+
+                // Will not try to handle entries that start from patterns symbols
+                if (pathWithoutPrefix.StartsWith("*") || pathWithoutPrefix.StartsWith("?"))
+                {
+                    absolutePaths.Add(CoverageUtils.NormaliseFolderSeparators(entry));
+                    continue;
+                }
+
+                var isRelative = string.IsNullOrEmpty(Path.GetPathRoot(pathWithoutPrefix));
+                if (isRelative)
+                {
+                    if (sourcePathsSpecified)
+                    {
+                        foreach (var source in sources)
+                        {
+                            var combined = Path.Combine(source, pathWithoutPrefix);
+                            var fullPath = $"{prefix}{Path.GetFullPath(combined)}";
+                            absolutePaths.Add(CoverageUtils.NormaliseFolderSeparators(fullPath));
+                        }
+                    }
+                    // Relative path without 'sourcePath' will be added 'as is' since it is unclear what user wants to achieve
+                    else
+                    {
+                        absolutePaths.Add(CoverageUtils.NormaliseFolderSeparators(entry));
+                    }
+                }
+                else
+                {
+                    absolutePaths.Add(CoverageUtils.NormaliseFolderSeparators(entry));
+                }
+            }
+
+            return absolutePaths.ToArray();
         }
     }
 }

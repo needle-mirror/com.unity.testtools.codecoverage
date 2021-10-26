@@ -42,6 +42,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
         Warning_ExcludeAttributeMethod = 18,
         Warning_StandaloneUnsupported = 19,
         Warning_UseProjectSettingsNonBatchmode = 20,
+        Warning_FailedToExtractPathFiltersFromFile = 21,
     }
 
     internal static class ResultsLogger
