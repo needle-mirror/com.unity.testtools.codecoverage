@@ -260,7 +260,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         private void ParseCoverageOptions()
         {
-            m_CoverageOptions = m_CoverageOptionsArg.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            m_CoverageOptions = m_CoverageOptionsArg.TrimEnd('"').Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string optionArgsStr in m_CoverageOptions)
             {

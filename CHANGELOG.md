@@ -4,6 +4,19 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2021-12-17
+
+### Fixes
+- Ensure assemblies are removed from the Included Assemblies field if they no longer exist (case [1318668](https://issuetracker.unity3d.com/issues/code-coverage-the-included-assemblies-field-shows-assemblies-that-no-longer-exist))
+
+### Changes
+- Updated Report Generator to version 4.8.13
+
+### Improvements
+- Added Help IconButton in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.1/manual/CodeCoverageWindow.html) for Unity versions 2021.2.2f1 and above
+- Added [What's new](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.1/manual/whats-new.html) and [Upgrade guide](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.1/manual/upgrade-guide.html) pages in the documentation 
+- Updated documentation to match version 1.1.1
+
 ## [1.1.0] - 2021-06-09
 
 ### Fixes

@@ -10,7 +10,7 @@ The summary view is divided into several sections: Summary, Coverage History, Ri
 
 ### Summary
 
-This section shows a brief summary of the coverage results including the number of asseblies, classes, files and lines that were processed. The most important value is the **Line Coverage** which shows the current coverage percentage of all coverable lines.
+This section shows a brief summary of the coverage results including the number of assemblies, classes, files and lines that were processed. The most important value is the **Line Coverage** which shows the current coverage percentage of all coverable lines. Coverable lines only include the lines that can get executed and aren't marked to be [excluded from coverage](UsingCodeCoverage.md#excluding-code-from-code-coverage).
 
 ### Coverage History
 

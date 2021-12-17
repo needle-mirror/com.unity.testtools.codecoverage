@@ -154,5 +154,14 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             return new Regex(CoverageUtils.GlobToRegex(filter), RegexOptions.Compiled);
         }
+
+        public static string RemoveAssembliesThatNoLongerExist(string assembliesString)
+        {
+            IEnumerable<string> currentAssemblies = GetAllProjectAssemblies().Select(x => x.name);
+            string[] assemblyNames = assembliesString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            IEnumerable<string> filteredAssemblyNames = assemblyNames.Where(x => currentAssemblies.Contains(x));
+
+            return string.Join(",", filteredAssemblyNames);
+        }
     }
 }

@@ -166,6 +166,9 @@ namespace UnityEditor.TestTools.CodeCoverage
             public static readonly GUIContent ClearHistoryButtonLabel = EditorGUIUtility.TrTextContent("Clear History", "Clears the coverage report history.");
             public static readonly GUIContent StartRecordingButtonLabel = EditorGUIUtility.TrTextContentWithIcon(" Start Recording", "Record coverage data.", "Record Off");
             public static readonly GUIContent StopRecordingButtonLabel = EditorGUIUtility.TrTextContentWithIcon(" Stop Recording", "Stop recording coverage data.", "Record On");
+#if ICONBUTTON_SUPPORTED
+            public static readonly GUIContent HelpIcon = EditorGUIUtility.IconContent("_Help");
+#endif
 
             public static readonly GUIStyle largeButton = "LargeButton";
 
@@ -180,7 +183,11 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                 settings = new GUIStyle()
                 {
+#if ICONBUTTON_SUPPORTED
+                    margin = new RectOffset(8, 4, 4, 4)
+#else
                     margin = new RectOffset(8, 4, 18, 4)
+#endif
                 };
             }
         }
@@ -211,7 +218,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_CodeCoverageFormat = (CoverageFormat)CoveragePreferences.instance.GetInt("Format", 0);
             m_GenerateAdditionalMetrics = CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
             m_IncludeHistoryInReport = CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
-            m_AssembliesToInclude = CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
+            m_AssembliesToInclude = GetIncludedAssemblies();
             m_AssembliesToIncludeLength = m_AssembliesToInclude.Length;
             m_PathsToInclude = CoveragePreferences.instance.GetStringForPaths("PathsToInclude", string.Empty);
             m_PathsToExclude = CoveragePreferences.instance.GetStringForPaths("PathsToExclude", string.Empty);
@@ -284,6 +291,14 @@ namespace UnityEditor.TestTools.CodeCoverage
                 }
             }
         }
+        private string GetIncludedAssemblies()
+        {
+            string assembliesFromPreferences = CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
+            string filteredAssemblies = AssemblyFiltering.RemoveAssembliesThatNoLongerExist(assembliesFromPreferences);
+            CoveragePreferences.instance.SetString("IncludeAssemblies", filteredAssemblies);
+
+            return filteredAssemblies;
+        }
 
         private void OnEnable()
         {
@@ -309,6 +324,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             GUILayout.BeginVertical(Styles.settings);
 
+#if ICONBUTTON_SUPPORTED
+            DrawTopBarGUI();
+#endif
             ResetIncludeWarnings();
 
             CheckScriptingRuntimeVersion();
@@ -465,6 +483,37 @@ namespace UnityEditor.TestTools.CodeCoverage
                 m_WarningsAddedAccumulativeHeight += 40;
             }
         }
+
+#if ICONBUTTON_SUPPORTED
+        void DrawHelpGUI()
+        {
+            var iconSize = EditorStyles.iconButton.CalcSize(Styles.HelpIcon);
+
+            var rect = GUILayoutUtility.GetRect(iconSize.x, iconSize.y);
+
+            if (GUI.Button(rect, Styles.HelpIcon, EditorStyles.iconButton))
+            {
+                PackageManager.PackageInfo packageInfo = PackageManager.PackageInfo.FindForAssetPath("Packages/com.unity.testtools.codecoverage");
+                if (packageInfo != null)
+                {
+                    string shortVersion = packageInfo.version.Substring(0, packageInfo.version.IndexOf('.', packageInfo.version.IndexOf('.') + 1));
+                    string documentationUrl = $"https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@{shortVersion}";
+                    Help.ShowHelpPage(documentationUrl);
+                }
+            }
+        }
+
+        void DrawTopBarGUI()
+        {
+            GUILayout.BeginHorizontal();
+
+            GUILayout.FlexibleSpace();
+
+            DrawHelpGUI();
+
+            GUILayout.EndHorizontal();
+        }
+#endif
 
         void DrawCodeCoverageLocation()
         {
