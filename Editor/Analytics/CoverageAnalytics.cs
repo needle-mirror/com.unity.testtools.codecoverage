@@ -90,6 +90,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
                 CurrentCoverageEvent.useDefaultHistoryLoc = CommandLineManager.instance.coverageHistoryPath.Length == 0;
                 CurrentCoverageEvent.usePathStrippingPatterns = CommandLineManager.instance.pathStrippingSpecified;
                 CurrentCoverageEvent.useSourcePaths = CommandLineManager.instance.sourcePathsSpecified;
+                CurrentCoverageEvent.usePathFiltersFromFile = CommandLineManager.instance.pathFiltersFromFileSpecified;
             }
             else
             {
@@ -101,6 +102,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
                 CurrentCoverageEvent.generateTestReferences = CommandLineManager.instance.generateTestReferences || CoveragePreferences.instance.GetBool("GenerateTestReferences", false);
                 CurrentCoverageEvent.usePathStrippingPatterns = CommandLineManager.instance.pathStrippingSpecified;
                 CurrentCoverageEvent.useSourcePaths = CommandLineManager.instance.sourcePathsSpecified;
+                CurrentCoverageEvent.usePathFiltersFromFile = CommandLineManager.instance.pathFiltersFromFileSpecified;
 
                 CurrentCoverageEvent.useDefaultAssemblyFilters = !CommandLineManager.instance.assemblyFiltersSpecified;
                 if (!CommandLineManager.instance.assemblyFiltersSpecified)

@@ -101,6 +101,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public bool pathFiltersFromFileSpecified
+        {
+            get;
+            private set;
+        }
+
         public bool pathStrippingSpecified
         {
             get;
@@ -179,6 +185,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             pathFiltersSpecified = false;
             pathStrippingSpecified = false;
             sourcePathsSpecified = false;
+            pathFiltersFromFileSpecified = false;
             assemblyFiltering = new AssemblyFiltering();
             pathFiltering = new PathFiltering();
             pathStripping = new PathStripping();
@@ -434,6 +441,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                     case "PATHFILTERSFROMFILE":
                         if (optionArgs.Length > 0)
                         {
+                            pathFiltersFromFileSpecified = true;
                             if (File.Exists(optionArgs))
                             {
                                 try
@@ -442,7 +450,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                                 }
                                 catch (Exception e)
                                 {
-                                    ResultsLogger.Log(ResultID.Warning_FailedToExtractPathFiltersFromFile, $"Exception '{e.Message}' while reading '{optionArgs}'");
+                                    ResultsLogger.Log(ResultID.Warning_FailedToExtractPathFiltersFromFile, e.Message, optionArgs);
                                 }
                             }
                         }
@@ -507,10 +515,28 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         private void ParsePathFilters(string[] pathFilters)
         {
+            var sources = new string[0];
+            if (sourcePathsSpecified)
+                sources = sourcePaths.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
             for (int i = 0; i < pathFilters.Length; ++i)
             {
                 string filter = pathFilters[i];
                 string filterBody = filter.Length > 1 ? filter.Substring(1) : string.Empty;
+
+                var isRelative = !filterBody.StartsWith("*") && !filterBody.StartsWith("?") && string.IsNullOrEmpty(Path.GetPathRoot(filterBody));
+                //If current path is relative - expand it to an absolute path using specified source paths
+                if (isRelative && sourcePathsSpecified)
+                {
+                    string expandedPaths = string.Empty;
+                    foreach (var source in sources)
+                    {
+                        if (expandedPaths.Length > 0)
+                            expandedPaths += ",";
+                        expandedPaths += CoverageUtils.NormaliseFolderSeparators(Path.Combine(source, filterBody));
+                    }
+                    filterBody = expandedPaths;
+                }
 
                 if (filter.StartsWith("+", StringComparison.OrdinalIgnoreCase))
                 {
@@ -534,57 +560,17 @@ namespace UnityEditor.TestTools.CodeCoverage
                 pathFiltersSpecified = true;
         }
 
-        private string[] GetPathFiltersFromFile(string path)
+        internal string[] GetPathFiltersFromFile(string path)
         {
-            var absolutePaths = new List<string>();
-            var sources = new string[0];
-            if (sourcePathsSpecified)
-                sources = sourcePaths.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            var paths = new List<string>();
 
             foreach (var line in File.ReadAllLines(path))
             {
                 var entry = line.Trim();
-                if (!entry.StartsWith("+") && !entry.StartsWith("-"))
-                {
-                    ResultsLogger.Log(ResultID.Warning_PathFiltersNotPrefixed, entry);
-                    continue;
-                }
-
-                var prefix = entry[0];
-                var pathWithoutPrefix = entry.Substring(1, entry.Length - 1).TrimStart();
-
-                // Will not try to handle entries that start from patterns symbols
-                if (pathWithoutPrefix.StartsWith("*") || pathWithoutPrefix.StartsWith("?"))
-                {
-                    absolutePaths.Add(CoverageUtils.NormaliseFolderSeparators(entry));
-                    continue;
-                }
-
-                var isRelative = string.IsNullOrEmpty(Path.GetPathRoot(pathWithoutPrefix));
-                if (isRelative)
-                {
-                    if (sourcePathsSpecified)
-                    {
-                        foreach (var source in sources)
-                        {
-                            var combined = Path.Combine(source, pathWithoutPrefix);
-                            var fullPath = $"{prefix}{Path.GetFullPath(combined)}";
-                            absolutePaths.Add(CoverageUtils.NormaliseFolderSeparators(fullPath));
-                        }
-                    }
-                    // Relative path without 'sourcePath' will be added 'as is' since it is unclear what user wants to achieve
-                    else
-                    {
-                        absolutePaths.Add(CoverageUtils.NormaliseFolderSeparators(entry));
-                    }
-                }
-                else
-                {
-                    absolutePaths.Add(CoverageUtils.NormaliseFolderSeparators(entry));
-                }
+                paths.Add(CoverageUtils.NormaliseFolderSeparators(entry));
             }
 
-            return absolutePaths.ToArray();
+            return paths.ToArray();
         }
     }
 }

@@ -4,7 +4,11 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.2.0-exp.5] - 2021-10-26
+## [1.2.0-exp.6] - 2022-03-18
+
+### Fixes
+- Ensure assemblies are removed from the Included Assemblies field if they no longer exist (case [1318668](https://issuetracker.unity3d.com/issues/code-coverage-the-included-assemblies-field-shows-assemblies-that-no-longer-exist))
+- Ensure invalid or hidden sequence points are ignored (case [1372305](https://issuetracker.unity3d.com/issues/class-which-derives-from-methodbase-causes-incorrect-sequence-points-to-be-generated-by-coverage-api)). Note that this fix is temporarily applied to the Code Coverage package and will be moved to the [Coverage API](https://docs.unity3d.com/ScriptReference/TestTools.Coverage.html) in the engine in the future.
 
 ### Changes
 - Updated Report Generator to version 4.8.13
@@ -15,11 +19,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added Help IconButton in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html)
 - Refactored the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) UI to include a new *Report Options* section and removing the word 'Generate' from options
 - Introduced new selection buttons under the *Included Assemblies* dropdown in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html); use the *All* button to select all the assemblies in the project. Use the *Assets* button to select only the assemblies under the `Assets` folder. Use the *Packages* button to select only the Packages' assemblies. If searching, the buttons will apply only to the assemblies visible in the list.
+- Added [What's new](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/whats-new.html) and [Upgrade guide](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/upgrade-guide.html) pages in the documentation
+- Added [Using relative paths in path filters](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html#using-relative-paths-in-path-filters) section in documentation
+- Updated documentation to match version 1.2.0-exp.6
 
 ### Features
 - Added `Test Runner References` coverage report option in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) which if checked generates references to tests allowing viewing coverage per test. Note that this option affects Test Runner Coverage sessions only.
 - Added `generateTestReferences` in *-coverageOptions* for [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html) which allows viewing coverage per test
-- Added `pathFiltersFromFile` in *-coverageOptions* for [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html) which allows specifying an external file which contains a list of path filters. When this file contains relative paths, the `sourcePaths` option can be used to specify the source directories.  
+- Added `pathFiltersFromFile` in *-coverageOptions* for [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html) which allows specifying an external file which contains a list of path filters. When this file contains relative paths, the `sourcePaths` option can be used to specify the source directories.
+- When the `pathFilters` option in *-coverageOptions* contains relative paths, the `sourcePaths` option can be used to specify the source directories.
 
 ## [1.1.0] - 2021-06-09
 

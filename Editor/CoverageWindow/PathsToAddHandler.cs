@@ -36,7 +36,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             string candidate = CoverageUtils.BrowseForDir(Application.dataPath, m_PathFilterType == PathFilterType.Include ? kSelectIncludedDirectoryMessage : kSelectExcludedDirectoryMessage);
             if (CoverageUtils.IsValidFolder(candidate))
             {
-                candidate = string.Concat(candidate, "/*");
+                candidate = string.Concat(candidate, "/**");
 
                 UpdatePathToFilter(candidate);
             }

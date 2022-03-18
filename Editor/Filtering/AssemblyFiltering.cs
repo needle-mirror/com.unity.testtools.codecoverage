@@ -85,7 +85,24 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
         }
 
-        private static Assembly[] GetAllProjectAssemblies()
+        public static System.Reflection.Assembly[] GetAllProjectAssembliesInternal()
+        {
+            System.Reflection.Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            Array.Sort(assemblies, (x, y) => String.Compare(x.GetName().Name, y.GetName().Name));
+
+            string allAssemblyFiltersString = GetAllProjectAssembliesString() + ",unityeditor*,unityengine*,unity.*";
+            string[] allAssemblyFilters = allAssemblyFiltersString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            Regex[] assembliesRegex = allAssemblyFilters
+            .Select(f => CreateFilterRegex(f))
+            .ToArray();
+
+            System.Reflection.Assembly[] filteredAssemblies = assemblies.Where(assembly => assembliesRegex.Any(regex => regex.IsMatch(assembly.GetName().Name.ToLowerInvariant()))).ToArray();
+
+            return filteredAssemblies;
+        }
+
+        public static Assembly[] GetAllProjectAssemblies()
         {
             Assembly[] assemblies = CompilationPipeline.GetAssemblies();
             Array.Sort(assemblies, (x, y) => String.Compare(x.name, y.name));
@@ -154,6 +171,26 @@ namespace UnityEditor.TestTools.CodeCoverage
             filter = filter.ToLowerInvariant();
 
             return new Regex(CoverageUtils.GlobToRegex(filter), RegexOptions.Compiled);
+        }
+
+        public static string RemoveAssembliesThatNoLongerExist(string assembliesString)
+        {
+            IEnumerable<string> currentAssemblies;
+
+            bool developerMode = EditorPrefs.GetBool("DeveloperMode", false);
+            if (developerMode)
+            {
+                currentAssemblies = GetAllProjectAssembliesInternal().Select(x => x.GetName().Name);
+            }
+            else
+            {
+                currentAssemblies = GetAllProjectAssemblies().Select(x => x.name);
+            }
+
+            string[] assemblyNames = assembliesString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            IEnumerable<string> filteredAssemblyNames = assemblyNames.Where(x => currentAssemblies.Contains(x));
+
+            return string.Join(",", filteredAssemblyNames);
         }
     }
 }

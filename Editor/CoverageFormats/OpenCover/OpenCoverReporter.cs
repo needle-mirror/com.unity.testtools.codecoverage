@@ -647,6 +647,15 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                 CoveredSequencePoint[] classMethodSequencePointsArray = Coverage.GetSequencePointsFor(method);
                                 foreach (CoveredSequencePoint classMethodSequencePoint in classMethodSequencePointsArray)
                                 {
+                                    // Skip invalid/hidden sequence points
+                                    if (classMethodSequencePoint.line < 0 || 
+                                        classMethodSequencePoint.line == 16707566 ||    // 0xfeefee
+                                        classMethodSequencePoint.line == 15732480)      // 0xf00f00
+                                    {
+                                        ResultsLogger.LogSessionItem($"Ignored sequence point - Invalid line number: {classMethodSequencePoint.line} in method: {methodName} in class: {className}", LogVerbosityLevel.Info);
+                                        continue;
+                                    }
+
                                     string filename = classMethodSequencePoint.filename;
                                     if (filesNotFound.Contains(filename) || !m_ReporterFilter.ShouldProcessFile(filename))
                                     {

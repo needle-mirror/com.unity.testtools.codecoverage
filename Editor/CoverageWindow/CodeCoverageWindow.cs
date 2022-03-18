@@ -223,7 +223,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_GenerateAdditionalMetrics = CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
             m_GenerateTestReferences = CoveragePreferences.instance.GetBool("GenerateTestReferences", false);
             m_IncludeHistoryInReport = CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
-            m_AssembliesToInclude = CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
+            m_AssembliesToInclude = GetIncludedAssemblies();
             m_AssembliesToIncludeLength = m_AssembliesToInclude.Length;
             m_PathsToInclude = CoveragePreferences.instance.GetStringForPaths("PathsToInclude", string.Empty);
             m_PathsToExclude = CoveragePreferences.instance.GetStringForPaths("PathsToExclude", string.Empty);
@@ -295,6 +295,15 @@ namespace UnityEditor.TestTools.CodeCoverage
                     m_CoverageSettings.resultsRootFolderPath = CoverageUtils.NormaliseFolderSeparators(CoverageUtils.JoinPaths(m_CoverageSettings.rootFolderPath, resultsRootDirectoryName));
                 }
             }
+        }
+
+        private string GetIncludedAssemblies()
+        {
+            string assembliesFromPreferences = CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
+            string filteredAssemblies = AssemblyFiltering.RemoveAssembliesThatNoLongerExist(assembliesFromPreferences);
+            CoveragePreferences.instance.SetString("IncludeAssemblies", filteredAssemblies);
+
+            return filteredAssemblies;
         }
 
         private void OnEnable()

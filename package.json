@@ -1,7 +1,7 @@
 {
   "name": "com.unity.testtools.codecoverage",
   "displayName": "Code Coverage",
-  "version": "1.2.0-exp.5",
+  "version": "1.2.0-exp.6",
   "unity": "2019.3",
   "unityRelease": "0a8",
   "description": "Use this package to export code coverage data and reports from your automated tests. Additionally, the Code Coverage package offers a Coverage Recording feature which allows capturing coverage data on demand, for manual testing or when there are no automated tests in the project.",
@@ -22,15 +22,18 @@
       "path": "Samples~/Tutorial"
     }
   ],
+  "upm": {
+    "changelog": "### Fixes,- Ensure assemblies are removed from the Included Assemblies field if they no longer exist (case [1318668](https://issuetracker.unity3d.com/issues/code-coverage-the-included-assemblies-field-shows-assemblies-that-no-longer-exist)),- Ensure invalid or hidden sequence points are ignored (case [1372305](https://issuetracker.unity3d.com/issues/class-which-derives-from-methodbase-causes-incorrect-sequence-points-to-be-generated-by-coverage-api)). Note that this fix is temporarily applied to the Code Coverage package and will be moved to the [Coverage API](https://docs.unity3d.com/ScriptReference/TestTools.Coverage.html) in the engine in the future.,### Changes,- Updated Report Generator to version 4.8.13,- Renamed *assemblyFilters* aliases in [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html); `<user>` was renamed to `<assets>` and `<project>` was renamed to `<all>`.,### Improvements,- The size of the coverage result files and the Code Coverage session duration have been optimized. When more than one coverage xml result files are generated within a Code Coverage session, these files now include only the coverage data of the visited lines. Then, at the end of the session a final coverage xml result file is generated which includes all the lines but with zero coverage.,- Added Help IconButton in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html),- Refactored the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) UI to include a new *Report Options* section and removing the word 'Generate' from options,- Introduced new selection buttons under the *Included Assemblies* dropdown in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html); use the *All* button to select all the assemblies in the project. Use the *Assets* button to select only the assemblies under the `Assets` folder. Use the *Packages* button to select only the Packages' assemblies. If searching, the buttons will apply only to the assemblies visible in the list.,- Added [What's new](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/whats-new.html) and [Upgrade guide](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/upgrade-guide.html) pages in the documentation,- Added [Using relative paths in path filters](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html#using-relative-paths-in-path-filters) section in documentation,- Updated documentation to match version 1.2.0-exp.6,### Features,- Added `Test Runner References` coverage report option in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) which if checked generates references to tests allowing viewing coverage per test. Note that this option affects Test Runner Coverage sessions only.,- Added `generateTestReferences` in *-coverageOptions* for [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html) which allows viewing coverage per test,- Added `pathFiltersFromFile` in *-coverageOptions* for [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html) which allows specifying an external file which contains a list of path filters. When this file contains relative paths, the `sourcePaths` option can be used to specify the source directories.,- When the `pathFilters` option in *-coverageOptions* contains relative paths, the `sourcePaths` option can be used to specify the source directories."
+  },
   "relatedPackages": {
-    "com.unity.testtools.codecoverage.tests": "1.2.0-exp.5"
+    "com.unity.testtools.codecoverage.tests": "1.2.0-exp.6"
   },
   "upmCi": {
-    "footprint": "a58b1874431943e6a114f2866d9e6d6ae807f30d"
+    "footprint": "eae0d644f27a0afee313ebec1a5e0c52c762938f"
   },
   "repository": {
     "url": "https://github.cds.internal.unity3d.com/unity/com.unity.testtools.codecoverage.git",
     "type": "git",
-    "revision": "503ad56e29c76c06365d0b879111cb40c7bee94f"
+    "revision": "507e353e0fdf438085cf03dadf50f3ea26c888ee"
   }
 }

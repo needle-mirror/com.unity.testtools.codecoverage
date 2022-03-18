@@ -97,6 +97,8 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
         public bool usePathStrippingPatterns;
         // Did the user specify source paths (command line only)
         public bool useSourcePaths;
+        // Did the user specify path filters from file option (command line only)
+        public bool usePathFiltersFromFile;
     }
 
     /* Future-proof

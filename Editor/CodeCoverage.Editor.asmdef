@@ -50,7 +50,7 @@
         },
         {
             "name": "Unity",
-            "expression": "2022.1.0a4",
+            "expression": "2021.2.2f1",
             "define": "ICONBUTTON_SUPPORTED"
         }
     ],

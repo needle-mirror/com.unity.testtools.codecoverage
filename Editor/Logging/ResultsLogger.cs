@@ -72,6 +72,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             { ResultID.Warning_ExcludeAttributeMethod, new ResultData(LogType.Warning, "Not able to detect custom attribute ExcludeFromCoverage in Method: {0}, Class: {1}, Assembly: {2}") },
             { ResultID.Warning_StandaloneUnsupported, new ResultData(LogType.Warning, "Code Coverage is not supported in standalone currently. Code Coverage Results and Report will not be generated.") },
             { ResultID.Warning_UseProjectSettingsNonBatchmode, new ResultData(LogType.Warning, "'-coverageOptions useProjectSettings' can only be used in batchmode and it does not take effect when running the editor from the command-line in non-batchmode.") },
+            { ResultID.Warning_FailedToExtractPathFiltersFromFile, new ResultData(LogType.Warning, "Failed to extract path filters from file: Exception '{0}' while reading '{1}'") },
         };
 
         public static bool Log(ResultID resultId, params string[] extraParams)
