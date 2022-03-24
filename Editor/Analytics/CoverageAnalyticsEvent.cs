@@ -93,8 +93,8 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
         public bool useEvent_onCoverageSessionPaused;
         // Did the user use the onCoverageSessionUnpaused event (batchmode compatible)
         public bool useEvent_onCoverageSessionUnpaused;
-        // Did the user specify path stripping patterns (command line only)
-        public bool usePathStrippingPatterns;
+        // Did the user specify path replace patterns (command line only)
+        public bool usePathReplacePatterns;
         // Did the user specify source paths (command line only)
         public bool useSourcePaths;
         // Did the user specify path filters from file option (command line only)

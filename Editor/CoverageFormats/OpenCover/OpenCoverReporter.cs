@@ -754,8 +754,8 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     {
                         ModelFile coveredFile = new ModelFile();
                         coveredFile.FullPath = CoverageUtils.NormaliseFolderSeparators(fileEntry.Key);
-                        if (CommandLineManager.instance.pathStrippingSpecified)
-                            coveredFile.FullPath = CommandLineManager.instance.pathStripping.StripPath(coveredFile.FullPath);
+                        if (CommandLineManager.instance.pathReplacingSpecified)
+                            coveredFile.FullPath = CommandLineManager.instance.pathReplacing.ReplacePath(coveredFile.FullPath);
                         coveredFile.UniqueId = fileEntry.Value;
 
                         coveredFileList.Add(coveredFile);

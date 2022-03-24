@@ -2,11 +2,15 @@
 
 To upgrade to Code Coverage package version 1.2, you need to do the following:
 - [Update assembly filtering aliases in batchmode](upgrade-guide.md#update-assembly-filtering-aliases-in-batchmode)
+- [Rename `pathStrippingPatterns` to `pathReplacePatterns` in batchmode](upgrade-guide.md#rename-pathstrippingpatterns-to-pathreplacepatterns-in-batchmode)
 
 **Note**: If you're upgrading from a version older than 1.1, follow the upgrade guide for version 1.1 first.
 
 ## Update assembly filtering aliases in batchmode
 - Rename assembly filtering aliases when running in [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html). `<user>` alias was renamed to `<assets>` and `<project>` was renamed to `<all>`.
+
+## Rename `pathStrippingPatterns` to `pathReplacePatterns` in batchmode
+- Rename `pathStrippingPatterns` to `pathReplacePatterns` in [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html).<br/><br/>**Example:**<br/><br/>Change `pathStrippingPatterns:C:/MyProject/` to `pathReplacePatterns:C:/MyProject/,`.<br/>This is equivelent to stripping `C:/MyProject/` by replacing `C:/MyProject/` with an empty string.
 
 # Upgrading to Code Coverage package version 1.1
 To upgrade to Code Coverage package version 1.1, you need to do the following:

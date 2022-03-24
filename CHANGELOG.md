@@ -4,7 +4,7 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.2.0-exp.6] - 2022-03-18
+## [1.2.0-exp.7] - 2022-03-24
 
 ### Fixes
 - Ensure assemblies are removed from the Included Assemblies field if they no longer exist (case [1318668](https://issuetracker.unity3d.com/issues/code-coverage-the-included-assemblies-field-shows-assemblies-that-no-longer-exist))
@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changes
 - Updated Report Generator to version 4.8.13
 - Renamed *assemblyFilters* aliases in [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html); `<user>` was renamed to `<assets>` and `<project>` was renamed to `<all>`.
+- Replaced `pathStrippingPatterns` with `pathReplacePatterns` in [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html). The `pathReplacePatterns` option allows stripping and replacing specific sections from the paths that are stored in the coverage results xml files.
+
+See the [Upgrade guide](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/upgrade-guide.html) if upgrading to Code Coverage package version 1.2
 
 ### Improvements
 - The size of the coverage result files and the Code Coverage session duration have been optimized. When more than one coverage xml result files are generated within a Code Coverage session, these files now include only the coverage data of the visited lines. Then, at the end of the session a final coverage xml result file is generated which includes all the lines but with zero coverage.
@@ -21,7 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Introduced new selection buttons under the *Included Assemblies* dropdown in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html); use the *All* button to select all the assemblies in the project. Use the *Assets* button to select only the assemblies under the `Assets` folder. Use the *Packages* button to select only the Packages' assemblies. If searching, the buttons will apply only to the assemblies visible in the list.
 - Added [What's new](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/whats-new.html) and [Upgrade guide](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/upgrade-guide.html) pages in the documentation
 - Added [Using relative paths in path filters](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html#using-relative-paths-in-path-filters) section in documentation
-- Updated documentation to match version 1.2.0-exp.6
+- Updated documentation to match version 1.2.0-exp.7
 
 ### Features
 - Added `Test Runner References` coverage report option in the [Code Coverage window](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CodeCoverageWindow.html) which if checked generates references to tests allowing viewing coverage per test. Note that this option affects Test Runner Coverage sessions only.

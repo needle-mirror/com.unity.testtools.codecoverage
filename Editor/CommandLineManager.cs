@@ -107,7 +107,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
-        public bool pathStrippingSpecified
+        public bool pathReplacingSpecified
         {
             get;
             private set;
@@ -136,7 +136,8 @@ namespace UnityEditor.TestTools.CodeCoverage
             get;
             private set;
         }
-        public PathStripping pathStripping
+
+        public PathReplacing pathReplacing
         {
             get;
             private set;
@@ -166,7 +167,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         private string m_ExcludeAssemblies;
         private string m_IncludePaths;
         private string m_ExcludePaths;
-        private string m_PathStrippingPatterns;
+        private string m_PathReplacePatterns;
 
         public CommandLineManagerImplementation(string[] commandLineArgs)
         {
@@ -183,12 +184,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             generateRootEmptyReport = false;
             assemblyFiltersSpecified = false;
             pathFiltersSpecified = false;
-            pathStrippingSpecified = false;
+            pathReplacingSpecified = false;
             sourcePathsSpecified = false;
             pathFiltersFromFileSpecified = false;
             assemblyFiltering = new AssemblyFiltering();
             pathFiltering = new PathFiltering();
-            pathStripping = new PathStripping();
+            pathReplacing = new PathReplacing();
             runTests = false;
             batchmode = false;
             burstDisabled = false;
@@ -199,7 +200,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_ExcludeAssemblies = string.Empty;
             m_IncludePaths = string.Empty;
             m_ExcludePaths = string.Empty;
-            m_PathStrippingPatterns = string.Empty;
+            m_PathReplacePatterns = string.Empty;
 
             CommandLineOptionSet optionSet = new CommandLineOptionSet(
                 new CommandLineOption("enableCodeCoverage", () => { runFromCommandLine = true; }),
@@ -465,11 +466,11 @@ namespace UnityEditor.TestTools.CodeCoverage
                         }
                         break;
 
-                    case "PATHSTRIPPINGPATTERNS":
+                    case "PATHREPLACEPATTERNS":
                         if (optionArgs.Length > 0)
                         {
-                            pathStrippingSpecified = true;
-                            m_PathStrippingPatterns = optionArgs;
+                            pathReplacingSpecified = true;
+                            m_PathReplacePatterns = optionArgs;
                         }
                         break;
 
@@ -510,7 +511,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             assemblyFiltering.Parse(m_IncludeAssemblies, m_ExcludeAssemblies);
             pathFiltering.Parse(m_IncludePaths, m_ExcludePaths);
-            pathStripping.Parse(m_PathStrippingPatterns);
+            pathReplacing.Parse(m_PathReplacePatterns);
         }
 
         private void ParsePathFilters(string[] pathFilters)
