@@ -26,24 +26,34 @@
             }
         }
 
-        public bool ShouldProcessAssembly(string assemblyName)
+        public AssemblyFiltering GetAssemblyFiltering()
         {
             if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
-                return CommandLineManager.instance.assemblyFiltering.IsAssemblyIncluded(assemblyName);
+                return CommandLineManager.instance.assemblyFiltering;
             else
                 return CommandLineManager.instance.assemblyFiltersSpecified ?
-                    CommandLineManager.instance.assemblyFiltering.IsAssemblyIncluded(assemblyName) :
-                    m_AssemblyFiltering.IsAssemblyIncluded(assemblyName);
+                    CommandLineManager.instance.assemblyFiltering :
+                    m_AssemblyFiltering;
+        }
+
+        public bool ShouldProcessAssembly(string assemblyName)
+        {
+            return GetAssemblyFiltering().IsAssemblyIncluded(assemblyName);
+        }
+
+        public PathFiltering GetPathFiltering()
+        {
+            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
+                return CommandLineManager.instance.pathFiltering;
+            else
+                return CommandLineManager.instance.pathFiltersSpecified ?
+                    CommandLineManager.instance.pathFiltering :
+                    m_PathFiltering;
         }
 
         public bool ShouldProcessFile(string filename)
         {
-            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
-                return CommandLineManager.instance.pathFiltering.IsPathIncluded(filename);
-            else
-                return CommandLineManager.instance.pathFiltersSpecified ?
-                    CommandLineManager.instance.pathFiltering.IsPathIncluded(filename) :
-                    m_PathFiltering.IsPathIncluded(filename);
+            return GetPathFiltering().IsPathIncluded(filename);
         }
 
         public bool ShouldGenerateAdditionalMetrics()

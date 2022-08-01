@@ -4,7 +4,7 @@ namespace UnityEditor.TestTools.CodeCoverage.CommandLineParser
 {
     internal class CommandLineOptionSet
     {
-        ICommandLineOption[] m_Options;
+        readonly ICommandLineOption[] m_Options;
 
         public CommandLineOptionSet(params ICommandLineOption[] options)
         {

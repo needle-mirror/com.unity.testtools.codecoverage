@@ -2,11 +2,9 @@
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
-    internal class ReportGeneratorStyles
+    internal static class ReportGeneratorStyles
     {
-        public static GUIContent ProgressTitle = EditorGUIUtility.TrTextContent("Code Coverage");
-        public static GUIContent ProgressInfo = EditorGUIUtility.TrTextContent("Preparing the Report..");
-        public static GUIContent ProgressInfoPreparing = EditorGUIUtility.TrTextContent("Preparing the Report..");
-        public static GUIContent ProgressInfoCreating = EditorGUIUtility.TrTextContent("Creating the Report..");
+        public static readonly GUIContent ProgressTitle = EditorGUIUtility.TrTextContent("Code Coverage");
+        public static readonly GUIContent ProgressInfoCreating = EditorGUIUtility.TrTextContent("Generating the report..");
     }
 }

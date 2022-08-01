@@ -8,7 +8,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 {
     internal class PathReplacing
     {
-        private Dictionary<Regex, string> m_PathReplacePatterns;
+        private readonly Dictionary<Regex, string> m_PathReplacePatterns;
         private bool m_HasPathReplacePatterns;
 
         public PathReplacing()

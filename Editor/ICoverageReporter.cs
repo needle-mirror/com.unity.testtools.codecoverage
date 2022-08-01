@@ -4,6 +4,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 {
     interface ICoverageReporter
     {
+        ICoverageReporterFilter GetReporterFilter();
         void OnInitialise(CoverageSettings settings);
         void OnRunStarted(ITestAdaptor testsToRun);
         void OnRunFinished(ITestResultAdaptor testResults);

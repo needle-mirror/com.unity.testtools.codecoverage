@@ -31,8 +31,14 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
         public bool generateMetrics;
         // Did the user have Generate Test Runner References selected (batchmode compatible)
         public bool generateTestReferences;
-        // Did the user have Autogenerate Report selected (batchmode compatible)
+        // Did the user have Generate Additional reports selected (batchmode compatible)
+        public bool generateAdditionalReports;
+        // Did the user have passed the dontClear coverage option (batchmode compatible)
+        public bool dontClear;
+        // Did the user have Auto Generate Report selected (batchmode compatible)
         public bool autogenerate;
+        // Did the user have Auto Open Report selected
+        public bool autoOpenReport;
         // Did the user select the Clear Data button
         public bool clearData;
         // Did the user select the Clear History button
@@ -100,22 +106,4 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
         // Did the user specify path filters from file option (command line only)
         public bool usePathFiltersFromFile;
     }
-
-    /* Future-proof
-    **
-    [Serializable]
-    internal struct Result
-    {
-        // The result id
-        public int resultId;
-        // Extra information (optional)
-        public string extra;
-
-        public Result(int resultId, string extra = "")
-        {
-            this.resultId = resultId;
-            this.extra = extra;
-        }
-    }
-    */
 }

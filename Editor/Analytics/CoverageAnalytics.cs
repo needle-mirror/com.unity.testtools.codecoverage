@@ -78,12 +78,14 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
 
             if (batchmode && !useProjectSettings)
             {
-                CurrentCoverageEvent.autogenerate = CommandLineManager.instance.generateBadgeReport || CommandLineManager.instance.generateHTMLReport;
+                CurrentCoverageEvent.autogenerate = CommandLineManager.instance.generateBadgeReport || CommandLineManager.instance.generateHTMLReport || CommandLineManager.instance.generateAdditionalReports;
                 CurrentCoverageEvent.createBadges = CommandLineManager.instance.generateBadgeReport;
                 CurrentCoverageEvent.generateHistory = CommandLineManager.instance.generateHTMLReportHistory;
                 CurrentCoverageEvent.generateHTMLReport = CommandLineManager.instance.generateHTMLReport;
                 CurrentCoverageEvent.generateMetrics = CommandLineManager.instance.generateAdditionalMetrics;
                 CurrentCoverageEvent.generateTestReferences = CommandLineManager.instance.generateTestReferences;
+                CurrentCoverageEvent.generateAdditionalReports = CommandLineManager.instance.generateAdditionalReports;
+                CurrentCoverageEvent.dontClear = CommandLineManager.instance.dontClear;
                 CurrentCoverageEvent.useDefaultAssemblyFilters = !CommandLineManager.instance.assemblyFiltersSpecified;
                 CurrentCoverageEvent.useDefaultPathFilters = !CommandLineManager.instance.pathFiltersSpecified;
                 CurrentCoverageEvent.useDefaultResultsLoc = CommandLineManager.instance.coverageResultsPath.Length == 0;
@@ -94,12 +96,15 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
             }
             else
             {
-                CurrentCoverageEvent.autogenerate = CommandLineManager.instance.generateBadgeReport || CommandLineManager.instance.generateHTMLReport || CoveragePreferences.instance.GetBool("AutoGenerateReport", true);
+                CurrentCoverageEvent.autogenerate = CommandLineManager.instance.generateBadgeReport || CommandLineManager.instance.generateHTMLReport || CommandLineManager.instance.generateAdditionalReports || CoveragePreferences.instance.GetBool("AutoGenerateReport", true);
+                CurrentCoverageEvent.autoOpenReport = CoveragePreferences.instance.GetBool("OpenReportWhenGenerated", true);
                 CurrentCoverageEvent.createBadges = CommandLineManager.instance.generateBadgeReport || CoveragePreferences.instance.GetBool("GenerateBadge", true);
                 CurrentCoverageEvent.generateHistory = CommandLineManager.instance.generateHTMLReportHistory || CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
                 CurrentCoverageEvent.generateHTMLReport = CommandLineManager.instance.generateHTMLReport || CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
                 CurrentCoverageEvent.generateMetrics = CommandLineManager.instance.generateAdditionalMetrics || CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
                 CurrentCoverageEvent.generateTestReferences = CommandLineManager.instance.generateTestReferences || CoveragePreferences.instance.GetBool("GenerateTestReferences", false);
+                CurrentCoverageEvent.generateAdditionalReports = CommandLineManager.instance.generateAdditionalReports || CoveragePreferences.instance.GetBool("GenerateAdditionalReports", false);
+                CurrentCoverageEvent.dontClear = CommandLineManager.instance.dontClear;
                 CurrentCoverageEvent.usePathReplacePatterns = CommandLineManager.instance.pathReplacingSpecified;
                 CurrentCoverageEvent.useSourcePaths = CommandLineManager.instance.sourcePathsSpecified;
                 CurrentCoverageEvent.usePathFiltersFromFile = CommandLineManager.instance.pathFiltersFromFileSpecified;

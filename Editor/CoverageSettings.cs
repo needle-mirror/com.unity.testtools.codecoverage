@@ -20,7 +20,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         public string historyPathFromCommandLine;
         public string historyFolderPath;
         public string overrideIncludeAssemblies;
-        public bool overrideGenerateReport = false;
+        public bool overrideGenerateHTMLReport = false;
         public bool hasPersistentRunData = true;
         public bool resetCoverageData = true;
         public bool revealReportInFinder = true;

@@ -71,7 +71,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
             else
             {
-                return m_HasIncludePaths ? m_IncludePaths.Any(f => f.IsMatch(name)) : true;
+                return !m_HasIncludePaths || m_IncludePaths.Any(f => f.IsMatch(name));
             }
         }
 

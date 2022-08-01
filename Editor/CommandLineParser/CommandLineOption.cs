@@ -5,7 +5,7 @@ namespace UnityEditor.TestTools.CodeCoverage.CommandLineParser
 {
     internal class CommandLineOption : ICommandLineOption
     {
-        Action<string> m_ArgAction;
+        readonly Action<string> m_ArgAction;
 
         public CommandLineOption(string argName, Action action)
         {
@@ -36,7 +36,7 @@ namespace UnityEditor.TestTools.CodeCoverage.CommandLineParser
         {
             if (string.IsNullOrEmpty(value))
             {
-                return null;
+                return new string[] { };
             }
 
             return value.Split(';').ToArray();

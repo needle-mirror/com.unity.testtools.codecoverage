@@ -12,7 +12,7 @@ namespace UnityEditor.TestTools.CodeCoverage
     class IncludedAssembliesTreeView : TreeView
     {
         string m_AssembliesToInclude;
-        CodeCoverageWindow m_Parent;
+        readonly CodeCoverageWindow m_Parent;
         const float kCheckBoxWidth = 42f;
 
         public float Width { get; set; } = 100f;

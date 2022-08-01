@@ -16,7 +16,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_CoverageSettings = coverageSettings;
         }
 
-        public virtual void WriteCoverageSession(bool atRoot)
+        public virtual void WriteCoverageSession(CoverageReportType reportType)
         {
 #if UNITY_2020_1_OR_NEWER
             if (Compilation.CompilationPipeline.codeOptimization == Compilation.CodeOptimization.Release)
@@ -38,7 +38,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
 #endif
 #if BURST_INSTALLED
-            if (EditorPrefs.GetBool("BurstCompilation", true) && !CommandLineManager.instance.burstDisabled)
+            if (EditorPrefs.GetBool("BurstCompilation", false) && !CommandLineManager.instance.burstDisabled)
             {
                 ResultsLogger.Log(ResultID.Warning_BurstCompilationEnabled);
             }
@@ -85,7 +85,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         protected string GetNextFullFilePath()
         {
-            int nextFileIndex = m_CoverageSettings.hasPersistentRunData ? CoverageRunData.instance.GetNextFileIndex() : 0;
+            int nextFileIndex = m_CoverageSettings.hasPersistentRunData ? CoverageUtils.GetNumberOfFilesInFolder(m_CoverageSettings.resultsFolderPath, "*.xml", SearchOption.TopDirectoryOnly) : 0;
             string fullFilePath = m_CoverageSettings.resultsFilePath + "_" + nextFileIndex.ToString("D4") + "." + m_CoverageSettings.resultsFileExtension;
             return fullFilePath;
         }

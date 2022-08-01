@@ -15,35 +15,35 @@ namespace UnityEditor.TestTools.CodeCoverage
     internal class CodeCoverageWindow : EditorWindow
     {
         private bool m_EnableCodeCoverage;
+#if !UNITY_2019_3_OR_NEWER
         private bool m_HasLatestScriptingRuntime;
+#endif
         private string m_CodeCoveragePath;
         private string m_CodeCoverageHistoryPath;
+        private FolderDropDownMenu m_ResultsFolderDropDownMenu;
+        private FolderDropDownMenu m_HistoryFolderDropDownMenu;
         private CoverageFormat m_CodeCoverageFormat;
         private bool m_IncludeHistoryInReport;
         private string m_AssembliesToInclude;
         private int m_AssembliesToIncludeLength;
         private string m_PathsToInclude;
         private string m_PathsToExclude;
-        private PathsToAddHandler m_AddPathsToIncludeHandler;
-        private PathsToAddHandler m_AddPathsToExcludeHandler;
-        private PathsToRemoveDropDownMenu m_RemovePathsToIncludeDropDownMenu;
-        private PathsToRemoveDropDownMenu m_RemovePathsToExcludeDropDownMenu;
+        private PathToAddDropDownMenu m_AddPathToIncludeDropDownMenu;
+        private PathToAddDropDownMenu m_AddPathToExcludeDropDownMenu;
 
         private CoverageReportGenerator m_ReportGenerator;
         private bool m_GenerateHTMLReport;
+        private bool m_GenerateAdditionalReports;
         private bool m_GenerateBadge;
         private bool m_GenerateAdditionalMetrics;
         private bool m_GenerateTestReferences;
         private bool m_AutoGenerateReport;
+        private bool m_OpenReportWhenGenerated;
 
         private CoverageSettings m_CoverageSettings;
 
-        private bool m_DoRepaint;
-        private bool m_IncludeWarnings;
-        private static readonly Vector2 s_WindowMinSizeNormal = new Vector2(445, 435);
+        private static readonly Vector2 s_WindowMinSizeNormal = new Vector2(445, 65);
 
-        private float m_WarningsAddedAccumulativeHeight = 0;
-        private float m_WarningsAddedAccumulativeHeightLast = 0;
         private bool m_LoseFocus = false; 
 
         private bool m_GenerateReport = false;
@@ -62,13 +62,22 @@ namespace UnityEditor.TestTools.CodeCoverage
         private readonly string kDisablingCodeCoverageMessage = L10n.Tr("Disabling Code Coverage will not take effect until Unity is restarted.");
         private readonly string kCodeOptimizationMessage = L10n.Tr("Code Coverage requires Code Optimization to be set to debug mode in order to obtain accurate coverage information.");
         private readonly string kBurstCompilationOnMessage = L10n.Tr("Code Coverage requires Burst Compilation to be disabled in order to obtain accurate coverage information.");
-        private readonly string kSelectCoverageDirectoryMessage = L10n.Tr("Select the Code Coverage directory");
+        private readonly string kSelectCoverageDirectoryMessage = L10n.Tr("Select the Coverage results directory");
         private readonly string kSelectCoverageHistoryDirectoryMessage = L10n.Tr("Select the Coverage Report history directory");
-        private readonly string kClearDataMessage = L10n.Tr("Are you sure you would like to clear the Coverage data from previous test runs or from previous Coverage Recording sessions? Note that you cannot undo this action.");
+        private readonly string kClearDataMessage = L10n.Tr("Are you sure you would like to clear the Coverage results from previous test runs or from previous Coverage Recording sessions? Note that you cannot undo this action.");
         private readonly string kClearHistoryMessage = L10n.Tr("Are you sure you would like to clear the coverage report history? Note that you cannot undo this action.");
         private readonly string kNoAssembliesSelectedMessage = L10n.Tr("Make sure you have included at least one assembly.");
         private readonly string kSettingOverriddenMessage = L10n.Tr("{0} is overridden by the {1} command line argument.");
         private readonly string kSettingsOverriddenMessage = L10n.Tr("{0} are overridden by the {1} command line argument.");
+
+        private readonly string[] kVerbosityLevelLabels = new string[]
+        {
+            "Verbose",
+            "Info",
+            "Warning",
+            "Error",
+            "Off"
+        };
 
         private void Update()
         {
@@ -135,48 +144,44 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
         }
 
-        class Styles
+        static class Styles
         {
             static bool s_Initialized;
 
             public static readonly GUIContent SwitchToDebugCodeOptimizationButton = EditorGUIUtility.TrTextContent("Switch to debug mode");
             public static readonly GUIContent SwitchBurstCompilationOffButton = EditorGUIUtility.TrTextContent("Disable Burst Compilation");
-            public static readonly GUIContent CodeCoverageResultsLocationLabel = EditorGUIUtility.TrTextContent("Results Location", "Click the Browse button to specify the folder where the coverage results and report will be saved to. The default location is the Project's folder.");
-            public static readonly GUIContent CodeCoverageHistoryLocationLabel = EditorGUIUtility.TrTextContent("History Location", "Click the Browse button to specify the folder where the coverage report history will be saved to. The default location is the Project's folder.");
+            public static readonly GUIContent CodeCoverageResultsLocationLabel = EditorGUIUtility.TrTextContent("Results Location", "Specify the folder where the coverage results and report are saved to. The default location is the Project's folder.\n\nClick the dropdown to open the containing folder, change the location or reset to the default location.");
+            public static readonly GUIContent CodeCoverageHistoryLocationLabel = EditorGUIUtility.TrTextContent("Report History Location", "Specify the folder where the coverage report history is saved to. The default location is the Project's folder.\n\nClick the dropdown to open the containing folder, change the location or reset to the default location.");
+            public static readonly GUIContent ResultsFolderButton = EditorGUIUtility.TrIconContent(EditorIcons.FolderOpened, "Specify the folder where the coverage results and report are saved to.\n\nClick this to open the containing folder, change the location or reset to the default location.");
+            public static readonly GUIContent HistoryFolderButton = EditorGUIUtility.TrIconContent(EditorIcons.FolderOpened, "Specify the folder where the coverage report history is saved to.\n\nClick this to open the containing folder, change the location or reset to the default location.");
             public static readonly GUIContent CoverageSettingsLabel = EditorGUIUtility.TrTextContent("Settings");
             public static readonly GUIContent CoverageReportOptionsLabel = EditorGUIUtility.TrTextContent("Report Options");
             public static readonly GUIContent EnableCodeCoverageLabel = EditorGUIUtility.TrTextContent("Enable Code Coverage", "Check this to enable Code Coverage. This is required in order to generate Coverage data and reports. Note that Code Coverage can affect the Editor performance.");
             public static readonly GUIContent CodeCoverageFormat = EditorGUIUtility.TrTextContent("Coverage Format", "The Code Coverage format used when saving the results.");
             public static readonly GUIContent GenerateAdditionalMetricsLabel = EditorGUIUtility.TrTextContent("Additional Metrics", "Check this to generate and include additional metrics in the HTML report. These currently include Cyclomatic Complexity and Crap Score calculations for each method.");
-            public static readonly GUIContent CoverageHistoryLabel = EditorGUIUtility.TrTextContent("History", "Check this to generate and include the coverage history in the HTML report.");
+            public static readonly GUIContent CoverageHistoryLabel = EditorGUIUtility.TrTextContent("Report History", "Check this to generate and include the coverage history in the HTML report.");
             public static readonly GUIContent AssembliesToIncludeLabel = EditorGUIUtility.TrTextContent("Included Assemblies", "Specify the assemblies that will be included in the coverage results.\n\nClick the dropdown to view and select or deselect the assemblies.");
-            public static GUIContent AssembliesToIncludeDropdownLabel = EditorGUIUtility.TrTextContent("<this will contain a list of the assemblies>", "<this will contain a list of the assemblies>");
+            public static readonly GUIContent AssembliesToIncludeDropdownLabel = EditorGUIUtility.TrTextContent("<this will contain a list of the assemblies>", "<this will contain a list of the assemblies>");
             public static readonly GUIContent AssembliesToIncludeEmptyDropdownLabel = EditorGUIUtility.TrTextContent(" Select", "Click this to view and select or deselect the assemblies.");
-            public static readonly GUIContent PathsToIncludeLabel = EditorGUIUtility.TrTextContent("Included Paths", "Specify the paths that will be included in the coverage results.  All folders and files are included if the list is empty. Globbing can be used to filter the paths.\n\nClick Add Folder to add folders or Add File to add files.");
-            public static readonly GUIContent PathsToExcludeLabel = EditorGUIUtility.TrTextContent("Excluded Paths", "Specify the paths that will be excluded from the coverage results. Globbing can be used to filter the paths.\n\nClick Add Folder to add folders or Add File to add files.");
-            public static readonly GUIContent PathsToIncludeAddFolderLabel = EditorGUIUtility.TrTextContent("Add Folder", "Click this to add folders that will be included in the coverage results.");
-            public static readonly GUIContent PathsToIncludeAddFileLabel = EditorGUIUtility.TrTextContent("Add File", "Click this to add files that will be included in the coverage results.");
-            public static readonly GUIContent PathsToIncludeRemoveLabel = EditorGUIUtility.TrTextContent("Remove", "Click this to remove entries in the list.");
-            public static readonly GUIContent PathsToExcludeAddFolderLabel = EditorGUIUtility.TrTextContent("Add Folder", "Click this to add folders that will be excluded from the coverage results.");
-            public static readonly GUIContent PathsToExcludeAddFileLabel = EditorGUIUtility.TrTextContent("Add File", "Click this to add files that will be excluded from the coverage results.");
-            public static readonly GUIContent PathsToExcludeRemoveLabel = EditorGUIUtility.TrTextContent("Remove", "Click this to remove entries in the list.");
-            public static readonly GUIContent BrowseButtonLabel = EditorGUIUtility.TrTextContent("Browse", "Click this to specify the folder where the coverage results and report will be saved to.");
-            public static readonly GUIContent GenerateHTMLReportLabel = EditorGUIUtility.TrTextContent("HTML Report", "Check this to generate an HTML version of the report.");
+            public static readonly GUIContent PathsToIncludeLabel = EditorGUIUtility.TrTextContent("Included Paths", "Click Add (+) to specify individual folders and files to include in coverage results. You can use globbing to filter the paths. If the list is empty, Unity includes all files in the Included Assemblies.\n\nTo remove an individual list entry, select the entry and then click Remove (-).");
+            public static readonly GUIContent PathsToExcludeLabel = EditorGUIUtility.TrTextContent("Excluded Paths", "Click Add (+) to specify individual folders and files to exclude from coverage results. You can use globbing to filter the paths.\n\nTo remove an individual list entry, select the entry and then click Remove (-).");
+            public static readonly GUIContent VerbosityLabel = EditorGUIUtility.TrTextContent("Log Verbosity Level", "Click the dropdown to set the verbosity level for the editor and console logs.\n\nVerbose: All logs\nInfo: Logs, Warnings and Errors\nWarning: Warnings and Errors\nError: Only Errors\nOff: No logs");
+            public static readonly GUIContent GenerateHTMLReportLabel = EditorGUIUtility.TrTextContent("HTML Report", "Check this to generate an HTML report.");
+            public static readonly GUIContent GenerateAdditionalReportsLabel = EditorGUIUtility.TrTextContent("Additional Reports", "Check this to generate SonarQube, Cobertura and LCOV reports.");
             public static readonly GUIContent GenerateBadgeReportLabel = EditorGUIUtility.TrTextContent("Summary Badges", "Check this to generate coverage summary badges in SVG and PNG format.");
-            public static readonly GUIContent GenerateTestRunnerReferencesLabel = EditorGUIUtility.TrTextContent("Test Runner References", "Check this to generate references to tests which allows viewing coverage per test. Note that this option affects Test Runner Coverage sessions only.");
+            public static readonly GUIContent GenerateTestRunnerReferencesLabel = EditorGUIUtility.TrTextContent("Test Runner References", "Check this to include test references to the generated coverage results and enable the 'Coverage by test methods' section in the HTML report, allowing you to see how each test contributes to the overall coverage.");
             public static readonly GUIContent AutoGenerateReportLabel = EditorGUIUtility.TrTextContent("Auto Generate Report", "Check this to generate the report automatically after the Test Runner has finished running the tests or the Coverage Recording session has completed.");
-            public static readonly GUIContent GenerateReportButtonLabel = EditorGUIUtility.TrTextContent("Generate from Last", "Generates a coverage report from the last set of tests that were run in the Test Runner or from the last Coverage Recording session.");
-            public static readonly GUIContent ClearCoverageButtonLabel = EditorGUIUtility.TrTextContent("Clear Data", "Clears the Coverage data from previous test runs or from previous Coverage Recording sessions, for the current project.");
+            public static readonly GUIContent OpenReportWhenGeneratedLabel = EditorGUIUtility.TrTextContent("Auto Open Report", "Check this to open the coverage report automatically after it has been generated.");
+            public static readonly GUIContent GenerateReportButtonLabel = EditorGUIUtility.TrTextContent("Generate Report", "Generates a coverage report from the last set of tests that were run in the Test Runner or from the last Coverage Recording session.");
+            public static readonly GUIContent ClearCoverageButtonLabel = EditorGUIUtility.TrTextContent("Clear Results", "Clears the Coverage results from previous test runs or from previous Coverage Recording sessions, for the current project.");
             public static readonly GUIContent ClearHistoryButtonLabel = EditorGUIUtility.TrTextContent("Clear History", "Clears the coverage report history.");
-            public static readonly GUIContent StartRecordingButtonLabel = EditorGUIUtility.TrTextContentWithIcon(" Start Recording", "Record coverage data.", "Record Off");
-            public static readonly GUIContent StopRecordingButtonLabel = EditorGUIUtility.TrTextContentWithIcon(" Stop Recording", "Stop recording coverage data.", "Record On");
-#if ICONBUTTON_SUPPORTED
-            public static readonly GUIContent HelpIcon = EditorGUIUtility.IconContent("_Help");
-#endif
+            public static readonly GUIContent StartRecordingButton = EditorGUIUtility.TrIconContent("Record Off", "Record coverage data.");
+            public static readonly GUIContent StopRecordingButton = EditorGUIUtility.TrIconContent("Record On", "Stop recording coverage data.");
+            public static readonly GUIContent PauseRecordingButton = EditorGUIUtility.TrIconContent("PauseButton", "Pause recording coverage data.");
+            public static readonly GUIContent UnpauseRecordingButton = EditorGUIUtility.TrIconContent("PlayButton", "Resume recording coverage data.");
+            public static readonly GUIContent HelpIcon = EditorGUIUtility.TrIconContent("_Help", "Open Reference for Code Coverage.");
 
-            public static readonly GUIStyle largeButton = "LargeButton";
-
-            public static GUIStyle settings;
+            public static readonly GUIStyle settings = new GUIStyle();
 
             public static void Init()
             {
@@ -185,14 +190,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                 s_Initialized = true;
 
-                settings = new GUIStyle()
-                {
-#if ICONBUTTON_SUPPORTED
-                    margin = new RectOffset(8, 4, 4, 4)
-#else
-                    margin = new RectOffset(8, 4, 18, 4)
-#endif
-                };
+                settings.margin = new RectOffset(8, 4, 10, 4);
             }
         }
 
@@ -204,9 +202,20 @@ namespace UnityEditor.TestTools.CodeCoverage
 #else
             TestRunnerWindow.ShowPlaymodeTestsRunnerWindowCodeBased();
 #endif
-            CodeCoverageWindow window = GetWindow<CodeCoverageWindow>(L10n.Tr("Code Coverage"), typeof(TestRunnerWindow));
-            window.minSize = s_WindowMinSizeNormal;
+            CodeCoverageWindow window = GetWindow<CodeCoverageWindow>(typeof(TestRunnerWindow));
             window.Show();
+        }
+
+        private void OnFocus()
+        {
+            Repaint();
+        }
+
+        private void ResetWindow()
+        {
+            CodeCoverageWindow window = GetWindow<CodeCoverageWindow>(typeof(TestRunnerWindow));
+            window.minSize = s_WindowMinSizeNormal;
+            window.titleContent = EditorGUIUtility.TrTextContentWithIcon(L10n.Tr("Code Coverage"), EditorIcons.CoverageWindow);
         }
 
         private void InitCodeCoverageWindow()
@@ -227,60 +236,34 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_AssembliesToIncludeLength = m_AssembliesToInclude.Length;
             m_PathsToInclude = CoveragePreferences.instance.GetStringForPaths("PathsToInclude", string.Empty);
             m_PathsToExclude = CoveragePreferences.instance.GetStringForPaths("PathsToExclude", string.Empty);
+            CodeCoverage.VerbosityLevel = (LogVerbosityLevel)CoveragePreferences.instance.GetInt("VerbosityLevel", 1);
             m_ReportGenerator = new CoverageReportGenerator();
             m_GenerateHTMLReport = CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
+            m_GenerateAdditionalReports = CoveragePreferences.instance.GetBool("GenerateAdditionalReports", false);
             m_GenerateBadge = CoveragePreferences.instance.GetBool("GenerateBadge", true);
             m_AutoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", true);
+            m_OpenReportWhenGenerated = CoveragePreferences.instance.GetBool("OpenReportWhenGenerated", true);
 
-            m_AddPathsToIncludeHandler = new PathsToAddHandler(this, PathFilterType.Include);
-            m_AddPathsToExcludeHandler = new PathsToAddHandler(this, PathFilterType.Exclude);
-            m_RemovePathsToIncludeDropDownMenu = new PathsToRemoveDropDownMenu(this, PathFilterType.Include);
-            m_RemovePathsToExcludeDropDownMenu = new PathsToRemoveDropDownMenu(this, PathFilterType.Exclude);
+            m_ResultsFolderDropDownMenu = new FolderDropDownMenu(this, FolderType.Results);
+            m_HistoryFolderDropDownMenu = new FolderDropDownMenu(this, FolderType.History);
+            m_AddPathToIncludeDropDownMenu = new PathToAddDropDownMenu(this, PathFilterType.Include);
+            m_AddPathToExcludeDropDownMenu = new PathToAddDropDownMenu(this, PathFilterType.Exclude);
             m_PathsToIncludeList = new List<string>(m_PathsToInclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-            m_PathsToIncludeReorderableList = new ReorderableList(m_PathsToIncludeList, typeof(String), true, false, false, false);
+            m_PathsToIncludeReorderableList = new ReorderableList(m_PathsToIncludeList, typeof(String), true, false, true, true);
             m_PathsToIncludeReorderableList.headerHeight = 0;
-            m_PathsToIncludeReorderableList.footerHeight = 0;
             m_PathsToExcludeList = new List<string>(m_PathsToExclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-            m_PathsToExcludeReorderableList = new ReorderableList(m_PathsToExcludeList, typeof(String), true, false, false, false);
+            m_PathsToExcludeReorderableList = new ReorderableList(m_PathsToExcludeList, typeof(String), true, false, true, true);
             m_PathsToExcludeReorderableList.headerHeight = 0;
-            m_PathsToExcludeReorderableList.footerHeight = 0;
 
             UpdateCoverageSettings();
-            RefreshCodeCoverageWindow();
 
             m_GenerateReport = false;
             m_StopRecording = false;
+
+            ResetWindow();
         }
 
-        private void RefreshCodeCoverageWindow()
-        {
-            UpdateWindowSize();
-            Repaint();
-        }
-
-        private void UpdateWindowSize()
-        {
-            minSize = MaxWindowSize;
-        }
-
-        private Vector2 MaxWindowSize
-        {
-            get
-            {
-                if (m_IncludeWarnings)
-                {
-                    Vector2 windowMinSizeWithWarnings = s_WindowMinSizeNormal;
-                    windowMinSizeWithWarnings.y += m_WarningsAddedAccumulativeHeight;
-                    return windowMinSizeWithWarnings;
-                }
-                else
-                {
-                    return s_WindowMinSizeNormal;
-                }
-            }
-        }
-
-        private void UpdateCoverageSettings()
+        void UpdateCoverageSettings()
         {
             if (m_CoverageSettings != null)
             {
@@ -311,11 +294,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             InitCodeCoverageWindow();
         }
 
-        private void OnFocus()
-        {
-            RefreshCodeCoverageWindow();
-        }
-
         public void OnGUI()
         {
             Styles.Init();
@@ -324,29 +302,36 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             GUILayout.BeginVertical();
 
+            float toolbarHeight = 0;
+#if !UNITY_2019_3_OR_NEWER
+            using (new EditorGUI.DisabledScope(!m_HasLatestScriptingRuntime))
+#endif
+            {
+                toolbarHeight = DrawToolbar();
+            }
+
             // Window scrollbar
-            float maxHeight = Mathf.Max(position.height, MaxWindowSize.y);
-            m_WindowScrollPosition = GUILayout.BeginScrollView(m_WindowScrollPosition, GUILayout.Height(maxHeight));
+            float maxHeight = Mathf.Max(position.height, 0) - toolbarHeight;
+            m_WindowScrollPosition = EditorGUILayout.BeginScrollView(m_WindowScrollPosition, GUILayout.Height(maxHeight));
 
             GUILayout.BeginVertical(Styles.settings);
 
-#if ICONBUTTON_SUPPORTED
-            DrawTopBarGUI();
-#endif
-            ResetIncludeWarnings();
-
+#if !UNITY_2019_3_OR_NEWER
             CheckScriptingRuntimeVersion();
+#endif
             CheckCoverageEnabled();
+#if UNITY_2020_1_OR_NEWER
             CheckCodeOptimization();
+#endif
+#if BURST_INSTALLED
             CheckBurstCompilation();
+#endif
 
+#if !UNITY_2019_3_OR_NEWER
             using (new EditorGUI.DisabledScope(!m_HasLatestScriptingRuntime))
+#endif
             {
-                DrawCodeCoverageLocation();
-                DrawCodeCoverageHistoryLocation();
-
                 // Draw Settings
-                GUILayout.Space(10);
                 EditorGUILayout.LabelField(Styles.CoverageSettingsLabel, EditorStyles.boldLabel);
                 using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning))
                 {
@@ -360,18 +345,102 @@ namespace UnityEditor.TestTools.CodeCoverage
                 {
                     DrawCoverageReportOptions();
                 }
-
-                DrawFooterButtons();
             }
 
             GUILayout.EndVertical();
 
-            HandleWarningsRepaint();
-
-            GUILayout.EndScrollView();
+            EditorGUILayout.EndScrollView();
             GUILayout.EndVertical();
 
             HandleFocusRepaint();
+        }
+
+        float DrawToolbar()
+        {
+            GUILayout.BeginHorizontal(EditorStyles.toolbar);
+
+            GUILayout.Space(10);
+
+            // Coverage Recording button
+            bool isRunning = CoverageRunData.instance.isRunning;
+            bool isRecording = CoverageRunData.instance.isRecording;
+            bool isRecordingPaused = CoverageRunData.instance.isRecordingPaused;
+
+            using (new EditorGUI.DisabledScope((isRunning && !isRecording) || m_StopRecording || m_AssembliesToIncludeLength == 0 || !Coverage.enabled || m_EnableCodeCoverage != Coverage.enabled || EditorApplication.isCompiling))
+            {
+                if (EditorGUILayout.DropdownButton(isRecording ? Styles.StopRecordingButton : Styles.StartRecordingButton, FocusType.Keyboard, EditorStyles.toolbarButton))
+                {
+                    if (isRecording)
+                    {
+                        m_StopRecording = true;
+                    }
+                    else
+                    {
+                        CodeCoverage.StartRecordingInternal();
+                    }
+                }
+            }
+
+            using (new EditorGUI.DisabledScope(!isRecording || m_StopRecording || m_AssembliesToIncludeLength == 0 || !Coverage.enabled || m_EnableCodeCoverage != Coverage.enabled || EditorApplication.isCompiling))
+            {
+                if (EditorGUILayout.DropdownButton(isRecordingPaused ? Styles.UnpauseRecordingButton : Styles.PauseRecordingButton, FocusType.Keyboard, EditorStyles.toolbarButton))
+                {
+                    if (isRecordingPaused)
+                    {
+                        CodeCoverage.UnpauseRecordingInternal();
+                    }
+                    else
+                    {
+                        CodeCoverage.PauseRecordingInternal();
+                    }
+                }
+            }
+
+            using (new EditorGUI.DisabledScope((!m_GenerateHTMLReport && !m_GenerateBadge && !m_GenerateAdditionalReports) || !DoesResultsRootFolderExist() || CoverageRunData.instance.isRunning || m_GenerateReport || m_AssembliesToIncludeLength == 0 || !Coverage.enabled || m_EnableCodeCoverage != Coverage.enabled || EditorApplication.isCompiling))
+            {
+                if (EditorGUILayout.DropdownButton(Styles.GenerateReportButtonLabel, FocusType.Keyboard, EditorStyles.toolbarButton))
+                {
+                    m_GenerateReport = true;
+                }
+            }
+
+            GUILayout.FlexibleSpace();
+
+            using (new EditorGUI.DisabledScope(!DoesResultsRootFolderExist() || CoverageRunData.instance.isRunning))
+            {
+                if (EditorGUILayout.DropdownButton(Styles.ClearCoverageButtonLabel, FocusType.Keyboard, EditorStyles.toolbarButton))
+                {
+                    ClearResultsRootFolderIfExists();
+                }
+            }
+
+            using (new EditorGUI.DisabledScope(!DoesReportHistoryExist() || CoverageRunData.instance.isRunning))
+            {
+                if (EditorGUILayout.DropdownButton(Styles.ClearHistoryButtonLabel, FocusType.Keyboard, EditorStyles.toolbarButton))
+                {
+                    ClearReportHistoryFolderIfExists();
+                }
+            }
+
+            DrawHelpIcon();
+
+            GUILayout.EndHorizontal();
+
+            return EditorStyles.toolbar.fixedHeight;
+        }
+
+        void DrawHelpIcon()
+        {
+            if (GUILayout.Button(Styles.HelpIcon, EditorStyles.toolbarButton))
+            {
+                PackageManager.PackageInfo packageInfo = PackageManager.PackageInfo.FindForAssetPath("Packages/com.unity.testtools.codecoverage");
+                if (packageInfo != null)
+                {
+                    string shortVersion = packageInfo.version.Substring(0, packageInfo.version.IndexOf('.', packageInfo.version.IndexOf('.') + 1));
+                    string documentationUrl = $"https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@{shortVersion}";
+                    Application.OpenURL(documentationUrl);
+                }
+            }
         }
 
         void HandleFocusRepaint()
@@ -393,48 +462,18 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
         }
 
-        void ResetIncludeWarnings()
-        {
-            m_WarningsAddedAccumulativeHeightLast = m_WarningsAddedAccumulativeHeight;
-            m_WarningsAddedAccumulativeHeight = 0;
-            m_IncludeWarnings = false;
-        }
-
-        void HandleWarningsRepaint()
-        {
-            if (m_WarningsAddedAccumulativeHeight != m_WarningsAddedAccumulativeHeightLast)
-            {
-                m_DoRepaint = true;
-            }
-
-            if (m_WarningsAddedAccumulativeHeight > 0)
-            {
-                m_IncludeWarnings = true;
-            }
-
-            if (m_DoRepaint)
-            {
-                RefreshCodeCoverageWindow();
-                m_DoRepaint = false;
-            }
-        }
-
+#if !UNITY_2019_3_OR_NEWER
         void CheckScriptingRuntimeVersion()
         {
-#if UNITY_2019_3_OR_NEWER
-            m_HasLatestScriptingRuntime = true;
-#else
             m_HasLatestScriptingRuntime = PlayerSettings.scriptingRuntimeVersion == ScriptingRuntimeVersion.Latest;
-#endif
 
             if (!m_HasLatestScriptingRuntime)
             {
                 EditorGUILayout.HelpBox(kLatestScriptingRuntimeMessage, MessageType.Warning);
                 GUILayout.Space(5);
-
-                m_WarningsAddedAccumulativeHeight += 45;
             }
         }
+#endif
 
         void CheckCoverageEnabled()
         {
@@ -445,9 +484,9 @@ namespace UnityEditor.TestTools.CodeCoverage
 #endif
         }
 
+#if UNITY_2020_1_OR_NEWER
         void CheckCodeOptimization()
         {
-#if UNITY_2020_1_OR_NEWER
             if (Compilation.CompilationPipeline.codeOptimization == Compilation.CodeOptimization.Release)
             {
                 EditorGUILayout.HelpBox(kCodeOptimizationMessage, MessageType.Warning);
@@ -459,20 +498,18 @@ namespace UnityEditor.TestTools.CodeCoverage
                         CoverageAnalytics.instance.CurrentCoverageEvent.switchToDebugMode = true;
                         Compilation.CompilationPipeline.codeOptimization = Compilation.CodeOptimization.Debug;
                         EditorPrefs.SetBool("ScriptDebugInfoEnabled", true);
-                        HandleWarningsRepaint();
                     }
                 }
 
                 GUILayout.Space(5);
-                m_WarningsAddedAccumulativeHeight += 65;
             }
-#endif
         }
+#endif
 
+#if BURST_INSTALLED
         void CheckBurstCompilation()
         {
-#if BURST_INSTALLED
-            if (EditorPrefs.GetBool("BurstCompilation", true))
+            if (EditorPrefs.GetBool("BurstCompilation", false))
             {
                 EditorGUILayout.HelpBox(kBurstCompilationOnMessage, MessageType.Warning);
 
@@ -480,54 +517,20 @@ namespace UnityEditor.TestTools.CodeCoverage
                 {
                     CoverageAnalytics.instance.CurrentCoverageEvent.switchBurstOff = true;
                     EditorApplication.ExecuteMenuItem("Jobs/Burst/Enable Compilation");
-                    HandleWarningsRepaint();
                 }
 
                 GUILayout.Space(5);
-                m_WarningsAddedAccumulativeHeight += 65;
             }
-#endif
         }
+#endif
 
         void CheckIfIncludedAssembliesIsEmpty()
         {
             if (m_AssembliesToIncludeLength == 0)
             {
                 EditorGUILayout.HelpBox(kNoAssembliesSelectedMessage, MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
             }
         }
-
-#if ICONBUTTON_SUPPORTED
-        void DrawHelpGUI()
-        {
-            var iconSize = EditorStyles.iconButton.CalcSize(Styles.HelpIcon);
-
-            var rect = GUILayoutUtility.GetRect(iconSize.x, iconSize.y);
-
-            if (GUI.Button(rect, Styles.HelpIcon, EditorStyles.iconButton))
-            {
-                PackageManager.PackageInfo packageInfo = PackageManager.PackageInfo.FindForAssetPath("Packages/com.unity.testtools.codecoverage");
-                if (packageInfo != null)
-                {
-                    string shortVersion = packageInfo.version.Substring(0, packageInfo.version.IndexOf('.', packageInfo.version.IndexOf('.') + 1));
-                    string documentationUrl = $"https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@{shortVersion}";
-                    Help.ShowHelpPage(documentationUrl);
-                }
-            }
-        }
-
-        void DrawTopBarGUI()
-        {
-            GUILayout.BeginHorizontal();
-
-            GUILayout.FlexibleSpace();
-
-            DrawHelpGUI();
-
-            GUILayout.EndHorizontal();
-        }
-#endif
 
         void DrawCodeCoverageLocation()
         {
@@ -548,22 +551,10 @@ namespace UnityEditor.TestTools.CodeCoverage
                     SetDefaultCoverageLocation();
                 }
 
-                Vector2 buttonSize = EditorStyles.miniButton.CalcSize(Styles.BrowseButtonLabel);
-                if (EditorGUILayout.DropdownButton(Styles.BrowseButtonLabel, FocusType.Keyboard, EditorStyles.miniButton, GUILayout.MaxWidth(buttonSize.x)))
+                Rect btnPosition = GUILayoutUtility.GetRect(Styles.ResultsFolderButton, EditorStyles.miniPullDown, GUILayout.MaxWidth(38));
+                if (EditorGUI.DropdownButton(btnPosition, Styles.ResultsFolderButton, FocusType.Keyboard, EditorStyles.miniPullDown))
                 {
-                    string candidate = CoverageUtils.BrowseForDir(m_CodeCoveragePath, kSelectCoverageDirectoryMessage);
-                    if (CoverageUtils.IsValidFolder(candidate))
-                    {
-                        m_CodeCoveragePath = candidate;
-                        CoveragePreferences.instance.SetStringForPaths("Path", m_CodeCoveragePath);
-
-                        UpdateCoverageSettings();
-                        m_LoseFocus = true;
-                    }
-#if UNITY_EDITOR_OSX
-                    //After returning from a native dialog on OSX GUILayout gets into a corrupt state, stop rendering UI for this frame.
-                    GUIUtility.ExitGUI();
-#endif
+                    m_ResultsFolderDropDownMenu.Show(btnPosition, m_CodeCoveragePath, kSelectCoverageDirectoryMessage);
                 }
             }
 
@@ -572,7 +563,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (settingPassedInCmdLine)
             {
                 EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Results Location", "-coverageResultsPath"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
             }
         }
 
@@ -595,22 +585,10 @@ namespace UnityEditor.TestTools.CodeCoverage
                     SetDefaultCoverageHistoryLocation();
                 }
 
-                Vector2 buttonSize = EditorStyles.miniButton.CalcSize(Styles.BrowseButtonLabel);
-                if (EditorGUILayout.DropdownButton(Styles.BrowseButtonLabel, FocusType.Keyboard, EditorStyles.miniButton, GUILayout.MaxWidth(buttonSize.x)))
+                Rect btnPosition = GUILayoutUtility.GetRect(Styles.HistoryFolderButton, EditorStyles.miniPullDown, GUILayout.MaxWidth(38));
+                if (EditorGUI.DropdownButton(btnPosition, Styles.HistoryFolderButton, FocusType.Keyboard, EditorStyles.miniPullDown))
                 {
-                    string candidate = CoverageUtils.BrowseForDir(m_CodeCoverageHistoryPath, kSelectCoverageHistoryDirectoryMessage);
-                    if (CoverageUtils.IsValidFolder(candidate))
-                    {
-                        m_CodeCoverageHistoryPath = candidate;
-                        CoveragePreferences.instance.SetStringForPaths("HistoryPath", m_CodeCoverageHistoryPath);
-
-                        UpdateCoverageSettings();
-                        m_LoseFocus = true;
-                    }
-#if UNITY_EDITOR_OSX
-                    //After returning from a native dialog on OSX GUILayout gets into a corrupt state, stop rendering UI for this frame.
-                    GUIUtility.ExitGUI();
-#endif
+                    m_HistoryFolderDropDownMenu.Show(btnPosition, m_CodeCoverageHistoryPath, kSelectCoverageHistoryDirectoryMessage);
                 }
             }
 
@@ -619,7 +597,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (settingPassedInCmdLine)
             {
                 EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "History Location", "-coverageHistoryPath"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
             }
         }
 
@@ -651,7 +628,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (settingPassedInCmdLine)
             {
                 EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Included Assemblies", "-coverageOptions: assemblyFilters"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
             }
         }
 
@@ -668,7 +644,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (settingPassedInCmdLine)
             {
                 EditorGUILayout.HelpBox(string.Format(kSettingsOverriddenMessage, "Included/Excluded Paths", "-coverageOptions: pathFilters/pathFiltersFromFile"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
             }
         }
 
@@ -685,6 +660,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             m_PathsToIncludeReorderableList.drawElementCallback = DrawPathsToIncludeListItem;
             m_PathsToIncludeReorderableList.onChangedCallback = (rl) => { PathsToInclude = string.Join(",", rl.list as List<string>); };
+            m_PathsToIncludeReorderableList.onAddDropdownCallback = (rect, rl) => { m_AddPathToIncludeDropDownMenu.Show(rect, m_PathsToInclude); };
             m_PathsToIncludeReorderableList.DoLayoutList();
 
             if (EditorGUI.EndChangeCheck())
@@ -692,46 +668,9 @@ namespace UnityEditor.TestTools.CodeCoverage
                 OnPathsListChange(m_PathsToIncludeReorderableList, PathFilterType.Include);
             }
 
-            GUILayout.Space(2);
             GUILayout.EndVertical();
 
             GUILayout.Space(2);
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-
-            Vector2 buttonSize = EditorStyles.miniButton.CalcSize(Styles.PathsToIncludeAddFolderLabel);
-            Rect btnPosition = GUILayoutUtility.GetRect(Styles.PathsToIncludeAddFolderLabel, EditorStyles.miniButton, GUILayout.MaxWidth(buttonSize.x));
-
-            if (EditorGUI.DropdownButton(btnPosition, Styles.PathsToIncludeAddFolderLabel, FocusType.Keyboard, EditorStyles.miniButton))
-            {
-                CoverageAnalytics.instance.CurrentCoverageEvent.selectAddFolder_IncludedPaths = true;
-                m_AddPathsToIncludeHandler.BrowseForDir(m_PathsToInclude);
-            }
-
-            GUILayout.Space(3);
-
-            buttonSize = EditorStyles.miniButton.CalcSize(Styles.PathsToIncludeAddFileLabel);
-            btnPosition = GUILayoutUtility.GetRect(Styles.PathsToIncludeAddFileLabel, EditorStyles.miniButton, GUILayout.MaxWidth(buttonSize.x));
-
-            if (EditorGUI.DropdownButton(btnPosition, Styles.PathsToIncludeAddFileLabel, FocusType.Keyboard, EditorStyles.miniButton))
-            {
-                CoverageAnalytics.instance.CurrentCoverageEvent.selectAddFile_IncludedPaths = true;
-                m_AddPathsToIncludeHandler.BrowseForFile(m_PathsToInclude);
-            }
-
-            buttonSize = EditorStyles.miniPullDown.CalcSize(Styles.PathsToIncludeRemoveLabel);
-            btnPosition = GUILayoutUtility.GetRect(Styles.PathsToIncludeRemoveLabel, EditorStyles.miniPullDown, GUILayout.MaxWidth(buttonSize.x));
-
-            using (new EditorGUI.DisabledScope(m_PathsToIncludeList.Count == 0))
-            {
-                if (EditorGUI.DropdownButton(btnPosition, Styles.PathsToIncludeRemoveLabel, FocusType.Keyboard, EditorStyles.miniPullDown))
-                {
-                    RemovePathsToIncludeListItem(btnPosition);
-                }
-            }
-
             GUILayout.EndHorizontal();
         }
 
@@ -748,6 +687,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             m_PathsToExcludeReorderableList.drawElementCallback = DrawPathsToExcludeListItem;
             m_PathsToExcludeReorderableList.onChangedCallback = (rl) => { PathsToExclude = string.Join(",", rl.list as List<string>); };
+            m_PathsToExcludeReorderableList.onAddDropdownCallback = (rect, rl) => { m_AddPathToExcludeDropDownMenu.Show(rect, m_PathsToExclude); };
             m_PathsToExcludeReorderableList.DoLayoutList();
 
             if (EditorGUI.EndChangeCheck())
@@ -755,46 +695,9 @@ namespace UnityEditor.TestTools.CodeCoverage
                 OnPathsListChange(m_PathsToExcludeReorderableList, PathFilterType.Exclude);
             }
 
-            GUILayout.Space(2);
             GUILayout.EndVertical();
 
             GUILayout.Space(2);
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-
-            Vector2 buttonSize = EditorStyles.miniButton.CalcSize(Styles.PathsToExcludeAddFolderLabel);
-            Rect btnPosition = GUILayoutUtility.GetRect(Styles.PathsToExcludeAddFolderLabel, EditorStyles.miniButton, GUILayout.MaxWidth(buttonSize.x));
-
-            if (EditorGUI.DropdownButton(btnPosition, Styles.PathsToExcludeAddFolderLabel, FocusType.Keyboard, EditorStyles.miniButton))
-            {
-                CoverageAnalytics.instance.CurrentCoverageEvent.selectAddFolder_ExcludedPaths = true;
-                m_AddPathsToExcludeHandler.BrowseForDir(m_PathsToExclude);
-            }
-
-            GUILayout.Space(3);
-
-            buttonSize = EditorStyles.miniButton.CalcSize(Styles.PathsToExcludeAddFileLabel);
-            btnPosition = GUILayoutUtility.GetRect(Styles.PathsToExcludeAddFileLabel, EditorStyles.miniButton, GUILayout.MaxWidth(buttonSize.x));
-
-            if (EditorGUI.DropdownButton(btnPosition, Styles.PathsToExcludeAddFileLabel, FocusType.Keyboard, EditorStyles.miniButton))
-            {
-                CoverageAnalytics.instance.CurrentCoverageEvent.selectAddFile_ExcludedPaths = true;
-                m_AddPathsToExcludeHandler.BrowseForFile(m_PathsToExclude);
-            }
-
-            buttonSize = EditorStyles.miniPullDown.CalcSize(Styles.PathsToExcludeRemoveLabel);
-            btnPosition = GUILayoutUtility.GetRect(Styles.PathsToExcludeRemoveLabel, EditorStyles.miniPullDown, GUILayout.MaxWidth(buttonSize.x));
-
-            using (new EditorGUI.DisabledScope(m_PathsToExcludeList.Count == 0))
-            {
-                if (EditorGUI.DropdownButton(btnPosition, Styles.PathsToExcludeRemoveLabel, FocusType.Keyboard, EditorStyles.miniPullDown))
-                {
-                    RemovePathsToExcludeListItem(btnPosition);
-                }
-            }
-
             GUILayout.EndHorizontal();
         }
 
@@ -805,11 +708,6 @@ namespace UnityEditor.TestTools.CodeCoverage
                 string pathToInclude = m_PathsToIncludeList[index].Replace(",", "");
                 m_PathsToIncludeReorderableList.list[index] = EditorGUI.TextField(rect, pathToInclude);
             }
-        }
-
-        void RemovePathsToIncludeListItem(Rect rect)
-        {
-            m_RemovePathsToIncludeDropDownMenu.Show(rect, m_PathsToIncludeReorderableList, m_PathsToIncludeList);
         }
 
         void DrawPathsToExcludeListItem(Rect rect, int index, bool isActive, bool isFocused)
@@ -845,17 +743,11 @@ namespace UnityEditor.TestTools.CodeCoverage
                 PathsToExclude = string.Join(",", pathsList);
         }
 
-        void RemovePathsToExcludeListItem(Rect rect)
-        {
-            m_RemovePathsToExcludeDropDownMenu.Show(rect, m_PathsToExcludeReorderableList, m_PathsToExcludeList);
-        }
-
         void CheckIfCodeCoverageIsDisabled()
         {
             if (!m_EnableCodeCoverage)
             {
                 EditorGUILayout.HelpBox(kCodeCoverageDisabledNoRestartMessage, MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
             }
 #if !UNITY_2020_2_OR_NEWER
             if (m_EnableCodeCoverage != Coverage.enabled)
@@ -864,10 +756,33 @@ namespace UnityEditor.TestTools.CodeCoverage
                     EditorGUILayout.HelpBox(kEnablingCodeCoverageMessage, MessageType.Warning);
                 else
                     EditorGUILayout.HelpBox(kDisablingCodeCoverageMessage, MessageType.Warning);
-
-                m_WarningsAddedAccumulativeHeight += 40;
             }
 #endif
+        }
+
+        void DrawVerbosityLevel()
+        {
+            GUILayout.Space(2);
+
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.verbosityLevelSpecified;
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
+            {
+                EditorGUI.BeginChangeCheck();
+                int verbosityLevel = EditorGUILayout.Popup(Styles.VerbosityLabel, (int)CodeCoverage.VerbosityLevel, kVerbosityLevelLabels);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    CoveragePreferences.instance.SetInt("VerbosityLevel", verbosityLevel);
+                    CodeCoverage.VerbosityLevel = (LogVerbosityLevel)verbosityLevel;
+                }
+            }
+
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Logs Verbosity Level", "-coverageOptions: verbosity"), MessageType.Warning);
+            }
+
+            
         }
 
         void DrawEnableCoverageCheckbox()
@@ -893,7 +808,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (settingPassedInCmdLine)
             {
                 EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Enable Code Coverage", "-enableCodeCoverage"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
             }
             else
             {
@@ -918,7 +832,26 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (settingPassedInCmdLine)
             {
                 EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "HTML Report", "-coverageOptions: generateHtmlReport"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
+            }
+        }
+
+        void DrawGenerateAdditionalReportsCheckbox()
+        {
+            bool settingPassedInCmdLine = CommandLineManager.instance.runFromCommandLine && CommandLineManager.instance.generateAdditionalReports;
+
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
+            {
+                EditorGUI.BeginChangeCheck();
+                m_GenerateAdditionalReports = EditorGUILayout.Toggle(Styles.GenerateAdditionalReportsLabel, m_GenerateAdditionalReports, GUILayout.ExpandWidth(false));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    CoveragePreferences.instance.SetBool("GenerateAdditionalReports", m_GenerateAdditionalReports);
+                }
+            }
+
+            if (settingPassedInCmdLine)
+            {
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Additional Reports", "-coverageOptions: generateAdditionalReports"), MessageType.Warning);
             }
         }
 
@@ -939,7 +872,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (settingPassedInCmdLine)
             {
                 EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Summary Badges", "-coverageOptions: generateBadgeReport"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
             }
         }
 
@@ -950,7 +882,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning || settingPassedInCmdLine))
             {
                 EditorGUI.BeginChangeCheck();
-                using (new EditorGUI.DisabledScope(!m_GenerateHTMLReport && !m_GenerateBadge))
+                using (new EditorGUI.DisabledScope(!m_GenerateHTMLReport && !m_GenerateAdditionalReports))
                 {
                     m_IncludeHistoryInReport = EditorGUILayout.Toggle(Styles.CoverageHistoryLabel, m_IncludeHistoryInReport, GUILayout.ExpandWidth(false));
                     if (EditorGUI.EndChangeCheck())
@@ -962,8 +894,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (settingPassedInCmdLine)
             {
-                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "History", "-coverageOptions: generateHtmlReportHistory"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Report History", "-coverageOptions: generateHtmlReportHistory"), MessageType.Warning);
             }
         }
 
@@ -984,7 +915,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (settingPassedInCmdLine)
             {
                 EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Additional Metrics", "-coverageOptions: generateAdditionalMetrics"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
             }
         }
 
@@ -1005,7 +935,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (settingPassedInCmdLine)
             {
                 EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Test Runner References", "-coverageOptions: generateTestReferences"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
             }
         }
 
@@ -1026,85 +955,43 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (settingPassedInCmdLine)
             {
                 EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Auto Generate Report", CommandLineManager.instance.generateHTMLReport ? "-coverageOptions: generateHtmlReport" : "-coverageOptions: generateBadgeReport"), MessageType.Warning);
-                m_WarningsAddedAccumulativeHeight += 40;
+            }
+        }
+
+        void DrawOpenReportWhenGeneratedCheckbox()
+        {
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning))
+            {
+                EditorGUI.BeginChangeCheck();
+                m_OpenReportWhenGenerated = EditorGUILayout.Toggle(Styles.OpenReportWhenGeneratedLabel, m_OpenReportWhenGenerated, GUILayout.ExpandWidth(false));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    CoveragePreferences.instance.SetBool("OpenReportWhenGenerated", m_OpenReportWhenGenerated);
+                }
             }
         }
 
         void DrawCoverageSettings()
         {
             DrawEnableCoverageCheckbox();
+            DrawCodeCoverageLocation();
+            DrawCodeCoverageHistoryLocation();
             DrawIncludedAssemblies();
             CheckIfIncludedAssembliesIsEmpty();
             DrawPathFiltering();
+            DrawVerbosityLevel();
         }
 
         void DrawCoverageReportOptions()
         {
             DrawGenerateHTMLReportCheckbox();
-            DrawGenerateBadgeReportCheckbox();
+            DrawGenerateAdditionalReportsCheckbox();
             DrawGenerateHistoryCheckbox();
+            DrawGenerateBadgeReportCheckbox();
             DrawGenerateAdditionalMetricsCheckbox();
             DrawGenerateTestRunnerReferencesCheckbox();
             DrawAutoGenerateReportCheckbox();
-        }
-
-        void DrawFooterButtons()
-        {
-            GUILayout.Space(15);
-
-            GUILayout.BeginHorizontal();
-
-            Vector2 buttonSize = EditorStyles.miniButton.CalcSize(Styles.ClearCoverageButtonLabel);
-            using (new EditorGUI.DisabledScope(!DoesResultsRootFolderExist() || CoverageRunData.instance.isRunning))
-            {
-                if (EditorGUILayout.DropdownButton(Styles.ClearCoverageButtonLabel, FocusType.Keyboard, Styles.largeButton, GUILayout.MaxWidth(buttonSize.x)))
-                {
-                    ClearResultsRootFolderIfExists();
-                }
-            }
-
-            buttonSize = EditorStyles.miniButton.CalcSize(Styles.ClearHistoryButtonLabel);
-
-            using (new EditorGUI.DisabledScope(!DoesReportHistoryExist() || CoverageRunData.instance.isRunning))
-            {
-                if (EditorGUILayout.DropdownButton(Styles.ClearHistoryButtonLabel, FocusType.Keyboard, Styles.largeButton, GUILayout.MaxWidth(buttonSize.x)))
-                {
-                    ClearReportHistoryFolderIfExists();
-                }
-            }
-
-            GUILayout.FlexibleSpace();
-
-            buttonSize = EditorStyles.miniButton.CalcSize(Styles.GenerateReportButtonLabel);
-            using (new EditorGUI.DisabledScope((!m_GenerateHTMLReport && !m_GenerateBadge) || !DoesResultsRootFolderExist() || CoverageRunData.instance.isRunning || m_GenerateReport || m_AssembliesToIncludeLength == 0 || !Coverage.enabled || m_EnableCodeCoverage != Coverage.enabled || EditorApplication.isCompiling))
-            {
-                if (EditorGUILayout.DropdownButton(Styles.GenerateReportButtonLabel, FocusType.Keyboard, Styles.largeButton, GUILayout.MaxWidth(buttonSize.x)))
-                {
-                    m_GenerateReport = true;
-                }
-            }
-
-            // Coverage Recording
-            bool isRunning = CoverageRunData.instance.isRunning;
-            bool isRecording = CoverageRunData.instance.isRecording;
-
-            using (new EditorGUI.DisabledScope((isRunning && !isRecording) || m_StopRecording || m_AssembliesToIncludeLength == 0 || !Coverage.enabled || m_EnableCodeCoverage != Coverage.enabled || EditorApplication.isCompiling))
-            {
-                buttonSize = EditorStyles.miniButton.CalcSize(Styles.StartRecordingButtonLabel);
-                if (EditorGUILayout.DropdownButton(isRecording ? Styles.StopRecordingButtonLabel : Styles.StartRecordingButtonLabel, FocusType.Keyboard, Styles.largeButton, GUILayout.MaxWidth(buttonSize.x)))
-                {
-                    if (isRecording)
-                    {
-                        m_StopRecording = true;
-                    }
-                    else
-                    {
-                        CodeCoverage.StartRecordingInternal();
-                    }
-                }
-            }
-
-            GUILayout.EndHorizontal();
+            DrawOpenReportWhenGeneratedCheckbox(); 
         }
 
         private bool DoesResultsRootFolderExist()
@@ -1113,14 +1000,14 @@ namespace UnityEditor.TestTools.CodeCoverage
                 return false;
 
             string resultsRootFolderPath = m_CoverageSettings.resultsRootFolderPath;
-            return CoverageUtils.DoesFolderExistAndNotEmpty(resultsRootFolderPath);
+            return CoverageUtils.GetNumberOfFilesInFolder(resultsRootFolderPath, "*.xml", SearchOption.AllDirectories) > 0;
         }
 
         private void ClearResultsRootFolderIfExists()
         {
             CoverageAnalytics.instance.CurrentCoverageEvent.clearData = true;
 
-            if (!EditorUtility.DisplayDialog(L10n.Tr("Clear Data"), kClearDataMessage, L10n.Tr("Clear"), L10n.Tr("Cancel")))
+            if (!EditorUtility.DisplayDialog(L10n.Tr("Clear Results"), kClearDataMessage, L10n.Tr("Clear"), L10n.Tr("Cancel")))
                 return;
 
             if (m_CoverageSettings == null)
@@ -1131,6 +1018,16 @@ namespace UnityEditor.TestTools.CodeCoverage
             CoverageUtils.ClearFolderIfExists(resultsRootFolderPath, "*.xml");
         }
 
+        public string GetResultsRootFolder()
+        {
+            if (m_CoverageSettings == null)
+                return m_CodeCoveragePath;
+
+            string resultsRootFolderPath = m_CoverageSettings.resultsRootFolderPath;
+            CoverageUtils.EnsureFolderExists(resultsRootFolderPath);
+            return resultsRootFolderPath;
+        }
+
         private bool DoesReportHistoryExist()
         {
             if (m_CoverageSettings == null)
@@ -1138,15 +1035,14 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string historyFolderPath = m_CoverageSettings.historyFolderPath;
 
-            return CoverageUtils.DoesFolderExistAndNotEmpty(historyFolderPath) && 
-                   CoverageUtils.GetNumberOfFilesInFolder(historyFolderPath, "????-??-??_??-??-??_CoverageHistory.xml", SearchOption.TopDirectoryOnly) > 0;
+            return CoverageUtils.GetNumberOfFilesInFolder(historyFolderPath, "????-??-??_??-??-??_CoverageHistory.xml", SearchOption.TopDirectoryOnly) > 0;
         }
 
         private void ClearReportHistoryFolderIfExists()
         {
             CoverageAnalytics.instance.CurrentCoverageEvent.clearHistory = true;
 
-            if (!EditorUtility.DisplayDialog(L10n.Tr("Clear History"), kClearHistoryMessage, L10n.Tr("Clear"), L10n.Tr("Cancel")))
+            if (!EditorUtility.DisplayDialog(L10n.Tr("Clear Report History"), kClearHistoryMessage, L10n.Tr("Clear"), L10n.Tr("Cancel")))
                 return;
 
             if (m_CoverageSettings == null)
@@ -1157,26 +1053,44 @@ namespace UnityEditor.TestTools.CodeCoverage
             CoverageUtils.ClearFolderIfExists(historyFolderPath, "????-??-??_??-??-??_CoverageHistory.xml");
         }
 
-        void SetDefaultCoverageLocation()
+        public string GetReportHistoryFolder()
         {
-            string projectPath = CoverageUtils.GetProjectPath();
-            if (CoverageUtils.IsValidFolder(projectPath))
+            if (m_CoverageSettings == null)
+                return m_CodeCoverageHistoryPath;
+
+            string historyFolderPath = m_CoverageSettings.historyFolderPath;
+            CoverageUtils.EnsureFolderExists(historyFolderPath);
+            return historyFolderPath;
+        }
+
+        public void SetCoverageLocation(string folderPath)
+        {
+            if (CoverageUtils.IsValidFolder(folderPath))
             {
-                m_CodeCoveragePath = projectPath;
+                m_CodeCoveragePath = folderPath;
                 CoveragePreferences.instance.SetStringForPaths("Path", m_CodeCoveragePath);
                 UpdateCoverageSettings();
             }
         }
 
-        void SetDefaultCoverageHistoryLocation()
+        public void SetDefaultCoverageLocation()
         {
-            string projectPath = CoverageUtils.GetProjectPath();
-            if (CoverageUtils.IsValidFolder(projectPath))
+            SetCoverageLocation(CoverageUtils.GetProjectPath());
+        }
+
+        public void SetCoverageHistoryLocation(string folderPath)
+        {
+            if (CoverageUtils.IsValidFolder(folderPath))
             {
-                m_CodeCoverageHistoryPath = projectPath;
+                m_CodeCoverageHistoryPath = folderPath;
                 CoveragePreferences.instance.SetStringForPaths("HistoryPath", m_CodeCoverageHistoryPath);
                 UpdateCoverageSettings();
             }
+        }
+
+        public void SetDefaultCoverageHistoryLocation()
+        {
+            SetCoverageHistoryLocation(CoverageUtils.GetProjectPath());
         }
     }
 }

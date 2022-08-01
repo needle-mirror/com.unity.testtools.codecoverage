@@ -110,6 +110,11 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             CoverageAnalytics.instance.CurrentCoverageEvent.useAPI_PauseRec = true;
 
+            PauseRecordingInternal();
+        }
+
+        internal static void PauseRecordingInternal()
+        {
             bool isRunning = CoverageRunData.instance.isRunning;
 
             if (isRunning)
@@ -135,6 +140,11 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             CoverageAnalytics.instance.CurrentCoverageEvent.useAPI_UnpauseRec = true;
 
+            UnpauseRecordingInternal();
+        }
+
+        internal static void UnpauseRecordingInternal()
+        {
             bool isRunning = CoverageRunData.instance.isRunning;
 
             if (isRunning)

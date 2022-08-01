@@ -6,14 +6,14 @@ To start open the **Worksheet** pdf file located under the *Code Coverage Tutori
 
 ### Tutorial tasks
 
-- What is Code Coverage ​(2 min)
-- Install the Code Coverage package ​(2 min)
-- Enable Code Coverage ​(1 min)
-- Understanding the game code: Shoot() function​ (4 min)
-- Generate a Coverage report from PlayMode tests​ (3 min)
-- Add Weapon tests to improve coverage​ (3 min)
-- Add a test for the LaserController​ (4 min)
-- Clear the coverage data​ (1 min)
-- Generate a Coverage report using Coverage Recording​ (4 min)
+- What is Code Coverage (2 min)
+- Install the Code Coverage package (2 min)
+- Enable Code Coverage (1 min)
+- Understanding the game code: Shoot() function (4 min)
+- Generate a Coverage report from PlayMode tests (3 min)
+- Add Weapon tests to improve coverage (3 min)
+- Add a test for the LaserController (4 min)
+- Clear the coverage data (1 min)
+- Generate a Coverage report using Coverage Recording (4 min)
 
-For questions and feedback please reach out to us in the dedicated Code Coverage package ​forum thread: https://forum.unity.com/threads/code-coverage-package.777542
+For questions and feedback please visit the [Testing & Automation](https://forum.unity.com/forums/testing-automation.211) forum section to browse current conversations or start a new thread. Please use the **code coverage** tag.

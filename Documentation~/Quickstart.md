@@ -1,6 +1,6 @@
-# Quickstart - Code Coverage Tutorial
+# Quickstart - Code Coverage tutorial
 
-The Quickstart guide will give you an insight into what Code Coverage is and how you can identify areas of your code that need more testing, even if you haven't written any automated tests. It takes about **30 minutes** to complete.
+The Quickstart guide will give you an insight into what Code Coverage is and how you can identify areas of your code that need more testing, even if you haven't written any automated tests. It takes about 30 minutes to complete.
 
 ![Code Coverage Workshop](images/quickguide/asteroids.png)
 
@@ -19,7 +19,7 @@ The Quickstart guide will give you an insight into what Code Coverage is and how
 
 **Note:** Estimated times are shown for each task to give you a better understanding of the time required. These times are rough guidelines - it is fine to take as much or as little time as needed.
 
-## 1. What is Code Coverage <sub>*(2 min)*</sub>
+## 1. What is Code Coverage <sub>(2 min)</sub>
 
 [Code Coverage](https://en.wikipedia.org/wiki/Code_coverage) is a measure of how much of your code has been executed. It is normally associated with automated tests, but you can gather coverage data in Unity at any time when the Editor is running.
 
@@ -29,26 +29,26 @@ It is much easier to accidentally introduce bugs into code that is not covered b
 
 Additionally, the Code Coverage package offers a [Coverage Recording](CoverageRecording.md) feature which allows capturing coverage data on demand, in case you do not have tests in your project or doing manual testing.
 
-## 2. Install the Code Coverage package <sub>*(2 min)*</sub>
-*Skip this task if the package is already installed.*
+## 2. Install the Code Coverage package <sub>(2 min)</sub>
+**Note:** Skip this task if the package is already installed.
 
 Use the [Unity Package Manager](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest) to find and install the **Code Coverage** package.
 
 ![Install Code Coverage package](images/install_package.png)
 
-Alternatively, use the Add(+) dropdown and select **Add package from git URL...** or **Add package by name...** and type `com.unity.testtools.codecoverage`.
+Alternatively, use the **Add (+)** dropdown and select **Add package from git URL...** or **Add package by name...** and type `com.unity.testtools.codecoverage`.
 
 ![Install Code Coverage package from URL](images/install_package_url.png)
 
 To verify that Code Coverage has been installed correctly, open the Code Coverage window (go to **Window** > **Analysis** > **Code Coverage**). If you don't see the **Code Coverage** menu item, then Code Coverage did not install correctly.
 
-## 3. Install the Asteroids sample project <sub>*(1 min)*</sub>
+## 3. Install the Asteroids sample project <sub>(1 min)</sub>
 
 1. In the [Unity Package Manager](https://docs.unity3d.com/Packages/com.unity.package-manager-ui@latest) (**Window** > **Package Manager**) select the **Code Coverage** package, if not already selected.
 2. Find the **Samples** section in the package details (right hand side) and select **Import** next to **Code Coverage Tutorial**.<br/><br/>
 ![Import Asteroids project](images/quickguide/import_sample.png)
 
-## 4. Enable Code Coverage <sub>*(1 min)*</sub>
+## 4. Enable Code Coverage <sub>(1 min)</sub>
 
 To enable Code Coverage open the [Code Coverage window](CodeCoverageWindow.md) (go to **Window** > **Analysis** > **Code Coverage**) and select **Enable Code Coverage** if not already selected, to be able to generate Coverage data and reports.
 
@@ -56,7 +56,7 @@ To enable Code Coverage open the [Code Coverage window](CodeCoverageWindow.md) (
 
 **Note:** Enabling Code Coverage adds some overhead to the editor and can affect the performance.
 
-## 5. Understanding the game code: Shoot() function <sub>*(4 min)*</sub>
+## 5. Understanding the game code: Shoot() function <sub>(4 min)</sub>
 
 1. Go to `Asteroids/Scenes` in Project View and open the **Asteroids** scene.<br/>
 This is located in `Assets/Samples/Code Coverage/<version>/Code Coverage Tutorial`.
@@ -75,7 +75,7 @@ If Weapon is Basic, the Prefabs/Weapons/Projectile prefab is instantiated
 If Weapon is Laser, the Prefabs/Weapons/Laser prefab is instantiated
 ```
 
-## 6. Generate a Coverage report from PlayMode tests <sub>*(3 min)*</sub>
+## 6. Generate a Coverage report from PlayMode tests <sub>(3 min)</sub>
 
 1. Open the [Code Coverage window](CodeCoverageWindow.md) (go to **Window** > **Analysis** > **Code Coverage**).<br/><br/>
 ![Code Coverage Window](images/quickguide/coverage_window.png)
@@ -89,7 +89,7 @@ If Weapon is Laser, the Prefabs/Weapons/Laser prefab is instantiated
 `Unity.TestTools.CodeCoverage.Sample.Asteroids.Tests` are selected.<br/><br/>
 ![Included Assemblies](images/quickguide/included_assemblies.png)
 
-4. Make sure **HTML Report**, **History** and **Auto Generate Report** are all checked.
+4. Make sure **HTML Report**, **Report History**, **Auto Generate Report** and **Auto Open Report** are all checked.
 ![Auto Generate Report](images/quickguide/auto_generate_report.png)
 
 5. Switch to the [Test Runner](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html?subfolder=/manual/workflow-run-test.html) window, select the **PlayMode** tab and hit **Run All** tests.<br/><br/>
@@ -105,7 +105,7 @@ You can sort the results by _Line coverage_.
 
 See also [How to interpret the results](HowToInterpretResults.md).
 
-## 7. Add Weapon tests to improve coverage <sub>*(3 min)*</sub>
+## 7. Add Weapon tests to improve coverage <sub>(3 min)</sub>
 
 1. Open the `Tests/WeaponTests.cs` script.
 
@@ -119,11 +119,11 @@ See also [How to interpret the results](HowToInterpretResults.md).
 
 ![Code Coverage Report](images/quickguide/report_tests_after.png)
 
-## 8. Add a test for the LaserController <sub>*(4 min)*</sub>
+## 8. Add a test for the LaserController <sub>(4 min)</sub>
 
 1. Open the `Tests/WeaponTests.cs` script.
 
-2. Go to the **\_18\_LaserFiresSuccessfully** test in _line 225_.
+2. Go to the **\_18\_LaserFiresSuccessfully** test in line 225.
 
 3. Uncomment and study the code.
 
@@ -140,29 +140,29 @@ See also [How to interpret the results](HowToInterpretResults.md).
 
 Complete the [Bonus Task](#11-bonus-task-sub5-8-minsub) at the end of the tutorial to get 100% coverage!
 
-## 9. Clear the coverage data <sub>*(1 min)*</sub>
+## 9. Clear the coverage data <sub>(1 min)</sub>
 
 1. Open the [Code Coverage window](CodeCoverageWindow.md) (go to **Window** > **Analysis** > **Code Coverage**).
 
-2. Select **Clear Data** and confirm.
+2. Select **Clear Results** and confirm.
 
 3. Select **Clear History** and confirm.
 
-## 10. Generate a Coverage report using Coverage Recording <sub>*(4 min)*</sub>
+## 10. Generate a Coverage report using Coverage Recording <sub>(4 min)</sub>
 
 1. Go to `Asteroids/Scenes` in Project View and open the **Asteroids** scene, if not opened already.
 
-2. Open the [Code Coverage window](CodeCoverageWindow.md). Make sure **HTML Report**, **History** and **Auto Generate Report** all are checked.<br/>
+2. Open the [Code Coverage window](CodeCoverageWindow.md). Make sure **HTML Report**, **Report History**, **Auto Generate Report** and **Auto Open Report** all are checked.<br/>
 ![Auto Generate Report](images/quickguide/auto_generate_report.png)
 
 3. Select **Start Recording**.<br/>
-![Start Recording](images/quickguide/start_recording.png)
+![Start Recording](images/coverage_recording/start_recording.png)
 
 4. Hit **Play** to play the game and **exit** PlayMode before you get **8000** points.
 ![Enter Play mode](images/quickguide/press_play.png)
 
 5. Select **Stop Recording**.<br/>
-![Stop Recording](images/quickguide/stop_recording.png)
+![Stop Recording](images/coverage_recording/stop_recording.png)
 
 6. A file viewer window will open up containing the coverage report. Select `index.htm`.
 
@@ -183,7 +183,7 @@ Complete the [Bonus Task](#11-bonus-task-sub5-8-minsub) at the end of the tutori
 See also [How to interpret the results](HowToInterpretResults.md).
 <br/><br/>
 
-## 11. Bonus task <sub>*(5-8 min)*</sub>
+## 11. Bonus task <sub>(5-8 min)</sub>
 
 Write a new test that checks that the laser gets destroyed after 2 seconds, which will also cover the rest of the code in **LaserController**.
 
@@ -196,6 +196,6 @@ Write a new test that checks that the laser gets destroyed after 2 seconds, whic
 
 <br/>
 
-### Well done for finishing the Code Coverage Tutorial!
+### Well done for finishing the Code Coverage tutorial!
 
-For questions and feedback please reach out to us in the dedicated Code Coverage package [forum thread](https://forum.unity.com/threads/code-coverage-package.777542/).
+For questions and feedback please visit the [Testing & Automation](https://forum.unity.com/forums/testing-automation.211/) forum section to browse current conversations or start a new thread. Please use the **code coverage** tag.

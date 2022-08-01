@@ -5,14 +5,14 @@ namespace UnityEditor.TestTools.CodeCoverage
 {
     class IncludedAssembliesPopupWindow : PopupWindowContent
     {
-        SearchField m_SearchField;
-        IncludedAssembliesTreeView m_TreeView;
+        readonly SearchField m_SearchField;
+        readonly IncludedAssembliesTreeView m_TreeView;
 
         const float kWindowHeight = 221;
 
         public float Width { get; set; }
 
-        class Styles
+        static class Styles
         {
             public static readonly GUIContent SelectLabel = EditorGUIUtility.TrTextContent("Select:");
             public static readonly GUIContent SelectAllButtonLabel = EditorGUIUtility.TrTextContent("All", "Click this to select and include all the assemblies in the project. This includes both the assemblies under the 'Assets' folder and packages.\n\nIf searching, it will apply only to the assemblies visible in the list.");

@@ -24,7 +24,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
         Log_ResultsSaved = 0,
         Log_ReportSaved = 1,
         Error_FailedReport = 2,
-        Error_FailedReportNoTests = 3,
+        Error_FailedReportNoCoverageResults = 3,
         Error_FailedReportNoAssemblies = 4,
         Assert_NullAssemblyTypes = 5,
         Warning_DebugCodeOptimization = 6,
@@ -43,6 +43,10 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
         Warning_StandaloneUnsupported = 19,
         Warning_UseProjectSettingsNonBatchmode = 20,
         Warning_FailedToExtractPathFiltersFromFile = 21,
+        Warning_FailedReportNullCoverageFilters = 22,
+        Log_VisitedResultsSaved = 23,
+        Warning_NoVisitedCoverageResultsSaved = 24,
+        Warning_NoVisitedCoverageResultsSavedRecordingPaused = 25,
     }
 
     internal static class ResultsLogger
@@ -51,21 +55,25 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
 
         static Dictionary<ResultID, ResultData> s_Results = new Dictionary<ResultID, ResultData>()
         {
-            { ResultID.Log_ResultsSaved, new ResultData(LogType.Log, "Code Coverage Results were saved in {0}") },
-            { ResultID.Log_ReportSaved, new ResultData(LogType.Log, "Code Coverage Report was generated in {0}") },
-            { ResultID.Error_FailedReport, new ResultData(LogType.Error, "Failed to generate Code Coverage Report.") },
-            { ResultID.Error_FailedReportNoTests, new ResultData(LogType.Error, "Failed to generate Code Coverage Report. Make sure you have run one or more tests before generating a report.") },
-            { ResultID.Error_FailedReportNoAssemblies, new ResultData(LogType.Error, "Failed to generate Code Coverage Report. Make sure you have included at least one assembly before generating a report.") },
+            { ResultID.Log_ResultsSaved, new ResultData(LogType.Log, "Code Coverage results for all sequence points were saved in {0}") },
+            { ResultID.Log_VisitedResultsSaved, new ResultData(LogType.Log, "Code Coverage results for visited sequence points were saved in {0}") },
+            { ResultID.Log_ReportSaved, new ResultData(LogType.Log, "Code Coverage Report was generated in {0}\nIncluded Assemblies: {1}\nExcluded Assemblies: {2}\nIncluded Paths: {3}\nExcluded Paths: {4}") },
+            { ResultID.Error_FailedReport, new ResultData(LogType.Error, "Failed to generate Code Coverage Report.\nIncluded Assemblies: {0}\nExcluded Assemblies: {1}\nIncluded Paths: {2}\nExcluded Paths: {3}") },
+            { ResultID.Error_FailedReportNoCoverageResults, new ResultData(LogType.Error, "Failed to generate Code Coverage Report. No code coverage results found.\nIncluded Assemblies: {0}\nExcluded Assemblies: {1}\nIncluded Paths: {2}\nExcluded Paths: {3}") },
+            { ResultID.Error_FailedReportNoAssemblies, new ResultData(LogType.Error, "Failed to generate Code Coverage Report. Make sure you have included at least one assembly before generating a report.\nIncluded Assemblies: {0}\nExcluded Assemblies: {1}\nIncluded Paths: {2}\nExcluded Paths: {3}") },
             { ResultID.Assert_NullAssemblyTypes, new ResultData(LogType.Assert, "assemblyTypes cannot be null") },
             { ResultID.Warning_DebugCodeOptimization, new ResultData(LogType.Warning, "Code Coverage requires Code Optimization to be set to debug mode in order to obtain accurate coverage information. Switch to debug mode in the Editor (bottom right corner, select the Bug icon > Switch to debug mode), using the CompilationPipeline api by setting 'CompilationPipeline.codeOptimization = CodeOptimization.Debug' or by passing '-debugCodeOptimization' to the command line in batchmode.") },
             { ResultID.Warning_AssemblyFiltersNotPrefixed, new ResultData(LogType.Warning, "'-coverageOptions assemblyFilters' argument {0} would not be applied as it is not prefixed with +/-.") },
             { ResultID.Warning_PathFiltersNotPrefixed, new ResultData(LogType.Warning, "'-coverageOptions pathFilters' argument {0} would not be applied as it is not prefixed with +/-.") },
             { ResultID.Warning_MultipleResultsPaths, new ResultData(LogType.Warning, "'-coverageResultsPath' has already been specified on the command-line. Keeping the original setting: '{0}'.") },
             { ResultID.Warning_MultipleHistoryPaths, new ResultData(LogType.Warning, "'-coverageHistoryPath' has already been specified on the command-line. Keeping the original setting: '{0}'.") },
-            { ResultID.Warning_NoCoverageResultsSaved, new ResultData(LogType.Warning, "No coverage results were saved.") },
+            { ResultID.Warning_NoCoverageResultsSaved, new ResultData(LogType.Warning, "Code coverage results for all sequence points were not saved.\nIncluded Assemblies: {0}\nExcluded Assemblies: {1}\nIncluded Paths: {2}\nExcluded Paths: {3}") },
+            { ResultID.Warning_NoVisitedCoverageResultsSaved, new ResultData(LogType.Warning, "Code coverage results were not saved. Visited sequence points not found. \nIncluded Assemblies: {0}\nExcluded Assemblies: {1}\nIncluded Paths: {2}\nExcluded Paths: {3}") },
+            { ResultID.Warning_NoVisitedCoverageResultsSavedRecordingPaused, new ResultData(LogType.Warning, "Code coverage results were not saved because coverage recording was paused. \nIncluded Assemblies: {0}\nExcluded Assemblies: {1}\nIncluded Paths: {2}\nExcluded Paths: {3}") },
             { ResultID.Warning_FailedToDeleteDir, new ResultData(LogType.Warning, "Failed to delete directory: {0}") },
             { ResultID.Warning_FailedToDeleteFile, new ResultData(LogType.Warning, "Failed to delete file: {0}") },
             { ResultID.Warning_FailedReportNullCoverageSettings, new ResultData(LogType.Warning, "Failed to generate Code Coverage Report. CoverageSettings was not set.") },
+            { ResultID.Warning_FailedReportNullCoverageFilters, new ResultData(LogType.Warning, "Failed to generate Code Coverage Report. Error parsing Coverage filtering.") },
             { ResultID.Warning_BurstCompilationEnabled, new ResultData(LogType.Warning, "Code Coverage requires Burst Compilation to be disabled in order to obtain accurate coverage information. To disable Burst Compilation uncheck Jobs > Burst > Enable Compilation or pass '-burst-disable-compilation' to the command line in batchmode.") },
             { ResultID.Warning_ExcludeAttributeAssembly, new ResultData(LogType.Warning, "Not able to detect custom attribute ExcludeFromCoverage in Assembly: {0}") },
             { ResultID.Warning_ExcludeAttributeClass, new ResultData(LogType.Warning, "Not able to detect custom attribute ExcludeFromCoverage in Class: {0}, Assembly: {1}") },
@@ -87,16 +95,10 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
 
             string message = string.Concat(
                 $"[{CoverageSettings.PackageName}] ",
-                extraParams != null ? string.Format(result.message, extraParams) : result.message);
+                extraParams.Length > 0 ? string.Format(result.message, extraParams) : result.message);
 
             switch (result.type)
             {
-                case LogType.Log:
-                    if(VerbosityLevel <= LogVerbosityLevel.Info)
-                        Debug.Log(message);
-
-                    CoverageAnalytics.instance.AddResult(resultId);
-                    break;
                 case LogType.Warning:
                     if (VerbosityLevel <= LogVerbosityLevel.Warning)
                         Debug.LogWarning(message);
@@ -111,13 +113,11 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
                     CoverageAnalytics.instance.SendCoverageEvent(false);
                     break;
                 case LogType.Assert:
-                    if (extraParams[0] != null && string.Equals(extraParams[0], "0"))
-                    {
-                        CoverageAnalytics.instance.AddResult(resultId);
-                        CoverageAnalytics.instance.SendCoverageEvent(false);
-                        Debug.Assert(false, message);
-                    }                      
+                    CoverageAnalytics.instance.AddResult(resultId);
+                    CoverageAnalytics.instance.SendCoverageEvent(false);
+                    Debug.Assert(false, message);                     
                     break;
+                case LogType.Log:
                 default:
                     if (VerbosityLevel <= LogVerbosityLevel.Info)
                         Debug.Log(message);
@@ -136,7 +136,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
 
             if (logLevel >= VerbosityLevel)
             {
-                message = string.Concat($"[{CoverageSettings.PackageName}] {message}");
+                message = string.Format($"[{CoverageSettings.PackageName}] {message}");
 
                 Console.WriteLine(message);
                 return true;

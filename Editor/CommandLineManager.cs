@@ -77,6 +77,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public bool generateAdditionalReports
+        {
+            get;
+            private set;
+        }
+
         public bool useProjectSettings
         {
             get;
@@ -84,6 +90,18 @@ namespace UnityEditor.TestTools.CodeCoverage
         }
 
         public bool generateRootEmptyReport
+        {
+            get;
+            private set;
+        }
+
+        public bool dontClear
+        {
+            get;
+            private set;
+        }
+
+        public bool verbosityLevelSpecified
         {
             get;
             private set;
@@ -162,7 +180,6 @@ namespace UnityEditor.TestTools.CodeCoverage
         }
 
         private string m_CoverageOptionsArg;
-        private string[] m_CoverageOptions;
         private string m_IncludeAssemblies;
         private string m_ExcludeAssemblies;
         private string m_IncludePaths;
@@ -180,8 +197,11 @@ namespace UnityEditor.TestTools.CodeCoverage
             generateHTMLReportHistory = false;
             generateHTMLReport = false;
             generateBadgeReport = false;
+            generateAdditionalReports = false;
             useProjectSettings = false;
             generateRootEmptyReport = false;
+            dontClear = false;
+            verbosityLevelSpecified = false;
             assemblyFiltersSpecified = false;
             pathFiltersSpecified = false;
             pathReplacingSpecified = false;
@@ -195,7 +215,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             burstDisabled = false;
 
             m_CoverageOptionsArg = string.Empty;
-            m_CoverageOptions = new string[] { };
             m_IncludeAssemblies = string.Empty;
             m_ExcludeAssemblies = string.Empty;
             m_IncludePaths = string.Empty;
@@ -303,9 +322,9 @@ namespace UnityEditor.TestTools.CodeCoverage
                 }
             }
 
-            m_CoverageOptions = options.ToArray();
+            string[] coverageOptions = options.ToArray();
 
-            foreach (string optionArgsStr in m_CoverageOptions)
+            foreach (string optionArgsStr in coverageOptions)
             {
                 if (optionArgsStr.Length == 0)
                     continue;
@@ -338,8 +357,16 @@ namespace UnityEditor.TestTools.CodeCoverage
                         generateBadgeReport = true;
                         break;
 
+                    case "GENERATEADDITIONALREPORTS":
+                        generateAdditionalReports = true;
+                        break;
+
                     case "GENERATEROOTEMPTYREPORT":
                         generateRootEmptyReport = true;
+                        break;
+
+                    case "DONTCLEAR":
+                        dontClear = true;
                         break;
 
                     case "GENERATETESTREFERENCES":
@@ -356,6 +383,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                     case "VERBOSITY":
                         if (optionArgs.Length > 0)
                         {
+                            verbosityLevelSpecified = true;
+
                             switch (optionArgs.ToUpperInvariant())
                             {
                                 case "VERBOSE":

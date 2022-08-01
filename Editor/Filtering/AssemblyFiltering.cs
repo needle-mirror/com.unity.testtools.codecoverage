@@ -29,6 +29,12 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
+        public string excludedAssembliesNoDefault
+        {
+            get;
+            private set;
+        }
+
         private Regex[] m_IncludeAssemblies;
         private Regex[] m_ExcludeAssemblies;
 
@@ -38,29 +44,18 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_ExcludeAssemblies = new Regex[] { };
         }
 
-        private string[] RemoveDefaultExcludedAssemblies(string[] excludeAssemblyFilters)
-        {
-            string[] defaultAssemblies = kDefaultExcludedAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            List<string> excludedAssemblies = excludeAssemblyFilters.ToList<string>();
-
-            foreach (string defaultAssembly in defaultAssemblies)
-            {
-                excludedAssemblies.Remove(defaultAssembly);
-            }
-
-            return excludedAssemblies.ToArray();
-        }
-
         public void Parse(string includeAssemblies, string excludeAssemblies)
         {
             includedAssemblies = includeAssemblies;
             excludedAssemblies = excludeAssemblies;
+            excludedAssembliesNoDefault = excludeAssemblies.Replace(kDefaultExcludedAssemblies, string.Empty);
 
             string[] includeAssemblyFilters = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
             string[] excludeAssemblyFilters = excludeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
+            string[] excludeAssemblyFiltersNoDefault = excludedAssembliesNoDefault.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
 
             CoverageAnalytics.instance.CurrentCoverageEvent.includedAssemblies = includeAssemblyFilters;
-            CoverageAnalytics.instance.CurrentCoverageEvent.excludedAssemblies = RemoveDefaultExcludedAssemblies(excludeAssemblyFilters);
+            CoverageAnalytics.instance.CurrentCoverageEvent.excludedAssemblies = excludeAssemblyFiltersNoDefault;
 
             m_IncludeAssemblies = includeAssemblyFilters
                 .Select(f => CreateFilterRegex(f))

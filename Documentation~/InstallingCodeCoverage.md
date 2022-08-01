@@ -8,7 +8,7 @@ Use the [Unity Package Manager](https://docs.unity3d.com/Packages/com.unity.pack
 
 ![Install Code Coverage package](images/install_package.png)
 
-Alternatively, use the Add(+) dropdown and select **Add package from git URL...** or **Add package by name...** and type `com.unity.testtools.codecoverage`.
+Alternatively, use the **Add (+)** dropdown and select **Add package from git URL...** or **Add package by name...** and type `com.unity.testtools.codecoverage`.
 
 ![Install Code Coverage package from URL](images/install_package_url.png)
 

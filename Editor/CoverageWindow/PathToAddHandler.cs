@@ -2,28 +2,21 @@
 using System;
 using UnityEngine;
 using UnityEditor.TestTools.CodeCoverage.Utils;
-using UnityEditor.TestTools.CodeCoverage.Analytics;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
-    internal class PathsToAddHandler
+    internal class PathToAddHandler
     {
         string m_PathsToFilter;
-        CodeCoverageWindow m_Parent;
-        PathFilterType m_PathFilterType;
+        readonly CodeCoverageWindow m_Parent;
+        readonly PathFilterType m_PathFilterType;
 
         private readonly string kSelectIncludedDirectoryMessage = L10n.Tr($"Select directory to include");
         private readonly string kSelectIncludedFileMessage = L10n.Tr("Select file to include");
         private readonly string kSelectExcludedDirectoryMessage = L10n.Tr($"Select directory to exclude");
         private readonly string kSelectExcludedFileMessage = L10n.Tr("Select file to exclude");
 
-        class Styles
-        {
-            public static readonly GUIContent PathsToFilterAddFolderLabel = EditorGUIUtility.TrTextContent("Add Folder");
-            public static readonly GUIContent PathsToFilterAddFileLabel = EditorGUIUtility.TrTextContent("Add File");
-        }
-
-        public PathsToAddHandler(CodeCoverageWindow parent, PathFilterType type)
+        public PathToAddHandler(CodeCoverageWindow parent, PathFilterType type)
         {
             m_Parent = parent;
             m_PathFilterType = type;

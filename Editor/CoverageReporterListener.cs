@@ -16,12 +16,9 @@ namespace UnityEditor.TestTools.CodeCoverage
         private CoverageReporterManager m_CoverageReporterManager;
         private bool m_IsConnectedToPlayer;
 
-        public CoverageReporterManager CoverageReporterManager
+        public void SetCoverageReporterManager(CoverageReporterManager manager)
         {
-            set
-            {
-                m_CoverageReporterManager = value;
-            }
+            m_CoverageReporterManager = manager;
         }
 
         public void RunStarted(ITestAdaptor testsToRun)
@@ -47,7 +44,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 coverageReporter.OnRunStarted(testsToRun);
         }
 
-        public void RunFinished(ITestResultAdaptor testResults)
+        public void RunFinished(ITestResultAdaptor result)
         {
             if (!Coverage.enabled)
                 return;
@@ -62,7 +59,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             ICoverageReporter coverageReporter = m_CoverageReporterManager.CoverageReporter;
             if (coverageReporter != null)
-                coverageReporter.OnRunFinished(testResults);
+                coverageReporter.OnRunFinished(result);
 
             m_CoverageReporterManager.GenerateReport();
         }
@@ -121,9 +118,9 @@ namespace UnityEditor.TestTools.CodeCoverage
     }
 
     [InitializeOnLoad]
-    internal class CoverageReporterStarter
+    internal static class CoverageReporterStarter
     {
-        public static CoverageReporterManager CoverageReporterManager;
+        public readonly static CoverageReporterManager CoverageReporterManager;
 
         static CoverageReporterStarter()
         {
@@ -160,13 +157,13 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             CoverageReporterManager = new CoverageReporterManager(coverageSettings);
 
-            listener.CoverageReporterManager = CoverageReporterManager;
+            listener.SetCoverageReporterManager(CoverageReporterManager);
 
             AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
             AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
 
             // Generate a report if running from the command line,
-            // generateHTMLReport or generateBadgeReport is passed to -coverageOptions
+            // generateHTMLReport or generateBadgeReport or generateAdditionalReports is passed to -coverageOptions
             // and -runTests has not been passed to the command line,
             if (CommandLineManager.instance.runFromCommandLine &&
                 CoverageReporterManager.ShouldAutoGenerateReport() &&

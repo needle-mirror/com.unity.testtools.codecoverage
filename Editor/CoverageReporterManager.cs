@@ -6,7 +6,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 {
     internal class CoverageReporterManager
     {
-        private CoverageSettings m_CoverageSettings = null;
+        private readonly CoverageSettings m_CoverageSettings = null;
         private ICoverageReporter m_CoverageReporter = null;
         CoverageReportGenerator m_ReportGenerator = null;
 
@@ -56,7 +56,9 @@ namespace UnityEditor.TestTools.CodeCoverage
             bool shouldAutoGenerateReport = false;
             bool cmdLineGenerateHTMLReport = CommandLineManager.instance.generateHTMLReport;
             bool cmdLineGenerateBadge = CommandLineManager.instance.generateBadgeReport;
+            bool cmdLineGenerateAdditionalReports = CommandLineManager.instance.generateAdditionalReports;
             bool generateHTMLReport = CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
+            bool generateAdditionalReports = CoveragePreferences.instance.GetBool("GenerateAdditionalReports", false);
             bool generateBadge = CoveragePreferences.instance.GetBool("GenerateBadge", true);
             bool autoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", false);
 
@@ -68,24 +70,26 @@ namespace UnityEditor.TestTools.CodeCoverage
                     {
                         shouldAutoGenerateReport =  cmdLineGenerateHTMLReport ||
                                                     cmdLineGenerateBadge ||
-                                                    (autoGenerateReport && (generateHTMLReport || generateBadge));
+                                                    cmdLineGenerateAdditionalReports ||
+                                                    (autoGenerateReport && (generateHTMLReport || generateBadge || generateAdditionalReports));
                     }
                     else
                     {
-                        shouldAutoGenerateReport = cmdLineGenerateHTMLReport || cmdLineGenerateBadge;
+                        shouldAutoGenerateReport = cmdLineGenerateHTMLReport || cmdLineGenerateBadge || cmdLineGenerateAdditionalReports;
                     }
                 }
                 else
                 {
                     shouldAutoGenerateReport =  cmdLineGenerateHTMLReport ||
                                                 cmdLineGenerateBadge ||
-                                                (autoGenerateReport && (generateHTMLReport || generateBadge));
+                                                cmdLineGenerateAdditionalReports ||
+                                                (autoGenerateReport && (generateHTMLReport || generateBadge || generateAdditionalReports));
                 }
             } 
             else
             {
                 autoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", true);
-                shouldAutoGenerateReport = autoGenerateReport && (generateHTMLReport || generateBadge);
+                shouldAutoGenerateReport = autoGenerateReport && (generateHTMLReport || generateBadge || generateAdditionalReports);
             }
 
             return shouldAutoGenerateReport;

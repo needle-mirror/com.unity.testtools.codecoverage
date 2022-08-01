@@ -11,9 +11,6 @@ namespace UnityEditor.TestTools.CodeCoverage
         private bool m_IsRunning = false;
 
         [SerializeField]
-        private int m_FileIndex = 0;
-
-        [SerializeField]
         private int m_TestRunCount = 0;
 
         [SerializeField]
@@ -35,7 +32,6 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             m_LastIgnoredSuite = string.Empty;
             m_IsRunning = true;
-            m_FileIndex = 0;
             m_TestRunCount = 0;
 
             if (setupEvents)
@@ -122,16 +118,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_ReportWasGenerated = success;
         }
 
-        public int GetNextFileIndex()
-        {
-            return m_FileIndex++;
-        }
-
-        public bool hasSingleFileCount
-        {
-            get { return m_FileIndex == 0; }
-        }
-
         public void IncrementTestRunCount()
         {
             m_TestRunCount++;
@@ -187,16 +173,6 @@ namespace UnityEditor.TestTools.CodeCoverage
         public bool reportWasGenerated
         {
             get { return m_CoverageRunDataImplementation.reportWasGenerated; }
-        }
-
-        public int GetNextFileIndex()
-        {
-            return m_CoverageRunDataImplementation.GetNextFileIndex();
-        }
-
-        public bool hasSingleFileCount
-        {
-            get { return m_CoverageRunDataImplementation.hasSingleFileCount; }
         }
 
         public void IncrementTestRunCount()

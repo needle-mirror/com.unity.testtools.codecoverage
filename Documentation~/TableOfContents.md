@@ -3,6 +3,7 @@
   * [Upgrade guide](upgrade-guide.md)
   * [Code Coverage package](index#code-coverage-package)
   * [Coverage HTML Report](index#coverage-html-report)
+  * [Other Reports](index#other-reports)
   * [Coverage Summary Badges](index#coverage-summary-badges)
 * [Quickstart](Quickstart)
   * [What is Code Coverage](Quickstart#1-what-is-code-coverage-sub2-minsub)

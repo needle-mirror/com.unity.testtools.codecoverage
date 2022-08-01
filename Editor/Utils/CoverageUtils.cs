@@ -212,60 +212,45 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
 
         public static int GetNumberOfFilesInFolder(string folderPath, string filePattern, SearchOption searchOption)
         {
-            if (folderPath == null)
-                return 0;
+            if (folderPath != null && Directory.Exists(folderPath))
+            {
+                string[] files = Directory.GetFiles(folderPath, filePattern, searchOption);
+                return files.Length;
+            }
 
-            string[] files = Directory.GetFiles(folderPath, filePattern, searchOption);
-            return files.Length;
+            return 0;
         }
 
         public static void ClearFolderIfExists(string folderPath, string filePattern)
         {
-            if (folderPath != null)
+            if (folderPath != null && Directory.Exists(folderPath))
             {
-                if (Directory.Exists(folderPath))
+                DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
+
+                foreach (FileInfo file in dirInfo.GetFiles(filePattern))
                 {
-                    DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
-
-                    foreach (FileInfo file in dirInfo.GetFiles(filePattern))
+                    try
                     {
-                        try
-                        {
-                            file.Delete();
-                        }
-                        catch (Exception)
-                        {
-                            ResultsLogger.Log(ResultID.Warning_FailedToDeleteFile, file.FullName);
-                        }
+                        file.Delete();
                     }
-
-                    foreach (DirectoryInfo dir in dirInfo.GetDirectories())
+                    catch (Exception)
                     {
-                        try
-                        {
-                            dir.Delete(true);
-                        }
-                        catch (Exception)
-                        {
-                            ResultsLogger.Log(ResultID.Warning_FailedToDeleteDir, dir.FullName);
-                        }
+                        ResultsLogger.Log(ResultID.Warning_FailedToDeleteFile, file.FullName);
                     }
                 }
-            } 
-        }
 
-        public static bool DoesFolderExistAndNotEmpty(string folderPath)
-        {
-            if (folderPath != null)
-            {
-                if (Directory.Exists(folderPath))
+                foreach (DirectoryInfo dir in dirInfo.GetDirectories())
                 {
-                    DirectoryInfo dirInfo = new DirectoryInfo(folderPath);
-                    return dirInfo.GetFiles().Length > 0 || dirInfo.GetDirectories().Length > 0;
+                    try
+                    {
+                        dir.Delete(true);
+                    }
+                    catch (Exception)
+                    {
+                        ResultsLogger.Log(ResultID.Warning_FailedToDeleteDir, dir.FullName);
+                    }
                 }
             }
-
-            return false;
         }
 
         public static bool IsValidFolder(string folderPath)
@@ -328,6 +313,19 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             if (startEndConstrains)
                 regex.Append("$");
             return regex.ToString();
+        }
+
+        public static string[] GetFilteringLogParams(AssemblyFiltering assemblyFiltering, PathFiltering pathFiltering, string[] otherParams = null)
+        {
+            string[] logParams = { assemblyFiltering != null && assemblyFiltering.includedAssemblies.Length > 0 ? assemblyFiltering.includedAssemblies : "<Not specified>",
+                    assemblyFiltering != null && assemblyFiltering.excludedAssembliesNoDefault.Length > 0 ? assemblyFiltering.excludedAssembliesNoDefault : "<Not specified>",
+                    pathFiltering != null && pathFiltering.includedPaths.Length > 0 ? pathFiltering.includedPaths : "<Not specified>",
+                    pathFiltering != null && pathFiltering.excludedPaths.Length > 0 ? pathFiltering.excludedPaths : "<Not specified>" };
+
+            if (otherParams != null && otherParams.Length > 0)
+                logParams = otherParams.Concat(logParams).ToArray();
+
+            return logParams;
         }
 
         [ExcludeFromCoverage]

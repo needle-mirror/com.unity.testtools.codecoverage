@@ -14,6 +14,21 @@ namespace UnityEditor.TestTools.CodeCoverage
     {
         public void Generate(CoverageSettings coverageSettings)
         {
+            CoverageReporterManager coverageReporterManager = CoverageReporterStarter.CoverageReporterManager;
+            AssemblyFiltering assemblyFiltering = null;
+            PathFiltering pathFiltering = null;
+            if (coverageReporterManager != null)
+            {
+                coverageReporterManager.CoverageReporter.GetReporterFilter().SetupFiltering();
+                assemblyFiltering = coverageReporterManager.CoverageReporter.GetReporterFilter().GetAssemblyFiltering();
+                pathFiltering = coverageReporterManager.CoverageReporter.GetReporterFilter().GetPathFiltering();
+            }
+                
+            if (assemblyFiltering == null || pathFiltering == null)
+            {
+                ResultsLogger.Log(ResultID.Warning_FailedReportNullCoverageFilters);
+            }
+
             CoverageRunData.instance.ReportGenerationStart();
 
             if (coverageSettings == null)
@@ -24,40 +39,33 @@ namespace UnityEditor.TestTools.CodeCoverage
                 return;
             }
 
-            string includeAssemblies = string.Empty;
-            if (CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings)
-                includeAssemblies = CommandLineManager.instance.assemblyFiltering.includedAssemblies;
-            else
-                includeAssemblies = CommandLineManager.instance.assemblyFiltersSpecified ?
-                        CommandLineManager.instance.assemblyFiltering.includedAssemblies :
-                        CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
-
+            string includeAssemblies = assemblyFiltering != null ? assemblyFiltering.includedAssemblies : string.Empty;
+            
             // If override for include assemblies is set in coverageSettings, use overrideIncludeAssemblies instead
             if (!String.IsNullOrEmpty(coverageSettings.overrideIncludeAssemblies))
                 includeAssemblies = coverageSettings.overrideIncludeAssemblies;
 
-            string[] includeAssembliesArray = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            for (int i = 0; i < includeAssembliesArray.Length; i++)
-            {
-                includeAssembliesArray[i] = "+" + includeAssembliesArray[i];
-            }
-            string assemblies = string.Join(",", includeAssembliesArray);
-            string[] assemblyFilters = assemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] assemblyFilters = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (assemblyFilters.Length == 0)
             {
                 EditorUtility.ClearProgressBar();
-                ResultsLogger.Log(ResultID.Error_FailedReportNoAssemblies);
+                ResultsLogger.Log(ResultID.Error_FailedReportNoAssemblies, CoverageUtils.GetFilteringLogParams(assemblyFiltering, pathFiltering));
                 CoverageRunData.instance.ReportGenerationEnd(false);
                 return;
             }
 
+            for (int i = 0; i < assemblyFilters.Length; i++)
+            {
+                assemblyFilters[i] = "+" + assemblyFilters[i];
+            }
+
             string rootFolderPath = coverageSettings.rootFolderPath;
 
-            if (!CoverageUtils.DoesFolderExistAndNotEmpty(rootFolderPath) || CoverageUtils.GetNumberOfFilesInFolder(rootFolderPath, "*.xml", SearchOption.AllDirectories) == 0)
+            if (CoverageUtils.GetNumberOfFilesInFolder(rootFolderPath, "*.xml", SearchOption.AllDirectories) == 0)
             {
                 EditorUtility.ClearProgressBar();
-                ResultsLogger.Log(ResultID.Error_FailedReportNoTests);
+                ResultsLogger.Log(ResultID.Error_FailedReportNoCoverageResults, CoverageUtils.GetFilteringLogParams(assemblyFiltering, pathFiltering));            
                 CoverageRunData.instance.ReportGenerationEnd(false);
                 return;
             }
@@ -84,25 +92,30 @@ namespace UnityEditor.TestTools.CodeCoverage
                 CommandLineManager.instance.generateHTMLReport :
                 CommandLineManager.instance.generateHTMLReport || CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
 
-            if (coverageSettings.overrideGenerateReport)
+            if (coverageSettings.overrideGenerateHTMLReport)
                 generateHTMLReport = true;
 
             bool generateBadge = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
-                CommandLineManager.instance.generateBadgeReport : 
+                CommandLineManager.instance.generateBadgeReport :
                 CommandLineManager.instance.generateBadgeReport || CoveragePreferences.instance.GetBool("GenerateBadge", true);
 
-            string reportTypesString = "xmlSummary,";
+            bool generateAdditionalReports = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
+                CommandLineManager.instance.generateAdditionalReports :
+                CommandLineManager.instance.generateAdditionalReports || CoveragePreferences.instance.GetBool("GenerateAdditionalReports", false);
+
+            string reportTypesString = "xmlSummary,MarkdownSummary,";
             if (generateHTMLReport)
                 reportTypesString += "Html,";
             if (generateBadge)
                 reportTypesString += "Badges,";
+            if (generateAdditionalReports)
+                reportTypesString += "SonarQube,lcov,Cobertura,";
 
             string[] reportTypes = reportTypesString.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             string[] plugins = new string[] { };
 
-            bool includeAdditionalMetrics = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
-                CommandLineManager.instance.generateAdditionalMetrics :
-                CommandLineManager.instance.generateAdditionalMetrics || CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
+            bool includeAdditionalMetrics = coverageReporterManager != null &&
+                   coverageReporterManager.CoverageReporter.GetReporterFilter().ShouldGenerateAdditionalMetrics();
 
             string[] classFilters = new string[] { };
             string[] fileFilters = new string[] { };
@@ -128,15 +141,16 @@ namespace UnityEditor.TestTools.CodeCoverage
             try
             {
                 if (!CommandLineManager.instance.batchmode)
-                    EditorUtility.DisplayProgressBar(ReportGeneratorStyles.ProgressTitle.text, ReportGeneratorStyles.ProgressInfo.text, 0.4f);
+                    EditorUtility.DisplayProgressBar(ReportGeneratorStyles.ProgressTitle.text, ReportGeneratorStyles.ProgressInfoCreating.text, 0f);
 
                 if (Directory.Exists(targetDirectory))
                     Directory.Delete(targetDirectory, true);
 
                 Generator generator = new Generator();
+                ResultsLogger.LogSessionItem("Initializing report generation..", LogVerbosityLevel.Info);
                 if (generator.GenerateReport(config, new Settings() { DisableRiskHotspots = !includeAdditionalMetrics }, new RiskHotspotsAnalysisThresholds()))
                 {
-                    ResultsLogger.Log(ResultID.Log_ReportSaved, targetDirectory);
+                    ResultsLogger.Log(ResultID.Log_ReportSaved, CoverageUtils.GetFilteringLogParams(assemblyFiltering, pathFiltering, new string[] { targetDirectory }));
 
                     CoverageRunData.instance.ReportGenerationEnd(true);
 
@@ -144,7 +158,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                     CoverageAnalytics.instance.SendCoverageEvent(true);
 
                     if (!CommandLineManager.instance.batchmode &&
-                        coverageSettings.revealReportInFinder)
+                        coverageSettings.revealReportInFinder &&
+                        CoveragePreferences.instance.GetBool("OpenReportWhenGenerated", true))
                     {
                         string indexHtm = CoverageUtils.JoinPaths(targetDirectory, "index.htm");
                         if (File.Exists(indexHtm))
@@ -155,8 +170,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 }
                 else
                 {
-                    ResultsLogger.Log(ResultID.Error_FailedReport);
-
+                    ResultsLogger.Log(ResultID.Error_FailedReport, CoverageUtils.GetFilteringLogParams(assemblyFiltering, pathFiltering));
                     CoverageRunData.instance.ReportGenerationEnd(false);
                 }
             }
@@ -188,7 +202,7 @@ namespace UnityEditor.TestTools.CodeCoverage
     {
         public VerbosityLevel VerbosityLevel { get; set; }
 
-        StringBuilder m_StringBuilder = new StringBuilder();
+        readonly StringBuilder m_StringBuilder = new StringBuilder();
 
         public void Debug(string message)
         {
@@ -199,21 +213,34 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
-            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Info);
+
+            if (string.Equals(format, "Finished parsing \'{0}\' {1}/{2}") ||
+                string.Equals(format, "Parsing of {0} files completed") ||
+                string.Equals(format, "Coverage report parsing took {0:f1} seconds") ||
+                string.Equals(format, "Initializing report builders for report types: {0}") ||
+                string.Equals(format, "Analyzing {0} classes") ||
+                string.Equals(format, "Report generation took {0:f1} seconds") )
+            {
+                ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Info);
+            }
+            else
+            {
+                ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Verbose);
+            }
 
             if (!CommandLineManager.instance.batchmode)
             {
-                if (string.Equals(format, " Creating report {0}/{1} (Assembly: {2}, Class: {3})"))
+                if (string.Equals(format, "Creating report {0}/{1} (Assembly: {2}, Class: {3})"))
                 {
                     if (args.Length >= 2)
                     {
-                        if (Int32.TryParse(string.Format("{0}", args[0]), out int currentNum) &&
-                            Int32.TryParse(string.Format("{0}", args[1]), out int totalNum) &&
+                        if (float.TryParse(string.Format("{0}", args[0]), out float currentNum) &&
+                            float.TryParse(string.Format("{0}", args[1]), out float totalNum) &&
                             currentNum <= totalNum &&
                             currentNum > 0 &&
                             totalNum > 0)
                         {
-                            float progress = (1f / totalNum) * currentNum;
+                            float progress = (currentNum + 1) / totalNum;
                             EditorUtility.DisplayProgressBar(ReportGeneratorStyles.ProgressTitle.text, ReportGeneratorStyles.ProgressInfoCreating.text, progress);
                         }
                     }
@@ -242,25 +269,14 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
-            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Info);
 
-            if (!CommandLineManager.instance.batchmode)
+            if (string.Equals(format, "Writing report file \'{0}\'"))
             {
-                if (string.Equals(format, "Loading report '{0}' {1}/{2}"))
-                {
-                    if (args.Length == 3)
-                    {
-                        if (Int32.TryParse(string.Format("{0}", args[1]), out int currentNum) &&
-                            Int32.TryParse(string.Format("{0}", args[2]), out int totalNum) &&
-                            currentNum <= totalNum &&
-                            currentNum > 0 &&
-                            totalNum > 0)
-                        {
-                            float progress = (1f / (totalNum + 1)) * currentNum;
-                            EditorUtility.DisplayProgressBar(ReportGeneratorStyles.ProgressTitle.text, ReportGeneratorStyles.ProgressInfoPreparing.text, progress);
-                        }
-                    }
-                }
+                ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Verbose);
+            }
+            else
+            {
+                ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Info);
             }
         }
 
@@ -273,7 +289,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string message = string.Format(format, args);
             m_StringBuilder.AppendLine(message);
-            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Warning);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Verbose);
         }
 
         public override string ToString()
