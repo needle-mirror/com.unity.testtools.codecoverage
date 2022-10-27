@@ -53,7 +53,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             bool isRecording = CoverageRunData.instance.isRecording;
 
             // We want to save in the 'Recording' subdirectory of the results folder when recording
-#if TEST_FRAMEWORK_1_2_OR_NEWER
+#if TEST_FRAMEWORK_2_0_OR_NEWER
             string testSuite = isRecording ? "Recording" : "Automated";
 #else
             string testSuite = isRecording ? "Recording" : TestContext.Parameters.Get("platform");

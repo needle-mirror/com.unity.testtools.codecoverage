@@ -45,8 +45,13 @@
         },
         {
             "name": "com.unity.test-framework",
-            "expression": "1.2.0",
-            "define": "TEST_FRAMEWORK_1_2_OR_NEWER"
+            "expression": "1.3.0",
+            "define": "TEST_FRAMEWORK_1_3_OR_NEWER"
+        },
+        {
+            "name": "com.unity.test-framework",
+            "expression": "2.0.0",
+            "define": "TEST_FRAMEWORK_2_0_OR_NEWER"
         }
     ],
     "noEngineReferences": false

@@ -142,7 +142,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 #endif
             CoverageReporterListener listener = ScriptableObject.CreateInstance<CoverageReporterListener>();
 
-#if TEST_FRAMEWORK_1_2_OR_NEWER
+#if TEST_FRAMEWORK_1_3_OR_NEWER
             TestRunnerApi.RegisterTestCallback(listener);
 #else
             TestRunnerApi api = ScriptableObject.CreateInstance<TestRunnerApi>();

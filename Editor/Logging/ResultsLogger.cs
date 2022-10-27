@@ -47,6 +47,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
         Log_VisitedResultsSaved = 23,
         Warning_NoVisitedCoverageResultsSaved = 24,
         Warning_NoVisitedCoverageResultsSavedRecordingPaused = 25,
+        Warning_UnknownCoverageOptionProvided = 26,
     }
 
     internal static class ResultsLogger
@@ -81,6 +82,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             { ResultID.Warning_StandaloneUnsupported, new ResultData(LogType.Warning, "Code Coverage is not supported in standalone currently. Code Coverage Results and Report will not be generated.") },
             { ResultID.Warning_UseProjectSettingsNonBatchmode, new ResultData(LogType.Warning, "'-coverageOptions useProjectSettings' can only be used in batchmode and it does not take effect when running the editor from the command-line in non-batchmode.") },
             { ResultID.Warning_FailedToExtractPathFiltersFromFile, new ResultData(LogType.Warning, "Failed to extract path filters from file: Exception '{0}' while reading '{1}'") },
+            { ResultID.Warning_UnknownCoverageOptionProvided, new ResultData(LogType.Warning, "Unknown coverage option provided: '{0}'") },
         };
 
         public static bool Log(ResultID resultId, params string[] extraParams)

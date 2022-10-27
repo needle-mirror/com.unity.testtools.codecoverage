@@ -4,6 +4,15 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2022-10-27
+
+### Fixes
+- Fixed compatibility with [Test Framework](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html) package version 1.3.
+
+### Improvements
+- A single file summary version of the report is now generated in Json format, in addition to the XML and Markdown formats.
+- Added a warning when an invalid coverage option is passed in *-coverageOptions* in [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html).
+
 ## [1.2.0] - 2022-08-01
 
 ### Fixes

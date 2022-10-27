@@ -518,6 +518,10 @@ namespace UnityEditor.TestTools.CodeCoverage
                                 sourcePathsSpecified = true;
                         }
                         break;
+
+                    default:
+                        ResultsLogger.Log(ResultID.Warning_UnknownCoverageOptionProvided, optionArgsStr);
+                        break;
                 }
             }
 

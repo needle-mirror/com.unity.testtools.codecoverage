@@ -103,7 +103,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 CommandLineManager.instance.generateAdditionalReports :
                 CommandLineManager.instance.generateAdditionalReports || CoveragePreferences.instance.GetBool("GenerateAdditionalReports", false);
 
-            string reportTypesString = "xmlSummary,MarkdownSummary,";
+            string reportTypesString = "xmlSummary,MarkdownSummary,JsonSummary,";
             if (generateHTMLReport)
                 reportTypesString += "Html,";
             if (generateBadge)
