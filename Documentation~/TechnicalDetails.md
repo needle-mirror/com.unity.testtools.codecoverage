@@ -19,5 +19,5 @@ This version of the Code Coverage package is compatible with the following versi
 Code Coverage includes the following known limitations:
 
 * Code Coverage currently only supports the [OpenCover](https://github.com/OpenCover/opencover) format.
-* Code Coverage currently only supports code ran in the Editor and not in Standalone/Player.
+* Code Coverage currently only supports code run in the Editor and not in Standalone/Player.
 * NPath Complexity calculation and Branch Coverage are not implemented at present so they will always appear as zero in the coverage report.

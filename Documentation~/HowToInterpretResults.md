@@ -10,7 +10,17 @@ The summary view is divided into several sections: Summary, Coverage History, Ri
 
 ### Summary
 
-This section shows a brief summary of the coverage results including the number of assemblies, classes, files and lines that were processed. The most important value is the **Line Coverage** which shows the current coverage percentage of all coverable lines. Coverable lines only include the lines that can get executed and aren't marked to be [excluded from coverage](UsingCodeCoverage.md#excluding-code-from-code-coverage).
+This section shows a brief summary of the coverage results including the number of assemblies, classes, files and lines that were processed. The most important value is the **Line Coverage** which shows the current coverage percentage of all coverable lines. Coverable lines only include the lines that can be executed and are colored either green or red in the [File(s)](#files) section depending on whether the line was covered or not. Uncoverable lines are the lines that cannot be executed and are not colored in the [File(s)](#files) section; these include lines containing:
+- Assemblies, Classes, Constructors, Methods and Structs that are marked to be [excluded from coverage](UsingCodeCoverage.md#excluding-code-from-code-coverage)
+- Directives
+- Attributes
+- Method signatures
+- Class definitions
+- Unassigned variable declarations 
+- Constant variable declarations
+- else/case/default keywords
+- Lines from other classes, when multiple classes are included in the same file
+- Blank lines
 
 ### Coverage History
 

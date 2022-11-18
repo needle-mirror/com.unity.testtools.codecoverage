@@ -4,7 +4,7 @@ You can pass the following arguments in batchmode:
 
 **-enableCodeCoverage**, to enable code coverage.  
 **-coverageResultsPath** (optional), to set the location where the coverage results and report are saved to. The default location is the project's path.  
-**-coverageHistoryPath** (optional), to set the location where the coverage report history are saved to. The default location is the project's path.  
+**-coverageHistoryPath** (optional), to set the location where the coverage report history is saved to. The default location is the project's path.  
 **-coverageOptions** (optional), to pass extra options. Options are separated by semicolon. Some shells use semicolons to separate commands. Therefore, to ensure that coverage options are parsed correctly, enclose them in quotation marks.
 
 |Coverage Option|Description|
@@ -92,6 +92,6 @@ Unity.exe -projectPath C:/MyProject -batchmode -testPlatform playmode -runTests 
 ```
 
 This example contains three rules:
-* `+Scripts/Animation/**` - because the `sourcePaths` option was set and this is a relative path, this rule will include all the scripts in `C:/MyProject/Assets/Scripts/Animation` folder and its subfolders.
+* `+Scripts/Animation/**` - because the `sourcePaths` option was set and this is a relative path, this rule will include all the scripts in the `C:/MyProject/Assets/Scripts/Animation` folder and its subfolders.
 * `-**/Generated/**` - excludes all the files that have `/Generated/` in their path. This is not a relative path so the `sourcePaths` option has no effect.
 * `+C:/MyPackages/com.my.company.mypackage/**` - includes all the scripts located in the package outside of the project. This is an absolute path so the `sourcePaths` option has no effect. 

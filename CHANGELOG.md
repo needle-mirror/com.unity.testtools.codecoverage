@@ -4,6 +4,16 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2022-11-18
+
+### Fixes
+- Temporary fix for the [Test Framework](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html) 1.3 issue where the *RunFinished* callback is not called when running from the command line and there is a domain reload (case [DSTR-692](https://issuetracker.unity3d.com/issues/registered-callbacks-dont-work-after-domain-reload)).
+
+### Improvements
+- Reduced the number of logs for the default *Verbosity:Info*.
+- Added *Uncoverable lines* definition in [How to interpret the results](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/HowToInterpretResults.html#summary) page in the documentation.
+- Updated documentation to match version 1.2.2.
+
 ## [1.2.1] - 2022-10-27
 
 ### Fixes

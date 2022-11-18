@@ -6,7 +6,7 @@ It is typically presented as a [report](HowToInterpretResults.md) that shows the
 
 ## Code Coverage package
 
-Use the Code Coverage package with the [Test Runner](CoverageTestRunner.md) to gather and present test coverage information. When you run your tests with code coverage enabled you can see exactly which lines of your code are executed when the tests ran in addition to whether the tests passed or failed. See [Using Code Coverage with Test Runner](CoverageTestRunner.md).
+Use the Code Coverage package with the [Test Runner](CoverageTestRunner.md) to gather and present test coverage information. When you run your tests with code coverage enabled you can see exactly which lines of your code are executed when the tests run in addition to whether the tests passed or failed. See [Using Code Coverage with Test Runner](CoverageTestRunner.md).
 
 Once a test run has completed, the Code Coverage package will generate an [HTML coverage report](HowToInterpretResults.md) showing which lines of your code are covered by tests. Code Coverage currently supports  **PlayMode** and **EditMode** tests. It also allows you to track the code coverage changes through time.
 

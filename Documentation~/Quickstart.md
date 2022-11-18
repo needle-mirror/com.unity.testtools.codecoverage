@@ -63,7 +63,7 @@ This is located in `Assets/Samples/Code Coverage/<version>/Code Coverage Tutoria
 
 2. Hit **Play** and play the game for a minute or two.<br/>
 ![Enter Play mode](images/quickguide/press_play.png)
-Use the arrow keys to move and spacebar to shoot.
+Use the arrow keys to move and the spacebar to shoot.
 
 3. Exit PlayMode.
 

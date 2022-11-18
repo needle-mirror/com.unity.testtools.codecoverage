@@ -518,7 +518,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     if (assembly.GetCustomAttribute<ExcludeFromCoverageAttribute>() != null ||
                         assembly.GetCustomAttribute<ExcludeFromCodeCoverageAttribute>() != null)
                     {
-                        ResultsLogger.LogSessionItem($"Excluded assembly (ExcludeFromCoverage): {assemblyName}", LogVerbosityLevel.Verbose);
+                        ResultsLogger.LogSessionItem($"Excluded assembly (ExcludeFromCoverage): {assemblyName}", LogVerbosityLevel.Info);
                         continue;
                     }
                 }
@@ -564,7 +564,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                     continue;
                 }
 
-                ResultsLogger.LogSessionItem($"Processing assembly: {assemblyName}", LogVerbosityLevel.Info);
+                ResultsLogger.LogSessionItem($"Processing assembly: {assemblyName}", LogVerbosityLevel.Verbose);
 
                 foreach (Type type in assemblyTypes)
                 {
@@ -594,7 +594,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                         ResultsLogger.Log(ResultID.Warning_ExcludeAttributeClass, className, assemblyName);
                     }
                     
-                    ResultsLogger.LogSessionItem($"Processing class: {className}, assembly: {assemblyName}", LogVerbosityLevel.Info);
+                    ResultsLogger.LogSessionItem($"Processing class: {className}, assembly: {assemblyName}", LogVerbosityLevel.Verbose);
 
                     CoveredMethodStats[] classMethodStatsArray = Coverage.GetStatsFor(type);
                     if (classMethodStatsArray.Length > 0)
@@ -616,7 +616,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                     method.GetCustomAttribute<ExcludeFromCodeCoverageAttribute>() != null ||
                                     CheckIfParentMemberIsExcluded(method))
                                 {
-                                    ResultsLogger.LogSessionItem($"Excluded method (ExcludeFromCoverage): {methodName}, class: {className}, assembly: {assemblyName}", LogVerbosityLevel.Verbose);
+                                    ResultsLogger.LogSessionItem($"Excluded method (ExcludeFromCoverage): {methodName}, class: {className}, assembly: {assemblyName}", LogVerbosityLevel.Info);
                                     if (m_ExcludedMethods == null)
                                         m_ExcludedMethods = new List<MethodBase>();
                                     m_ExcludedMethods.Add(method);
@@ -630,7 +630,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
                             if (IsGetterSetterPropertyExcluded(method, type))
                             {
-                                ResultsLogger.LogSessionItem($"Excluded method (ExcludeFromCoverage): {methodName}, class: {className}, assembly: {assemblyName}", LogVerbosityLevel.Verbose);
+                                ResultsLogger.LogSessionItem($"Excluded method (ExcludeFromCoverage): {methodName}, class: {className}, assembly: {assemblyName}", LogVerbosityLevel.Info);
                                 continue;
                             }
 
@@ -653,7 +653,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                     string filename = classMethodSequencePoint.filename;
                                     if (filesNotFound.Contains(filename) || !m_ReporterFilter.ShouldProcessFile(filename))
                                     {
-                                        ResultsLogger.LogSessionItem($"Excluded method (Path Filtering): {methodName}, class: {className}, assembly: {assemblyName}", LogVerbosityLevel.Info);
+                                        ResultsLogger.LogSessionItem($"Excluded method (Path Filtering): {methodName}, class: {className}, assembly: {assemblyName}", LogVerbosityLevel.Verbose);
                                         continue;
                                     }
                                     
@@ -716,7 +716,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                                         coveredMethod.CyclomaticComplexity = method.CalculateCyclomaticComplexity();
                                     }
 
-                                    ResultsLogger.LogSessionItem($"Processing method: {coveredMethod.FullName}, class: {className}, assembly: {assemblyName}", LogVerbosityLevel.Info);
+                                    ResultsLogger.LogSessionItem($"Processing method: {coveredMethod.FullName}, class: {className}, assembly: {assemblyName}", LogVerbosityLevel.Verbose);
 
                                     coveredMethods.Add(coveredMethod);
                                 }
