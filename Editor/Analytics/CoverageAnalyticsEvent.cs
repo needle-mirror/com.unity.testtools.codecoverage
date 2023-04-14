@@ -105,5 +105,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
         public bool useSourcePaths;
         // Did the user specify path filters from file option (command line only)
         public bool usePathFiltersFromFile;
+        // Did the user specify assembly filters from file option (command line only)
+        public bool useAssemblyFiltersFromFile;
     }
 }

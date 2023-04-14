@@ -236,7 +236,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_AssembliesToIncludeLength = m_AssembliesToInclude.Length;
             m_PathsToInclude = CoveragePreferences.instance.GetStringForPaths("PathsToInclude", string.Empty);
             m_PathsToExclude = CoveragePreferences.instance.GetStringForPaths("PathsToExclude", string.Empty);
-            CodeCoverage.VerbosityLevel = (LogVerbosityLevel)CoveragePreferences.instance.GetInt("VerbosityLevel", 1);
+            CodeCoverage.VerbosityLevel = (LogVerbosityLevel)CoveragePreferences.instance.GetInt("VerbosityLevel", (int)LogVerbosityLevel.Info);
             m_ReportGenerator = new CoverageReportGenerator();
             m_GenerateHTMLReport = CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
             m_GenerateAdditionalReports = CoveragePreferences.instance.GetBool("GenerateAdditionalReports", false);

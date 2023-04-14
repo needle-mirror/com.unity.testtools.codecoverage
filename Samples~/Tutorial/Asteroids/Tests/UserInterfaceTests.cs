@@ -4,15 +4,20 @@ using NUnit.Framework;
 using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
+#endif
 
 public class UserInterfaceTests
 {
     GameObject gameManagerPrefab;
     GameObject inGameMenuPrefab;
-    string asteroidsScenePath;
     LoadSceneParameters loadSceneParameters;
+#if UNITY_EDITOR
+    string asteroidsScenePath;
+#endif
 
     [SetUp]
     public void Setup()
@@ -22,8 +27,9 @@ public class UserInterfaceTests
         loadSceneParameters = new LoadSceneParameters(LoadSceneMode.Single, LocalPhysicsMode.None);
 
         Object asteroidsScene = ((GameObject)Resources.Load("TestsReferences")).GetComponent<TestsReferences>().asteroidsScene;
+#if UNITY_EDITOR
         asteroidsScenePath = AssetDatabase.GetAssetPath(asteroidsScene);
-
+#endif
         gameManagerPrefab = ((GameObject)Resources.Load("TestsReferences", typeof(GameObject))).GetComponent<TestsReferences>().gameManagerPrefab;
         inGameMenuPrefab = ((GameObject)Resources.Load("TestsReferences", typeof(GameObject))).GetComponent<TestsReferences>().inGameMenuPrefab;
     }
@@ -41,11 +47,17 @@ public class UserInterfaceTests
     [UnityTest]
     public IEnumerator _01_InGameMenuExistsInScene()
     {
-        EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);
-        
+#if UNITY_EDITOR
+        EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);     
         yield return null;
 
         Assert.NotNull(Object.FindObjectOfType<InGameMenuController>());
+#else
+        yield return null;
+
+        Assert.Pass();
+#endif        
+
     }
 
     [UnityTest]
@@ -112,8 +124,8 @@ public class UserInterfaceTests
     [UnityTest]
     public IEnumerator _05_PauseMenuChangesGameManagerGameState()
     {
+#if UNITY_EDITOR
         EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);
-        
         yield return null;
 
         InGameMenuController menuController = GameObject.Find("InGameMenu").GetComponent<InGameMenuController>();
@@ -123,13 +135,19 @@ public class UserInterfaceTests
         menuController.ChangeMenuState(false);
         Assert.IsFalse(GameManager.IsPaused);
         Assert.IsTrue(Time.timeScale == 1.0f);
+#else
+        yield return null;
+
+        Assert.Pass();
+#endif        
+
     }
 
     [UnityTest]
     public IEnumerator _06_InGameScoreCounterChangesWhenScoreChanges()
     {
+#if UNITY_EDITOR
         EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);
-        
         yield return null;
 
         Assert.NotNull(GameObject.Find("InGameMenu"));
@@ -140,9 +158,15 @@ public class UserInterfaceTests
         Assert.IsTrue(numbers.Length == 7);         
         GameManager.AddToScore(0);
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitUntil(() => numbers[3].text == "1");
 
         Assert.IsTrue(numbers[0].text == "0" && numbers[1].text == "0" && numbers[2].text == "0" && numbers[3].text == "1" && numbers[4].text == "0" && numbers[5].text == "0" && numbers[6].text == "0");
+#else
+        yield return null;
+
+        Assert.Pass();
+#endif        
+
     }
 
     [UnityTest]

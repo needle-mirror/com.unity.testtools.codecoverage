@@ -93,6 +93,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
                 CurrentCoverageEvent.usePathReplacePatterns = CommandLineManager.instance.pathReplacingSpecified;
                 CurrentCoverageEvent.useSourcePaths = CommandLineManager.instance.sourcePathsSpecified;
                 CurrentCoverageEvent.usePathFiltersFromFile = CommandLineManager.instance.pathFiltersFromFileSpecified;
+                CurrentCoverageEvent.useAssemblyFiltersFromFile = CommandLineManager.instance.assemblyFiltersFromFileSpecified;
             }
             else
             {
@@ -108,6 +109,8 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
                 CurrentCoverageEvent.usePathReplacePatterns = CommandLineManager.instance.pathReplacingSpecified;
                 CurrentCoverageEvent.useSourcePaths = CommandLineManager.instance.sourcePathsSpecified;
                 CurrentCoverageEvent.usePathFiltersFromFile = CommandLineManager.instance.pathFiltersFromFileSpecified;
+                CurrentCoverageEvent.useAssemblyFiltersFromFile = CommandLineManager.instance.assemblyFiltersFromFileSpecified;
+
 
                 CurrentCoverageEvent.useDefaultAssemblyFilters = !CommandLineManager.instance.assemblyFiltersSpecified;
                 if (!CommandLineManager.instance.assemblyFiltersSpecified)

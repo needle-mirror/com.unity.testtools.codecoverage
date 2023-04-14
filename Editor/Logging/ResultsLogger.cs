@@ -48,6 +48,10 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
         Warning_NoVisitedCoverageResultsSaved = 24,
         Warning_NoVisitedCoverageResultsSavedRecordingPaused = 25,
         Warning_UnknownCoverageOptionProvided = 26,
+        Warning_FailedToExtractFiltersFromFile = 27,
+        Warning_FilterFileContainsDuplicateKeys = 28,
+        Warning_FilterFileContainsInvalidKey = 29,
+        Warning_PathFiltersFromFileDeprecation = 30,
     }
 
     internal static class ResultsLogger
@@ -75,7 +79,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             { ResultID.Warning_FailedToDeleteFile, new ResultData(LogType.Warning, "Failed to delete file: {0}") },
             { ResultID.Warning_FailedReportNullCoverageSettings, new ResultData(LogType.Warning, "Failed to generate Code Coverage Report. CoverageSettings was not set.") },
             { ResultID.Warning_FailedReportNullCoverageFilters, new ResultData(LogType.Warning, "Failed to generate Code Coverage Report. Error parsing Coverage filtering.") },
-            { ResultID.Warning_BurstCompilationEnabled, new ResultData(LogType.Warning, "Code Coverage requires Burst Compilation to be disabled in order to obtain accurate coverage information. To disable Burst Compilation uncheck Jobs > Burst > Enable Compilation or pass '-burst-disable-compilation' to the command line in batchmode.") },
+            { ResultID.Warning_BurstCompilationEnabled, new ResultData(LogType.Warning, "Code Coverage requires Burst Compilation to be disabled in order to obtain accurate coverage information. To disable Burst Compilation uncheck Jobs > Burst > Enable Compilation or pass '--burst-disable-compilation' to the command line in batchmode.") },
             { ResultID.Warning_ExcludeAttributeAssembly, new ResultData(LogType.Warning, "Not able to detect custom attribute ExcludeFromCoverage in Assembly: {0}") },
             { ResultID.Warning_ExcludeAttributeClass, new ResultData(LogType.Warning, "Not able to detect custom attribute ExcludeFromCoverage in Class: {0}, Assembly: {1}") },
             { ResultID.Warning_ExcludeAttributeMethod, new ResultData(LogType.Warning, "Not able to detect custom attribute ExcludeFromCoverage in Method: {0}, Class: {1}, Assembly: {2}") },
@@ -83,6 +87,10 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             { ResultID.Warning_UseProjectSettingsNonBatchmode, new ResultData(LogType.Warning, "'-coverageOptions useProjectSettings' can only be used in batchmode and it does not take effect when running the editor from the command-line in non-batchmode.") },
             { ResultID.Warning_FailedToExtractPathFiltersFromFile, new ResultData(LogType.Warning, "Failed to extract path filters from file: Exception '{0}' while reading '{1}'") },
             { ResultID.Warning_UnknownCoverageOptionProvided, new ResultData(LogType.Warning, "Unknown coverage option provided: '{0}'") },
+            { ResultID.Warning_FailedToExtractFiltersFromFile, new ResultData(LogType.Warning, "Failed to extract filters from file: Exception '{0}' while reading '{1}'") },
+            { ResultID.Warning_FilterFileContainsDuplicateKeys, new ResultData(LogType.Warning, "Duplicate keys exist in the json file used for filtering: {0}") },
+            { ResultID.Warning_FilterFileContainsInvalidKey, new ResultData(LogType.Warning, "Invalid key(s) in the json file used for filtering: '{0}'") },
+            { ResultID.Warning_PathFiltersFromFileDeprecation, new ResultData(LogType.Warning, "The 'pathFiltersFromFile' option will be deprecated in the next package major release. Please use the 'filtersFromFile' option instead.") },
         };
 
         public static bool Log(ResultID resultId, params string[] extraParams)

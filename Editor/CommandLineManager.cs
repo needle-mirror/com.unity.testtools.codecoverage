@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor.TestTools.CodeCoverage.CommandLineParser;
 using UnityEditor.TestTools.CodeCoverage.Utils;
+using UnityEngine;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -108,6 +109,12 @@ namespace UnityEditor.TestTools.CodeCoverage
         }
 
         public bool assemblyFiltersSpecified
+        {
+            get;
+            private set;
+        }
+
+        public bool assemblyFiltersFromFileSpecified
         {
             get;
             private set;
@@ -228,7 +235,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 new CommandLineOption("coverageOptions", optionsArg => { AddCoverageOptions(optionsArg); }),
                 new CommandLineOption("runTests", () => { runTests = true; }),
                 new CommandLineOption("batchmode", () => { batchmode = true; }),
-                new CommandLineOption("burst-disable-compilation", () => { burstDisabled = true; })
+                new CommandLineOption("-burst-disable-compilation", () => { burstDisabled = true; })
             );
             optionSet.Parse(commandLineArgs);
 
@@ -413,58 +420,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                             string[] assemblyFilters = optionArgs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                            for (int i = 0; i < assemblyFilters.Length; ++i)
-                            {
-                                string filter = assemblyFilters[i];
-                                string filterBody = filter.Length > 1 ? filter.Substring(1) : string.Empty;
-
-                                if (filter.StartsWith("+", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    if (m_IncludeAssemblies.Length > 0)
-                                        m_IncludeAssemblies += ",";
-
-                                    if (filterBody.StartsWith("<", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        if (string.Equals(filterBody, AssemblyFiltering.kAssetsAlias, StringComparison.OrdinalIgnoreCase))
-                                            m_IncludeAssemblies += AssemblyFiltering.GetUserOnlyAssembliesString();
-                                        else if (string.Equals(filterBody, AssemblyFiltering.kAllAlias, StringComparison.OrdinalIgnoreCase))
-                                            m_IncludeAssemblies += AssemblyFiltering.GetAllProjectAssembliesString();
-                                        else if (string.Equals(filterBody, AssemblyFiltering.kPackagesAlias, StringComparison.OrdinalIgnoreCase))
-                                            m_IncludeAssemblies += AssemblyFiltering.GetPackagesOnlyAssembliesString();
-                                        else if (string.Equals(filterBody, AssemblyFiltering.kCoreAlias, StringComparison.OrdinalIgnoreCase))
-                                            m_IncludeAssemblies += AssemblyFiltering.kCoreAssemblies;
-                                    }
-                                    else
-                                    {
-                                        m_IncludeAssemblies += filterBody;
-                                    }
-                                }
-                                else if (filter.StartsWith("-", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    if (m_ExcludeAssemblies.Length > 0)
-                                        m_ExcludeAssemblies += ",";
-
-                                    if (filterBody.StartsWith("<", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        if (string.Equals(filterBody, AssemblyFiltering.kAssetsAlias, StringComparison.OrdinalIgnoreCase))
-                                            m_ExcludeAssemblies += AssemblyFiltering.GetUserOnlyAssembliesString();
-                                        else if (string.Equals(filterBody, AssemblyFiltering.kAllAlias, StringComparison.OrdinalIgnoreCase))
-                                            m_ExcludeAssemblies += AssemblyFiltering.GetAllProjectAssembliesString();
-                                        else if (string.Equals(filterBody, AssemblyFiltering.kPackagesAlias, StringComparison.OrdinalIgnoreCase))
-                                            m_ExcludeAssemblies += AssemblyFiltering.GetPackagesOnlyAssembliesString();
-                                        else if (string.Equals(filterBody, AssemblyFiltering.kCoreAlias, StringComparison.OrdinalIgnoreCase))
-                                            m_ExcludeAssemblies += AssemblyFiltering.kCoreAssemblies;
-                                    }
-                                    else
-                                    {
-                                        m_ExcludeAssemblies += filterBody;
-                                    }
-                                }
-                                else
-                                {
-                                    ResultsLogger.Log(ResultID.Warning_AssemblyFiltersNotPrefixed, filter);
-                                }
-                            }
+                            ParseAssemblyFilters(assemblyFilters);
                         }
                         break;
 
@@ -472,6 +428,8 @@ namespace UnityEditor.TestTools.CodeCoverage
                         if (optionArgs.Length > 0)
                         {
                             pathFiltersFromFileSpecified = true;
+                            ResultsLogger.Log(ResultID.Warning_PathFiltersFromFileDeprecation);
+
                             if (File.Exists(optionArgs))
                             {
                                 try
@@ -494,6 +452,37 @@ namespace UnityEditor.TestTools.CodeCoverage
                             ParsePathFilters(pathFilters);
                         }
                         break;
+
+                    case "FILTERSFROMFILE":
+                        if (optionArgs.Length > 0)
+                        {
+                            try
+                            {
+                                JsonFile jsonFile = GetFiltersFromFile(optionArgs);
+                                if (jsonFile != null)
+                                {
+                                    string[] pathFilters = ConvertToFilterArray(jsonFile.pathsInclude, jsonFile.pathsExclude);
+                                    if (pathFilters != null && pathFilters.Length > 0)
+                                    {
+                                        pathFiltersFromFileSpecified = true;
+                                        ParsePathFilters(pathFilters);
+                                    }
+
+                                    string[] assemblyFilters = ConvertToFilterArray(jsonFile.assembliesInclude, jsonFile.assembliesExclude);
+                                    if (assemblyFilters != null && assemblyFilters.Length > 0)
+                                    {
+                                        assemblyFiltersFromFileSpecified = true;
+                                        ParseAssemblyFilters(assemblyFilters);
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                ResultsLogger.Log(ResultID.Warning_FailedToExtractFiltersFromFile, e.Message, optionArgs);
+                            }
+                        }
+                            break;
+                        
 
                     case "PATHREPLACEPATTERNS":
                         if (optionArgs.Length > 0)
@@ -545,6 +534,62 @@ namespace UnityEditor.TestTools.CodeCoverage
             assemblyFiltering.Parse(m_IncludeAssemblies, m_ExcludeAssemblies);
             pathFiltering.Parse(m_IncludePaths, m_ExcludePaths);
             pathReplacing.Parse(m_PathReplacePatterns);
+        }
+
+        private void ParseAssemblyFilters(string[] assemblyFilters)
+        {
+            for (int i = 0; i < assemblyFilters.Length; ++i)
+            {
+                string filter = assemblyFilters[i];
+                string filterBody = filter.Length > 1 ? filter.Substring(1) : string.Empty;
+
+                if (filter.StartsWith("+", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (m_IncludeAssemblies.Length > 0)
+                        m_IncludeAssemblies += ",";
+
+                    if (filterBody.StartsWith("<", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (string.Equals(filterBody, AssemblyFiltering.kAssetsAlias, StringComparison.OrdinalIgnoreCase))
+                            m_IncludeAssemblies += AssemblyFiltering.GetUserOnlyAssembliesString();
+                        else if (string.Equals(filterBody, AssemblyFiltering.kAllAlias, StringComparison.OrdinalIgnoreCase))
+                            m_IncludeAssemblies += AssemblyFiltering.GetAllProjectAssembliesString();
+                        else if (string.Equals(filterBody, AssemblyFiltering.kPackagesAlias, StringComparison.OrdinalIgnoreCase))
+                            m_IncludeAssemblies += AssemblyFiltering.GetPackagesOnlyAssembliesString();
+                        else if (string.Equals(filterBody, AssemblyFiltering.kCoreAlias, StringComparison.OrdinalIgnoreCase))
+                            m_IncludeAssemblies += AssemblyFiltering.kCoreAssemblies;
+                    }
+                    else
+                    {
+                        m_IncludeAssemblies += filterBody;
+                    }
+                }
+                else if (filter.StartsWith("-", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (m_ExcludeAssemblies.Length > 0)
+                        m_ExcludeAssemblies += ",";
+
+                    if (filterBody.StartsWith("<", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (string.Equals(filterBody, AssemblyFiltering.kAssetsAlias, StringComparison.OrdinalIgnoreCase))
+                            m_ExcludeAssemblies += AssemblyFiltering.GetUserOnlyAssembliesString();
+                        else if (string.Equals(filterBody, AssemblyFiltering.kAllAlias, StringComparison.OrdinalIgnoreCase))
+                            m_ExcludeAssemblies += AssemblyFiltering.GetAllProjectAssembliesString();
+                        else if (string.Equals(filterBody, AssemblyFiltering.kPackagesAlias, StringComparison.OrdinalIgnoreCase))
+                            m_ExcludeAssemblies += AssemblyFiltering.GetPackagesOnlyAssembliesString();
+                        else if (string.Equals(filterBody, AssemblyFiltering.kCoreAlias, StringComparison.OrdinalIgnoreCase))
+                            m_ExcludeAssemblies += AssemblyFiltering.kCoreAssemblies;
+                    }
+                    else
+                    {
+                        m_ExcludeAssemblies += filterBody;
+                    }
+                }
+                else
+                {
+                    ResultsLogger.Log(ResultID.Warning_AssemblyFiltersNotPrefixed, filter);
+                }
+            }
         }
 
         private void ParsePathFilters(string[] pathFilters)
@@ -605,6 +650,35 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
 
             return paths.ToArray();
+        }
+
+        internal JsonFile GetFiltersFromFile(string path)
+        {
+            string jsonString = JsonUtils.CleanJsonString(File.ReadAllText(path));
+            JsonUtils.ValidateJsonKeys(jsonString);
+            JsonFile jsonFile = JsonUtility.FromJson<JsonFile>(jsonString);
+            return jsonFile;
+        }
+
+        internal string[] ConvertToFilterArray(string[] include, string[] exclude)
+        {
+            var filtersList = new List<string>();
+
+            if (include != null && include.Length > 0)
+            {
+                foreach (var filter in include)
+                {
+                    filtersList.Add($"+{filter}");
+                }
+            }
+            if (exclude != null && exclude.Length > 0)
+            {
+                foreach (var filter in exclude)
+                {
+                    filtersList.Add($"-{filter}");
+                }
+            }
+            return filtersList.ToArray();
         }
     }
 }

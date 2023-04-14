@@ -5,7 +5,7 @@
 If you use the [Burst package](https://docs.unity3d.com/Packages/com.unity.burst@latest) and have jobs compiled with Burst, you will need to disable Burst compilation in order to get full coverage. To disable Burst compilation you can do **one** of the following:
 
 - Uncheck **Enable Compilation** under **Jobs** > **Burst** > **Enable Compilation**.
-- Pass `-burst-disable-compilation` to the command line.
+- Pass `--burst-disable-compilation` to the command line.
 
 ## Using Code Coverage with Code Optimization
 

@@ -4,6 +4,16 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2023-04-14
+
+### Fixes
+- Fixed failing to gather code coverage for generic methods (case [COV-17](https://issuetracker.unity3d.com/issues/coverage-package-fails-to-gather-any-coverage-for-generic-methods)).
+
+### Improvements
+- Added `filtersFromFile` in *-coverageOptions* for [batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html). This allows specifying an external Json file which contains path and assembly filtering rules. When this file contains relative paths, the `sourcePaths` option can be used to specify the source directories.
+<br/>**Note:** The `pathFiltersFromFile` option will be deprecated in the next package major release. Please use the new `filtersFromFile` option instead.
+- Make sure `--burst-disable-compilation` is [expected](https://docs.unity3d.com/Packages/com.unity.burst@latest/index.html?subfolder=/manual/getting-started.html#command-line-options) to be passed with two dashes, unlike other editor command line options. 
+
 ## [1.2.2] - 2022-11-18
 
 ### Fixes
@@ -88,7 +98,7 @@ See the [Upgrade guide](https://docs.unity3d.com/Packages/com.unity.testtools.co
 ### Improvements
 - Implemented changes to support [Test Framework](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html) package version 1.2
 - Logs while the Report is generated are output per message rather than at the end of the generation
-- Do not log burst warning when `-burst-disable-compilation` is passed in the command line
+- Do not log burst warning when `--burst-disable-compilation` is passed in the command line
 - Added [Ignoring tests for Code Coverage](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.1/manual/CoverageBatchmode.html#ignoring-tests-for-code-coverage) section in documentation
 - Updated the [Generate combined report from separate projects](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.1/manual/CoverageBatchmode.html#generate-combined-report-from-separate-projects) section in documentation
 - Updated documentation to match version 1.1.0

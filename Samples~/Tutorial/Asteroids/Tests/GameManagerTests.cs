@@ -2,17 +2,24 @@
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
-using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
-public class GameManagerTests {
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+#endif
 
+public class GameManagerTests
+{
     GameObject gameManagerPrefab;
     GameObject asteroidPrefab;
     GameObject cameraPrefab;
-    string asteroidsScenePath;
     LoadSceneParameters loadSceneParameters;
+
+#if UNITY_EDITOR
+    string asteroidsScenePath;
+#endif
+
 
     [SetUp]
     public void Setup()
@@ -20,8 +27,10 @@ public class GameManagerTests {
         loadSceneParameters = new LoadSceneParameters(LoadSceneMode.Single, LocalPhysicsMode.None);
 
         Object asteroidsScene = ((GameObject)Resources.Load("TestsReferences")).GetComponent<TestsReferences>().asteroidsScene;
-        asteroidsScenePath = AssetDatabase.GetAssetPath(asteroidsScene);
 
+#if UNITY_EDITOR
+        asteroidsScenePath = AssetDatabase.GetAssetPath(asteroidsScene);
+#endif
         gameManagerPrefab = ((GameObject)Resources.Load("TestsReferences", typeof(GameObject))).GetComponent<TestsReferences>().gameManagerPrefab;
         asteroidPrefab = ((GameObject)Resources.Load("TestsReferences", typeof(GameObject))).GetComponent<TestsReferences>().asteroidPrefab;
         cameraPrefab = ((GameObject)Resources.Load("TestsReferences", typeof(GameObject))).GetComponent<TestsReferences>().cameraPrefab;
@@ -52,11 +61,18 @@ public class GameManagerTests {
     [UnityTest]
     public IEnumerator _03_GameManagerExistsInScene()
     {
+#if UNITY_EDITOR
         EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);
-        
         yield return null;
 
         Assert.NotNull(Object.FindObjectOfType<GameManager>());
+
+#else
+        yield return null;
+
+        Assert.Pass();
+#endif
+
     }
 
     [UnityTest]

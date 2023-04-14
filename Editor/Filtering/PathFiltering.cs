@@ -37,8 +37,8 @@ namespace UnityEditor.TestTools.CodeCoverage
             includedPaths = includePaths;
             excludedPaths = excludePaths;
 
-            string[] includePathFilters = includePaths.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            string[] excludePathFilters = excludePaths.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] includePathFilters = includePaths.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
+            string[] excludePathFilters = excludePaths.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
 
             m_IncludePaths = includePathFilters
                 .Where(f => f != "-")

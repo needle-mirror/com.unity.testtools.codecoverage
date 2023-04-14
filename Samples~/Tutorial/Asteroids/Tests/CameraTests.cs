@@ -3,14 +3,20 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 using UnityEngine.SceneManagement;
+
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
+#endif
 
 public class CameraTests 
 {
     GameObject cameraPrefab;
-    string asteroidsScenePath;
     LoadSceneParameters loadSceneParameters;
+
+#if UNITY_EDITOR
+    string asteroidsScenePath;
+#endif
 
     [SetUp]
     public void Setup()
@@ -20,8 +26,10 @@ public class CameraTests
         loadSceneParameters = new LoadSceneParameters(LoadSceneMode.Single, LocalPhysicsMode.None);
 
         Object asteroidsScene = ((GameObject)Resources.Load("TestsReferences")).GetComponent<TestsReferences>().asteroidsScene;
+        
+#if UNITY_EDITOR
         asteroidsScenePath = AssetDatabase.GetAssetPath(asteroidsScene);
-
+#endif
         cameraPrefab = ((GameObject)Resources.Load("TestsReferences", typeof(GameObject))).GetComponent<TestsReferences>().cameraPrefab;
     }
 
@@ -41,10 +49,16 @@ public class CameraTests
     [UnityTest]
     public IEnumerator _03_CameraExistsInScene()
     {
+#if UNITY_EDITOR
         EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);
-        
         yield return null;
 
         Assert.IsTrue(Object.FindObjectOfType<Camera>().name == "Camera");
+#else
+        yield return null;
+
+        Assert.Pass();
+#endif        
+
     }
 }
