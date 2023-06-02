@@ -693,7 +693,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
                                 bool includeMethod = true;
 
-                                if (reportType == CoverageReportType.CoveredMethodsOnly && totalVisitCount == 0 && !method.IsGenericMethod)
+                                if (reportType == CoverageReportType.CoveredMethodsOnly && totalVisitCount == 0 && !type.IsGenericType && !method.IsGenericMethod)
                                 {
                                     includeMethod = false;
                                 }

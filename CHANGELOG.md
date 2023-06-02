@@ -4,6 +4,13 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.2.4] - 2023-06-02
+
+### Fixes
+- Fixed failing to gather code coverage for normal methods in generic classes (case [COV-27](https://issuetracker.unity3d.com/issues/non-generic-methods-in-generic-classes-always-show-no-coverage)).
+- Documentation: Corrected *Settings.json* path in `useProjectSettings` section in *-coverageOptions* (case [COV-26](https://issuetracker.unity3d.com/issues/documentation-for-useprojectsettings-references-incorrect-settings-dot-json-path)).
+- Make sure *Auto Generate Report* defaults to true when running from the command line (case [COV-25](https://issuetracker.unity3d.com/issues/useprojectsettings-does-not-generate-report-until-auto-generate-report-is-toggled-off-and-on-again)).
+
 ## [1.2.3] - 2023-04-14
 
 ### Fixes
