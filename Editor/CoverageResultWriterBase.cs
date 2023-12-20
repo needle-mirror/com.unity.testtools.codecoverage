@@ -1,7 +1,5 @@
 using System.IO;
-using NUnit.Framework;
 using UnityEditor.TestTools.CodeCoverage.Utils;
-using UnityEngine;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -56,7 +54,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 #if TEST_FRAMEWORK_2_0_OR_NEWER
             string testSuite = isRecording ? "Recording" : "Automated";
 #else
-            string testSuite = isRecording ? "Recording" : TestContext.Parameters.Get("platform");
+            string testSuite = isRecording ? "Recording" : CoverageRunData.instance.testSuite;
 #endif
             string directoryName = CoverageUtils.JoinPaths(resultsRootDirectoryName, testSuite != null ? testSuite : "");
 

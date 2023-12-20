@@ -4,6 +4,12 @@ All notable changes to the Code Coverage package will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.2.5] - 2023-12-20
+
+### Fixes
+- Fixed failing to generate code coverage for assemblies whose name starts with 'system' (case [COV-38](https://issuetracker.unity3d.com/issues/code-coverage-fails-to-generate-a-report-when-the-assembly-name-begins-with-the-word-system)).
+- Fixed results xml file not been correctly stored under the EditMode folder if it is written after a domain reload (case [COV-36](https://issuetracker.unity3d.com/issues/coverage-results-xml-file-is-not-categorized-as-editmode-if-it-is-written-after-domain-reload)).
+
 ## [1.2.4] - 2023-06-02
 
 ### Fixes

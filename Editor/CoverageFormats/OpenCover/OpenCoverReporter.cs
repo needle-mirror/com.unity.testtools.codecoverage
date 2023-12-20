@@ -12,6 +12,7 @@ using Module = OpenCover.Framework.Model.Module;
 using ModelFile = OpenCover.Framework.Model.File;
 using File = System.IO.File;
 using UnityEditor.TestTools.CodeCoverage.Utils;
+using NUnit.Framework;
 
 namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 {
@@ -95,6 +96,8 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 
             m_ReporterFilter.SetupFiltering();
 
+            CoverageRunData.instance.testSuite = TestContext.Parameters.Get("platform");
+
             if (m_Writer == null)
             {
                 m_Writer = new OpenCoverResultWriter(settings);
@@ -105,6 +108,8 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
         public void OnRunStarted(ITestAdaptor testsToRun)
         {
             Events.InvokeOnCoverageSessionStarted();
+
+            CoverageRunData.instance.testSuite = TestContext.Parameters.Get("platform");
 
             if (m_Writer != null)
             {

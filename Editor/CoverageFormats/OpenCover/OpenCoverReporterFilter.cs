@@ -12,7 +12,7 @@
                 m_AssemblyFiltering = new AssemblyFiltering();
 
                 string includeAssemblies = CoveragePreferences.instance.GetString("IncludeAssemblies", AssemblyFiltering.GetUserOnlyAssembliesString());
-                m_AssemblyFiltering.Parse(includeAssemblies, AssemblyFiltering.kDefaultExcludedAssemblies);
+                m_AssemblyFiltering.Parse(includeAssemblies, string.Empty);
             }
 
             if (!CommandLineManager.instance.runFromCommandLine || !CommandLineManager.instance.pathFiltersSpecified)

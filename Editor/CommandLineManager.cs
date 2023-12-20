@@ -526,11 +526,6 @@ namespace UnityEditor.TestTools.CodeCoverage
                     m_IncludeAssemblies = AssemblyFiltering.GetUserOnlyAssembliesString();
             }
 
-            if (m_ExcludeAssemblies.Length > 0)
-                m_ExcludeAssemblies += ",";
-
-            m_ExcludeAssemblies += AssemblyFiltering.kDefaultExcludedAssemblies;
-
             assemblyFiltering.Parse(m_IncludeAssemblies, m_ExcludeAssemblies);
             pathFiltering.Parse(m_IncludePaths, m_ExcludePaths);
             pathReplacing.Parse(m_PathReplacePatterns);

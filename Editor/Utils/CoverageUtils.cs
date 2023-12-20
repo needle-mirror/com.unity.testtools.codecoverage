@@ -318,7 +318,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
         public static string[] GetFilteringLogParams(AssemblyFiltering assemblyFiltering, PathFiltering pathFiltering, string[] otherParams = null)
         {
             string[] logParams = { assemblyFiltering != null && assemblyFiltering.includedAssemblies.Length > 0 ? assemblyFiltering.includedAssemblies : "<Not specified>",
-                    assemblyFiltering != null && assemblyFiltering.excludedAssembliesNoDefault.Length > 0 ? assemblyFiltering.excludedAssembliesNoDefault : "<Not specified>",
+                    assemblyFiltering != null && assemblyFiltering.excludedAssemblies.Length > 0 ? assemblyFiltering.excludedAssemblies : "<Not specified>",
                     pathFiltering != null && pathFiltering.includedPaths.Length > 0 ? pathFiltering.includedPaths : "<Not specified>",
                     pathFiltering != null && pathFiltering.excludedPaths.Length > 0 ? pathFiltering.excludedPaths : "<Not specified>" };
 

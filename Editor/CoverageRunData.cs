@@ -28,6 +28,9 @@ namespace UnityEditor.TestTools.CodeCoverage
         [SerializeField]
         private bool m_IsGeneratingReport = false;
 
+        [SerializeField]
+        private string m_TestSuite = string.Empty;
+
         public void Start(bool setupEvents = true)
         {
             m_LastIgnoredSuite = string.Empty;
@@ -142,6 +145,16 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             return m_LastIgnoredSuite;
         }
+
+        public string testSuite
+        {
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                    m_TestSuite = value;
+            }
+            get { return m_TestSuite; }
+        }
     }
 
     [Serializable]
@@ -245,6 +258,12 @@ namespace UnityEditor.TestTools.CodeCoverage
         public void ReportGenerationEnd(bool success)
         {
             m_CoverageRunDataImplementation.ReportGenerationEnd(success);
+        }
+
+        public string testSuite
+        {
+            set { m_CoverageRunDataImplementation.testSuite = value; }
+            get { return m_CoverageRunDataImplementation.testSuite; }
         }
     }
 }

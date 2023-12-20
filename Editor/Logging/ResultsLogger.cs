@@ -144,6 +144,8 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             if (string.IsNullOrEmpty(message))
                 return false;
 
+            message = message.Replace('{', '[').Replace('}', ']');
+
             if (logLevel >= VerbosityLevel)
             {
                 message = string.Format($"[{CoverageSettings.PackageName}] {message}");

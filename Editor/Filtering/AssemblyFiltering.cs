@@ -10,7 +10,6 @@ namespace UnityEditor.TestTools.CodeCoverage
 {
     internal class AssemblyFiltering
     {
-        public const string kDefaultExcludedAssemblies = "system*,mono*,nunit*,microsoft*,mscorlib*,roslyn*";
         public const string kCoreAssemblies = "unityeditor*,unityengine*";
         public const string kAssetsAlias = "<assets>";
         public const string kPackagesAlias = "<packages>";
@@ -29,12 +28,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             private set;
         }
 
-        public string excludedAssembliesNoDefault
-        {
-            get;
-            private set;
-        }
-
         private Regex[] m_IncludeAssemblies;
         private Regex[] m_ExcludeAssemblies;
 
@@ -48,14 +41,12 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             includedAssemblies = includeAssemblies;
             excludedAssemblies = excludeAssemblies;
-            excludedAssembliesNoDefault = excludeAssemblies.Replace(kDefaultExcludedAssemblies, string.Empty);
 
             string[] includeAssemblyFilters = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
             string[] excludeAssemblyFilters = excludeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
-            string[] excludeAssemblyFiltersNoDefault = excludedAssembliesNoDefault.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
-
+            
             CoverageAnalytics.instance.CurrentCoverageEvent.includedAssemblies = includeAssemblyFilters;
-            CoverageAnalytics.instance.CurrentCoverageEvent.excludedAssemblies = excludeAssemblyFiltersNoDefault;
+            CoverageAnalytics.instance.CurrentCoverageEvent.excludedAssemblies = excludeAssemblyFilters;
 
             m_IncludeAssemblies = includeAssemblyFilters
                 .Select(f => CreateFilterRegex(f))
