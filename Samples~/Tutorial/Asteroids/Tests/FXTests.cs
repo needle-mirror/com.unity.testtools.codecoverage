@@ -23,7 +23,7 @@ public class FXTests
 
     void ClearScene()
     {
-        Transform[] objects = Object.FindObjectsOfType<Transform>();
+        Transform[] objects = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
         foreach (Transform obj in objects)
         {
             if (obj != null)
@@ -62,7 +62,7 @@ public class FXTests
         yield return new WaitForSeconds(1.0f);                      // Debris should be destroyed after 1 sec
         
         Assert.IsTrue(debris == null);
-        Assert.IsTrue(Object.FindObjectsOfType<Rigidbody2D>().Length == 0);
+        Assert.IsTrue(Object.FindObjectsByType<Rigidbody2D>(FindObjectsSortMode.None).Length == 0);
     }
 
     [UnityTest]
@@ -73,7 +73,7 @@ public class FXTests
         
         yield return null;
 
-        ParticleSystem explosion = Object.FindObjectOfType<ParticleSystem>();
+        ParticleSystem explosion = Object.FindAnyObjectByType<ParticleSystem>();
         Assert.IsTrue(explosion != null);
         
         yield return new WaitForSeconds(explosion.main.duration);

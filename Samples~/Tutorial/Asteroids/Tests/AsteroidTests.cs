@@ -17,7 +17,7 @@ public class AsteroidTests
 
     void ClearScene()
     {
-        Transform[] objects = Object.FindObjectsOfType<Transform>();
+        Transform[] objects = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
         foreach (Transform obj in objects)
         {
             if (obj != null)
@@ -56,7 +56,7 @@ public class AsteroidTests
     public void _05_AsteroidPrefabHasRequiredComponentControllerScript()
     {
         Assert.IsNotNull(asteroidPrefab.GetComponent<AsteroidController>());
-        Assert.IsNotNull(asteroidPrefab.GetComponent<AsteroidController>().asteroidExplosion); // Checking if script component has required references 
+        Assert.IsNotNull(asteroidPrefab.GetComponent<AsteroidController>().asteroidExplosion);                      // Checking if script component has required references 
     }
 
     [UnityTest]
@@ -85,12 +85,12 @@ public class AsteroidTests
     {
         ClearScene();
         GameObject asteroid = (GameObject)Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
-        asteroid.GetComponent<AsteroidController>().Split();                                    // Split base asteroid
+        asteroid.GetComponent<AsteroidController>().Split();                                                            // Split base asteroid
         
         yield return null;
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();        // Find all asteroids in the scene
-        Assert.IsTrue(asteroids.Length == 2);                                                   // There should be 2 asteroids in the scene now
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);        // Find all asteroids in the scene
+        Assert.IsTrue(asteroids.Length == 2);                                                                           // There should be 2 asteroids in the scene now
     }
 
     [UnityTest]
@@ -98,18 +98,18 @@ public class AsteroidTests
     {
         ClearScene();
         GameObject asteroid = (GameObject)Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
-        asteroid.GetComponent<AsteroidController>().Split();                                    // Split base asteroid
+        asteroid.GetComponent<AsteroidController>().Split();                                                            // Split base asteroid
         
         yield return null;
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();        // Find all asteroids in the scene
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);        // Find all asteroids in the scene
         foreach(AsteroidController childAsteroid in asteroids)
-            childAsteroid.Split();                                                              // Split found asteroids
+            childAsteroid.Split();                                                                                      // Split found asteroids
         
         yield return null;
 
-        asteroids = Object.FindObjectsOfType<AsteroidController>();                             // Find all asteroids in the scene
-        Assert.IsTrue(asteroids.Length == 4);                                                   // There should be 4 asteroids in the scene now
+        asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);                             // Find all asteroids in the scene
+        Assert.IsTrue(asteroids.Length == 4);                                                                           // There should be 4 asteroids in the scene now
     }
 
     [UnityTest]
@@ -118,24 +118,24 @@ public class AsteroidTests
     {
         ClearScene();
         GameObject asteroid = (GameObject)Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
-        asteroid.GetComponent<AsteroidController>().Split();                                    // Split base asteroid
+        asteroid.GetComponent<AsteroidController>().Split();                                                            // Split base asteroid
         
         yield return null;
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();        // Find all asteroids in the scene
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);        // Find all asteroids in the scene
         foreach (AsteroidController childAsteroid in asteroids)
-            childAsteroid.Split();                                                              // Split found asteroids
+            childAsteroid.Split();                                                                                      // Split found asteroids
         
         yield return null;
 
-        asteroids = Object.FindObjectsOfType<AsteroidController>();                             // Find all asteroids in the scene
+        asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);                             // Find all asteroids in the scene
         foreach (AsteroidController childAsteroid in asteroids)
-            childAsteroid.Split();                                                              // Split found asteroids
+            childAsteroid.Split();                                                                                      // Split found asteroids
         
         yield return null;
 
-        asteroids = Object.FindObjectsOfType<AsteroidController>();                             // Find all asteroids in the scene
-        Assert.IsTrue(asteroids.Length == 0);                                                   // There should be no asteroids left in the scene
+        asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);                             // Find all asteroids in the scene
+        Assert.IsTrue(asteroids.Length == 0);                                                                           // There should be no asteroids left in the scene
     }
 
     [UnityTest]
@@ -144,11 +144,11 @@ public class AsteroidTests
     {
         ClearScene();
         GameObject asteroid = (GameObject)Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
-        asteroid.GetComponent<AsteroidController>().Split();                                    // Split base asteroid
+        asteroid.GetComponent<AsteroidController>().Split();                                                            // Split base asteroid
         
         yield return null;
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();        // Find all asteroids in the scene
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);        // Find all asteroids in the scene
         foreach (AsteroidController childAsteroid in asteroids)  
             Assert.IsTrue(childAsteroid.transform.localScale == new Vector3(0.5f, 0.5f, 0.5f));
     }

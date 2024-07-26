@@ -53,7 +53,7 @@ public class CameraTests
         EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);
         yield return null;
 
-        Assert.IsTrue(Object.FindObjectOfType<Camera>().name == "Camera");
+        Assert.IsTrue(Object.FindAnyObjectByType<Camera>().name == "Camera");
 #else
         yield return null;
 

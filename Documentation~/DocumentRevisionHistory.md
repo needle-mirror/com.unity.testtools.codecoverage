@@ -2,6 +2,7 @@
 
 |Date|Reason|
 |:---|:---|
+|Jul 26, 2024|<li>Corrected formatting in **Using Code Coverage in batchmode** page.<li>Matches package version *1.2.6*.|
 |Dec 20, 2023|<li>Matches package version *1.2.5*.|
 |Jun 02, 2023|<li>Corrected *Settings.json* path in **useProjectSettings** section in *-coverageOptions*.<li>Matches package version *1.2.4*.|
 |Apr 14, 2023|<li>Added **filtersFromFile** section in *-coverageOptions*.<li>Updated **Using Code Coverage with Burst compiler** section with the correct number of dashes for *--burst-disable-compilation*.<li>Matches package version *1.2.3*.|

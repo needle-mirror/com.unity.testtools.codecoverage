@@ -21,7 +21,7 @@ public class SpaceshipTests {
 
     void ClearScene()
     {
-        Transform[] objects = Object.FindObjectsOfType<Transform>();
+        Transform[] objects = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
         foreach (Transform obj in objects)
         {
             if (obj != null)
@@ -109,7 +109,7 @@ public class SpaceshipTests {
         yield return new WaitForFixedUpdate();
         yield return null;
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
         Assert.IsTrue(asteroids.Length > 1);
     }
 
@@ -188,7 +188,7 @@ public class SpaceshipTests {
         ClearScene();
         SpaceshipController spaceship = Object.Instantiate(spaceshipPrefab, Vector3.zero, Quaternion.Euler(0.0f, 0.0f, 0.0f)).GetComponent<SpaceshipController>();
         spaceship.Shoot();
-        ProjectileController projectile = Object.FindObjectOfType<ProjectileController>();
+        ProjectileController projectile = Object.FindAnyObjectByType<ProjectileController>();
         Assert.IsTrue(projectile != null);
     }
 
@@ -203,7 +203,7 @@ public class SpaceshipTests {
         yield return null;
 
         Assert.IsTrue(spaceship == null);
-        DebrisController[] objects = Object.FindObjectsOfType<DebrisController>();
+        DebrisController[] objects = Object.FindObjectsByType<DebrisController>(FindObjectsSortMode.None);
         Assert.IsTrue(objects.Length > 0);
     }
 

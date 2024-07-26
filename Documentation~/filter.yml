@@ -32,6 +32,3 @@ apiRules:
   - exclude:
       uidRegex: UnityEditor.TestTools.CodeCoverage.Tests
       type: namespace
-  - exclude:
-      uidRegex: ^Global Namespace*
-      type: namespace

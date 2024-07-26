@@ -38,7 +38,7 @@ public class GameManagerTests
 
     void ClearScene()
     {
-        Transform[] objects = Object.FindObjectsOfType<Transform>();
+        Transform[] objects = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
         foreach (Transform obj in objects)
         {
             if (obj != null)
@@ -65,7 +65,7 @@ public class GameManagerTests
         EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);
         yield return null;
 
-        Assert.NotNull(Object.FindObjectOfType<GameManager>());
+        Assert.NotNull(Object.FindAnyObjectByType<GameManager>());
 
 #else
         yield return null;
@@ -84,7 +84,7 @@ public class GameManagerTests
 
         yield return null;
 
-        SpaceshipController spaceship = Object.FindObjectOfType<SpaceshipController>();        
+        SpaceshipController spaceship = Object.FindAnyObjectByType<SpaceshipController>();        
         Assert.IsTrue(spaceship != null);
     }
 
@@ -98,7 +98,7 @@ public class GameManagerTests
         yield return null;
 
         GameObject asteroid = Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
-        SpaceshipController spaceship = Object.FindObjectOfType<SpaceshipController>();
+        SpaceshipController spaceship = Object.FindAnyObjectByType<SpaceshipController>();
         spaceship.transform.position = Vector2.right * 10;
         asteroid.transform.position = spaceship.transform.position;
 
@@ -108,7 +108,7 @@ public class GameManagerTests
 
         yield return new WaitForSeconds(GameManager.SPACESHIP_RESPAWN_DELAY);
 
-        spaceship = Object.FindObjectOfType<SpaceshipController>();
+        spaceship = Object.FindAnyObjectByType<SpaceshipController>();
         Assert.IsTrue(spaceship != null);
     }
 
@@ -119,20 +119,20 @@ public class GameManagerTests
         GameManager gameManager = Object.Instantiate(gameManagerPrefab).GetComponent<GameManager>();
         GameManager.InitializeTestingEnvironment(true, false, false, false, false);
 
-        Object.DestroyImmediate(Object.FindObjectOfType<SpaceshipController>());
+        Object.DestroyImmediate(Object.FindAnyObjectByType<SpaceshipController>());
         gameManager.deaths = 2;
         gameManager.RespawnShip(0.0f);
 
         yield return new WaitForSeconds(GameManager.SPACESHIP_RESPAWN_DELAY);
 
-        SpaceshipController spaceship = Object.FindObjectOfType<SpaceshipController>();
+        SpaceshipController spaceship = Object.FindAnyObjectByType<SpaceshipController>();
         Assert.IsTrue(spaceship != null);
         Object.DestroyImmediate(spaceship);
         gameManager.RespawnShip(0.0f);
 
         yield return new WaitForSeconds(GameManager.SPACESHIP_RESPAWN_DELAY);
 
-        spaceship = Object.FindObjectOfType<SpaceshipController>();
+        spaceship = Object.FindAnyObjectByType<SpaceshipController>();
         Assert.IsTrue(spaceship == null);
     }
 
@@ -145,7 +145,7 @@ public class GameManagerTests
 
         yield return null;
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
         Assert.IsTrue(asteroids.Length > 0);                                                   
     }
 
@@ -158,7 +158,7 @@ public class GameManagerTests
 
         yield return new WaitForSeconds(gameManager.asteroidSpawnDelay + 0.5f);
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
         Assert.IsTrue(asteroids.Length > 1);
     }
 
@@ -174,7 +174,7 @@ public class GameManagerTests
         for (int i = 0; i < 100; i++) 
             gameManager.SpawnAsteroids();
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
 
         foreach (AsteroidController roid in asteroids)
         {
@@ -199,7 +199,7 @@ public class GameManagerTests
         for (int i = 0; i < 100; i++)
             gameManager.SpawnAsteroids();
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
         foreach (AsteroidController roid in asteroids)
         {
             if (roid.GetSplitCount() == 2)
@@ -234,7 +234,7 @@ public class GameManagerTests
         yield return null;
 
         score = GameManager.score;
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
 
         foreach(AsteroidController ast in asteroids)
             ast.Split();
@@ -245,7 +245,7 @@ public class GameManagerTests
         yield return null;
 
         score = GameManager.score;
-        asteroids = Object.FindObjectsOfType<AsteroidController>();
+        asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
 
         foreach (AsteroidController ast in asteroids)
             ast.Split();
@@ -267,7 +267,7 @@ public class GameManagerTests
         for (int i = 0; i < 8; i++)
             GameManager.AddToScore(0);
 
-        SpaceshipController spaceship = Object.FindObjectOfType<SpaceshipController>();
+        SpaceshipController spaceship = Object.FindAnyObjectByType<SpaceshipController>();
         Assert.IsTrue(spaceship != null);
         // Weapon changes to laser upon reaching 8000 points
         Assert.IsTrue(spaceship.currentWeapon == SpaceshipController.Weapon.Laser);

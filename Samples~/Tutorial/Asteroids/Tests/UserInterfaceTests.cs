@@ -36,7 +36,7 @@ public class UserInterfaceTests
 
     void ClearScene()
     {
-        Transform[] objects = Object.FindObjectsOfType<RectTransform>();
+        Transform[] objects = Object.FindObjectsByType<RectTransform>(FindObjectsSortMode.None);
         foreach (Transform obj in objects)
         {
             if (obj != null)
@@ -51,7 +51,7 @@ public class UserInterfaceTests
         EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);     
         yield return null;
 
-        Assert.NotNull(Object.FindObjectOfType<InGameMenuController>());
+        Assert.NotNull(Object.FindAnyObjectByType<InGameMenuController>());
 #else
         yield return null;
 

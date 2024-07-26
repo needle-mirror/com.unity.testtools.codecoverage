@@ -207,6 +207,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         public void Debug(string message)
         {
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Verbose);
         }
 
         public void DebugFormat(string format, params object[] args)
@@ -251,6 +252,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         public void Error(string message)
         {
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Error);
         }
 
         public void ErrorFormat(string format, params object[] args)
@@ -263,6 +265,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         public void Info(string message)
         {
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Info);
         }
 
         public void InfoFormat(string format, params object[] args)
@@ -283,6 +286,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         public void Warn(string message)
         {
             m_StringBuilder.AppendLine(message);
+            ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Warning);
         }
 
         public void WarnFormat(string format, params object[] args)

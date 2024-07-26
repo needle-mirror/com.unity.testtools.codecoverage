@@ -24,7 +24,7 @@ public class WeaponTests
 
     void ClearScene()
     {
-        Transform[] objects = Object.FindObjectsOfType<Transform>();
+        Transform[] objects = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
         foreach (Transform obj in objects)
         {
             if(obj != null)
@@ -185,7 +185,7 @@ public class WeaponTests
         yield return new WaitForFixedUpdate();
         yield return null;
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
         Assert.IsTrue(asteroids.Length > 1);
      }
 
@@ -201,7 +201,7 @@ public class WeaponTests
         yield return new WaitForFixedUpdate();
         yield return null;
 
-        AsteroidController[] asteroids = Object.FindObjectsOfType<AsteroidController>();
+        AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
         Assert.IsTrue(asteroids.Length == 2);
     }
 
@@ -231,7 +231,7 @@ public class WeaponTests
 
         yield return null;
 
-        // LaserController laser = Object.FindObjectOfType<LaserController>();
+        // LaserController laser = Object.FindAnyObjectByType<LaserController>();
         // Assert.NotNull(laser);
     }
 */
