@@ -1,4 +1,4 @@
-﻿//
+//
 // OpenCover - S Wilde
 //
 // This source code is released under the MIT License; see the accompanying license file.
@@ -31,18 +31,22 @@ namespace OpenCover.Framework.Model
         /// </summary>
         public FileRef FileRef { get; set; }
 
-        internal UInt32 FileRefUniqueId {
-            get { return FileRef == null? 0 : FileRef.UniqueId; }
+        internal UInt32 FileRefUniqueId
+        {
+            get { return FileRef == null ? 0 : FileRef.UniqueId; }
         }
 
         /// <summary>
         /// A list of sequence points that have been produced for this method
         /// </summary>
-        public SequencePoint[] SequencePoints {
-            get {
+        public SequencePoint[] SequencePoints
+        {
+            get
+            {
                 return _sequencePoints;
             }
-            set {
+            set
+            {
                 _sequencePoints = value ?? new SequencePoint[0];
             }
         }
@@ -51,11 +55,14 @@ namespace OpenCover.Framework.Model
         /// <summary>
         /// A list of branch points that have been identified for this method
         /// </summary>
-        public BranchPoint[] BranchPoints {
-            get {
+        public BranchPoint[] BranchPoints
+        {
+            get
+            {
                 return _branchPoints;
             }
-            set {
+            set
+            {
                 _branchPoints = value ?? new BranchPoint[0];
             }
         }
@@ -126,7 +133,7 @@ namespace OpenCover.Framework.Model
         /// </summary>
         [XmlAttribute("isGetter")]
         public bool IsGetter { get; set; }
-        
+
         /// <summary>
         /// Is this method a property setter
         /// </summary>
@@ -140,42 +147,49 @@ namespace OpenCover.Framework.Model
         public override void MarkAsSkipped(SkippedMethod reason)
         {
             SkippedDueTo = reason;
-            if (MethodPoint != null) 
+            if (MethodPoint != null)
                 MethodPoint.IsSkipped = true;
             MethodPoint = null;
             SequencePoints = null;
             BranchPoints = null;
         }
 
-        #region IsGenerated & CallName  
+        #region IsGenerated & CallName
 
         /// <summary>
-        /// True if this.FullName matches generated-method-regex-pattern 
+        /// True if this.FullName matches generated-method-regex-pattern
         /// </summary>
-        internal bool IsGenerated {
-            get {
-        		if (_resolvedIsGenerated == null) {
-                        _resolvedIsGenerated = !(string.IsNullOrEmpty(FullName) || FullName.Trim().Length == 0)
-                        && FullName.Contains("__") // quick test before using regex heavy weapon
-                        && IsGeneratedMethodRegex.IsMatch(FullName); 
-        		}
-        		return _resolvedIsGenerated == true;
+        internal bool IsGenerated
+        {
+            get
+            {
+                if (_resolvedIsGenerated == null)
+                {
+                    _resolvedIsGenerated = !(string.IsNullOrEmpty(FullName) || FullName.Trim().Length == 0)
+                    && FullName.Contains("__") // quick test before using regex heavy weapon
+                    && IsGeneratedMethodRegex.IsMatch(FullName);
+                }
+                return _resolvedIsGenerated == true;
             }
         }
 
         /// <summary>
         /// Method "::CallName(". (Name excluding return type, namespace and arguments)
         /// </summary>
-        internal string CallName {
-            get {
+        internal string CallName
+        {
+            get
+            {
                 if (_resolvedCallName != null)
                     return _resolvedCallName;
                 _resolvedCallName = string.Empty; // init resolve value
-                if (!(string.IsNullOrEmpty(FullName) || FullName.Trim().Length == 0)) {
+                if (!(string.IsNullOrEmpty(FullName) || FullName.Trim().Length == 0))
+                {
                     var startIndex = FullName.IndexOf("::", StringComparison.Ordinal);
                     startIndex += 2;
                     var finalIndex = FullName.IndexOf('(', startIndex);
-                    if (startIndex > 1 && finalIndex > startIndex) {
+                    if (startIndex > 1 && finalIndex > startIndex)
+                    {
                         _resolvedCallName = FullName // resolve cache
                             .Substring(startIndex, finalIndex - startIndex);
                     }
@@ -190,6 +204,5 @@ namespace OpenCover.Framework.Model
         private static readonly Regex IsGeneratedMethodRegex = new Regex(@"(<[^\s:>]+>\w__\w)", RegexOptions);
 
         #endregion
-
     }
 }

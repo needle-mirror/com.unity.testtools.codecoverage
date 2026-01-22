@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEditor.TestTools.CodeCoverage.Analytics;
 using UnityEngine;
 

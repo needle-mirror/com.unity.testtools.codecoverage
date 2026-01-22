@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace OpenCover.Framework
 {
@@ -13,7 +13,7 @@ namespace OpenCover.Framework
         public static T Do<T>(this T value, Action<T> action)
             where T : class
         {
-            if (value != null) 
+            if (value != null)
                 action(value);
             return value;
         }

@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace UnityEditor.TestTools.CodeCoverage
 {
     internal class CoverageSettings
@@ -12,8 +10,8 @@ namespace UnityEditor.TestTools.CodeCoverage
         public string rootFolderName = "CodeCoverage";
         public string resultsPathFromCommandLine;
         public string resultsFileName = "TestCoverageResults";
-        public string resultsFileExtension;
-        public string resultsFolderSuffix;
+        public string resultsFileExtension = "xml";
+        public string resultsFolderSuffix = "-opencov";
         public string resultsFolderPath;
         public string resultsRootFolderPath;
         public string resultsFilePath;

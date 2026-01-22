@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -173,14 +173,14 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
             if (EnsureFolderExists(historyFolderPath))
             {
                 historyFolderPath = NormaliseFolderSeparators(historyFolderPath, true);
-                
-                // If historyFolderPath == rootFolderPath, add 'Report-history' sub directory in rootFolderPath 
+
+                // If historyFolderPath == rootFolderPath, add 'Report-history' sub directory in rootFolderPath
                 if (string.Equals(historyFolderPath, rootFolderPath, StringComparison.InvariantCultureIgnoreCase))
                 {
                     addHistorySubDir = true;
                 }
                 // If historyFolderPath == projectPath, add 'CodeCoverage' directory to projectPath
-                // and add 'Report-history' sub directory in rootFolderPath 
+                // and add 'Report-history' sub directory in rootFolderPath
                 else if (string.Equals(historyFolderPath, projectPath, StringComparison.InvariantCultureIgnoreCase))
                 {
                     rootFolderPath = JoinPaths(projectPath, coverageSettings.rootFolderName);

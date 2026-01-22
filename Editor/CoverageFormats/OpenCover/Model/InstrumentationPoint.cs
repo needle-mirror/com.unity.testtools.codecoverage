@@ -17,7 +17,7 @@ namespace OpenCover.Framework.Model
         static InstrumentationPoint()
         {
             _instrumentPoint = 0;
-            InstrumentPoints = new List<InstrumentationPoint>(8192) {null};
+            InstrumentPoints = new List<InstrumentationPoint>(8192) { null };
         }
 
         internal static void Clear()
@@ -36,7 +36,7 @@ namespace OpenCover.Framework.Model
                 .ToList();
 
             var max = (int)points.Max(x => x.UniqueSequencePoint);
-            
+
             InstrumentPoints.Clear();
             InstrumentPoints.Add(null);
 
@@ -58,7 +58,8 @@ namespace OpenCover.Framework.Model
         /// <summary>
         /// Return the number of visit points
         /// </summary>
-        public static int Count {
+        public static int Count
+        {
             get { return InstrumentPoints.Count; }
         }
 
@@ -68,7 +69,7 @@ namespace OpenCover.Framework.Model
         /// <param name="spid">the sequence point identifier - NOTE 0 is not used</param>
         public static int GetVisitCount(uint spid)
         {
-            return InstrumentPoints[(int) spid].VisitCount;
+            return InstrumentPoints[(int)spid].VisitCount;
         }
 
         /// <summary>
@@ -81,7 +82,7 @@ namespace OpenCover.Framework.Model
         {
             if (spid != 0 && spid < InstrumentPoints.Count)
             {
-                var point = InstrumentPoints[(int) spid];
+                var point = InstrumentPoints[(int)spid];
                 point.VisitCount += amount;
                 if (point.VisitCount < 0)
                 {
@@ -102,7 +103,7 @@ namespace OpenCover.Framework.Model
             var tracked = point._tracked.Find(x => x.UniqueId == trackedMethodId);
             if (tracked == null)
             {
-                tracked = new TrackedMethodRef {UniqueId = trackedMethodId, VisitCount = amount};
+                tracked = new TrackedMethodRef { UniqueId = trackedMethodId, VisitCount = amount };
                 point._tracked.Add(tracked);
             }
             else
@@ -110,7 +111,7 @@ namespace OpenCover.Framework.Model
                 tracked.VisitCount += amount;
                 if (tracked.VisitCount < 0)
                     tracked.VisitCount = int.MaxValue;
-            }            
+            }
         }
 
         private List<TrackedMethodRef> _tracked;
@@ -175,14 +176,14 @@ namespace OpenCover.Framework.Model
             set
             {
                 _tracked = null;
-                if (value == null) 
+                if (value == null)
                     return;
                 _tracked = new List<TrackedMethodRef>(value);
             }
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         [XmlIgnore]
         public UInt32 OrigSequencePoint { get; set; }

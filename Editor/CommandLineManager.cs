@@ -189,9 +189,9 @@ namespace UnityEditor.TestTools.CodeCoverage
         private string m_CoverageOptionsArg;
         private string m_IncludeAssemblies;
         private string m_ExcludeAssemblies;
-        private string m_IncludePaths;
-        private string m_ExcludePaths;
+        private bool m_HasIncludePaths;
         private string m_PathReplacePatterns;
+        private readonly List<(String filter, bool isIncluded)> m_PathFiltersList;
 
         public CommandLineManagerImplementation(string[] commandLineArgs)
         {
@@ -224,9 +224,9 @@ namespace UnityEditor.TestTools.CodeCoverage
             m_CoverageOptionsArg = string.Empty;
             m_IncludeAssemblies = string.Empty;
             m_ExcludeAssemblies = string.Empty;
-            m_IncludePaths = string.Empty;
-            m_ExcludePaths = string.Empty;
+            m_HasIncludePaths = false;
             m_PathReplacePatterns = string.Empty;
+            m_PathFiltersList = new List<(String, bool)>();
 
             CommandLineOptionSet optionSet = new CommandLineOptionSet(
                 new CommandLineOption("enableCodeCoverage", () => { runFromCommandLine = true; }),
@@ -343,7 +343,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 if (indexOfColon > 0)
                 {
                     optionName = optionArgsStr.Substring(0, indexOfColon);
-                    optionArgs = optionArgsStr.Substring(indexOfColon+1);
+                    optionArgs = optionArgsStr.Substring(indexOfColon + 1);
                 }
 
                 switch (optionName.ToUpperInvariant())
@@ -416,8 +416,6 @@ namespace UnityEditor.TestTools.CodeCoverage
                     case "ASSEMBLYFILTERS":
                         if (optionArgs.Length > 0)
                         {
-                            assemblyFiltersSpecified = true;
-
                             string[] assemblyFilters = optionArgs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
                             ParseAssemblyFilters(assemblyFilters);
@@ -434,7 +432,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                             {
                                 try
                                 {
-                                    ParsePathFilters( GetPathFiltersFromFile(optionArgs) );
+                                    ParsePathFilters(GetPathFiltersFromFile(optionArgs));
                                 }
                                 catch (Exception e)
                                 {
@@ -481,8 +479,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                                 ResultsLogger.Log(ResultID.Warning_FailedToExtractFiltersFromFile, e.Message, optionArgs);
                             }
                         }
-                            break;
-                        
+                        break;
 
                     case "PATHREPLACEPATTERNS":
                         if (optionArgs.Length > 0)
@@ -516,18 +513,16 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (m_IncludeAssemblies.Length == 0)
             {
-                // If there are no inlcudedAssemblies specified but there are includedPaths specified
+                // If there are no includedAssemblies specified but there are includedPaths specified
                 // then include all project assemblies so path filtering can take precedence over assembly filtering,
-                // othewise if there are no includedPaths specified neither then inlcude just the user assemblies (found under the Assets folder)
-
-                if (m_IncludePaths.Length > 0)
-                    m_IncludeAssemblies = AssemblyFiltering.GetAllProjectAssembliesString();
-                else
-                    m_IncludeAssemblies = AssemblyFiltering.GetUserOnlyAssembliesString();
+                // otherwise if there are no includedPaths specified neither then include just the user assemblies (found under the Assets folder)
+                m_IncludeAssemblies = m_HasIncludePaths ?
+                    AssemblyFiltering.GetAllProjectAssembliesString() :
+                    AssemblyFiltering.GetUserOnlyAssembliesString();
             }
 
             assemblyFiltering.Parse(m_IncludeAssemblies, m_ExcludeAssemblies);
-            pathFiltering.Parse(m_IncludePaths, m_ExcludePaths);
+            pathFiltering.Parse(m_PathFiltersList);
             pathReplacing.Parse(m_PathReplacePatterns);
         }
 
@@ -585,6 +580,10 @@ namespace UnityEditor.TestTools.CodeCoverage
                     ResultsLogger.Log(ResultID.Warning_AssemblyFiltersNotPrefixed, filter);
                 }
             }
+
+            if (!string.IsNullOrEmpty(m_IncludeAssemblies) ||
+                !string.IsNullOrEmpty(m_ExcludeAssemblies))
+                assemblyFiltersSpecified = true;
         }
 
         private void ParsePathFilters(string[] pathFilters)
@@ -598,7 +597,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 string filter = pathFilters[i];
                 string filterBody = filter.Length > 1 ? filter.Substring(1) : string.Empty;
 
-                var isRelative = !filterBody.StartsWith("*") && !filterBody.StartsWith("?") && string.IsNullOrEmpty(Path.GetPathRoot(filterBody));
+                var isRelative = !filterBody.StartsWith("*") && !filterBody.StartsWith("?") && !filterBody.StartsWith("<") && string.IsNullOrEmpty(Path.GetPathRoot(filterBody));
                 //If current path is relative - expand it to an absolute path using specified source paths
                 if (isRelative && sourcePathsSpecified)
                 {
@@ -614,15 +613,12 @@ namespace UnityEditor.TestTools.CodeCoverage
 
                 if (filter.StartsWith("+", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (m_IncludePaths.Length > 0)
-                        m_IncludePaths += ",";
-                    m_IncludePaths += filterBody;
+                    m_PathFiltersList.Add((filterBody, true));
+                    m_HasIncludePaths = true;
                 }
                 else if (filter.StartsWith("-", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (m_ExcludePaths.Length > 0)
-                        m_ExcludePaths += ",";
-                    m_ExcludePaths += filterBody;
+                    m_PathFiltersList.Add((filterBody, false));
                 }
                 else
                 {
@@ -630,7 +626,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 }
             }
 
-            if (m_IncludePaths.Length > 0 || m_ExcludePaths.Length > 0)
+            if (m_PathFiltersList.Count > 0)
                 pathFiltersSpecified = true;
         }
 

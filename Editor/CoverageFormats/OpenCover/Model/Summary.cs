@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace OpenCover.Framework.Model
@@ -98,6 +94,5 @@ namespace OpenCover.Framework.Model
         /// </summary>
         [XmlAttribute("numMethods")]
         public int NumMethods { get; set; }
-
     }
 }

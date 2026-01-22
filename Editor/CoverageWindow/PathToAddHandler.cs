@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System;
 using UnityEngine;
 using UnityEditor.TestTools.CodeCoverage.Utils;
@@ -60,7 +60,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 if (m_PathFilterType == PathFilterType.Include)
                 {
                     m_Parent.PathsToInclude = m_PathsToFilter;
-                } 
+                }
                 else
                 {
                     m_Parent.PathsToExclude = m_PathsToFilter;

@@ -1,11 +1,14 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class SpaceshipController : MonoBehaviour
 {
     public GameObject spaceshipDebris;
     public WeaponList weaponList;
     public Vector2 direction = Vector2.zero;
-
+    PlayerInput playerInput;
+    InputAction moveAction;
+    InputAction shotAction;
     bool isColliding = false;
 
     public enum Weapon
@@ -17,6 +20,13 @@ public class SpaceshipController : MonoBehaviour
     public Weapon currentWeapon = Weapon.Basic;
     private GameObject weaponInstance;
 
+    void Awake()
+    {
+        playerInput = GetComponent<PlayerInput>();
+        moveAction = playerInput.actions["Move"];
+        shotAction = playerInput.actions["Jump"];
+    }
+
     private void Update()
     {
         if (!GameManager.IsPaused)
@@ -25,14 +35,15 @@ public class SpaceshipController : MonoBehaviour
 
     public void Move()
     {
-        float horizontalAxis = Input.GetAxis("Horizontal");
-        float verticalAxis = Input.GetAxis("Vertical");
+        Vector2 moveInput = moveAction.ReadValue<Vector2>();
+        float horizontalAxis = moveInput.x;
+        float verticalAxis = moveInput.y;
 
         if (verticalAxis > 0.0f)
             Thrust(verticalAxis);
         if (Mathf.Abs(horizontalAxis) > 0.0f)
             Turn(horizontalAxis);
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (shotAction.triggered)
             Shoot();
 
         transform.position += (Vector3)direction * Time.deltaTime * 4.0f;
@@ -68,7 +79,7 @@ public class SpaceshipController : MonoBehaviour
                 weaponInstance.transform.up = transform.up;
                 weaponInstance.transform.parent = transform;
                 break;
-             default:
+            default:
                 Debug.LogError("Invalid weapon state.");
                 break;
         }
@@ -77,7 +88,7 @@ public class SpaceshipController : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         // Preventing multiple collision triggers on the same frame
-        if (isColliding) 
+        if (isColliding)
             return;
 
         AsteroidController asteroidController = collision.gameObject.GetComponent<AsteroidController>();
@@ -85,7 +96,7 @@ public class SpaceshipController : MonoBehaviour
         if (asteroidController)
         {
             asteroidController.Split();
-            if(GameManager.instance != null)
+            if (GameManager.instance != null)
                 GameManager.instance.RespawnShip();
             Instantiate(spaceshipDebris, transform.position, transform.GetChild(0).rotation);
             Destroy(gameObject);
@@ -95,41 +106,44 @@ public class SpaceshipController : MonoBehaviour
 
     private void CalculatePositionOnCamera()
     {
-        if (Camera.main != null)
+        if (Camera.main == null)
+            return;
+
+        Vector2 positionOnCamera = Camera.main.WorldToViewportPoint(transform.position);
+        Vector2 wrappedPosition = positionOnCamera;
+        bool warped = false;
+
+        if (positionOnCamera.x > 1.05f)
         {
-            bool warped = false;
+            wrappedPosition.x = -0.05f;
+            warped = true;
+        }
+        else if (positionOnCamera.x < -0.05f)
+        {
+            wrappedPosition.x = 1.05f;
+            warped = true;
+        }
 
-            Vector2 positionOnCamera = Camera.main.WorldToViewportPoint(transform.position);
-            if (positionOnCamera.x > 1.05f)
-            {
-                warped = true;
-                transform.position = (Vector2)Camera.main.ViewportToWorldPoint(new Vector2(-0.05f, positionOnCamera.y));
-            }
-            else if (positionOnCamera.x < -0.05f)
-            {
-                warped = true;
-                transform.position = (Vector2)Camera.main.ViewportToWorldPoint(new Vector2(1.05f, positionOnCamera.y));
-            }
-            else if (positionOnCamera.y > 1.05f)
-            {
-                warped = true;
-                transform.position = (Vector2)Camera.main.ViewportToWorldPoint(new Vector2(positionOnCamera.x, -0.05f));
-            }
-            else if (positionOnCamera.y < -0.05f)
-            {
-                warped = true;
-                transform.position = (Vector2)Camera.main.ViewportToWorldPoint(new Vector2(positionOnCamera.x, 1.05f));
-            }
+        if (positionOnCamera.y > 1.05f)
+        {
+            wrappedPosition.y = -0.05f;
+            warped = true;
+        }
+        else if (positionOnCamera.y < -0.05f)
+        {
+            wrappedPosition.y = 1.05f;
+            warped = true;
+        }
 
-            if (warped)
-            {
-                transform.GetChild(0).GetChild(0).GetComponent<EngineTrail>().ClearParticles();
-            }
+        if (warped)
+        {
+            transform.position = (Vector2)Camera.main.ViewportToWorldPoint(wrappedPosition);
+            transform.GetChild(0).GetChild(0).GetComponent<EngineTrail>().ClearParticles();
         }
     }
 
     public void UpdateWeapon(int score)
-    {     
+    {
         Weapon weapon = Weapon.Basic;
 
         if (score >= 8000)

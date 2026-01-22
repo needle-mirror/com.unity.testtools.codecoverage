@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor.IMGUI.Controls;
 
 namespace UnityEditor.TestTools.CodeCoverage

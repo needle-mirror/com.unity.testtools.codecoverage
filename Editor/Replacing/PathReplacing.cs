@@ -1,8 +1,6 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEditor.TestTools.CodeCoverage.Utils;
-using UnityEngine;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -20,7 +18,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             string[] replacePatternsArray = replacePatterns.Split(',');
 
-            // There should be at least one pair 
+            // There should be at least one pair
             m_HasPathReplacePatterns = replacePatternsArray.Length > 1;
 
             if (m_HasPathReplacePatterns)
@@ -55,7 +53,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         Regex CreateFilterRegex(string filter)
         {
             filter = CoverageUtils.NormaliseFolderSeparators(filter);
-          
+
             return new Regex(CoverageUtils.GlobToRegex(filter, false), RegexOptions.Compiled | RegexOptions.IgnoreCase);
         }
     }

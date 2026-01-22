@@ -1,4 +1,3 @@
-using UnityEngine;
 using UnityEditor.TestTools.CodeCoverage.OpenCover;
 using UnityEditor.TestTools.CodeCoverage.Analytics;
 
@@ -31,19 +30,8 @@ namespace UnityEditor.TestTools.CodeCoverage
         {
             m_CoverageReporter = null;
 
-            // Use OpenCover format as currently this is the only one supported
-            CoverageFormat coverageFormat = CoverageFormat.OpenCover;
-
-            switch (coverageFormat)
-            {
-                case CoverageFormat.OpenCover:
-                    m_CoverageSettings.resultsFileExtension = "xml";
-                    m_CoverageSettings.resultsFolderSuffix = "-opencov";
-                    m_CoverageSettings.resultsFileName = CoverageRunData.instance.isRecording ? "RecordingCoverageResults" : "TestCoverageResults";
-
-                    m_CoverageReporter = new OpenCoverReporter();
-                    break;
-            }
+            m_CoverageSettings.resultsFileName = CoverageRunData.instance.isRecording ? "RecordingCoverageResults" : "TestCoverageResults";
+            m_CoverageReporter = new OpenCoverReporter();
 
             if (m_CoverageReporter != null)
             {
@@ -68,7 +56,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 {
                     if (CommandLineManager.instance.useProjectSettings)
                     {
-                        shouldAutoGenerateReport =  cmdLineGenerateHTMLReport ||
+                        shouldAutoGenerateReport = cmdLineGenerateHTMLReport ||
                                                     cmdLineGenerateBadge ||
                                                     cmdLineGenerateAdditionalReports ||
                                                     (autoGenerateReport && (generateHTMLReport || generateBadge || generateAdditionalReports));
@@ -80,12 +68,12 @@ namespace UnityEditor.TestTools.CodeCoverage
                 }
                 else
                 {
-                    shouldAutoGenerateReport =  cmdLineGenerateHTMLReport ||
+                    shouldAutoGenerateReport = cmdLineGenerateHTMLReport ||
                                                 cmdLineGenerateBadge ||
                                                 cmdLineGenerateAdditionalReports ||
                                                 (autoGenerateReport && (generateHTMLReport || generateBadge || generateAdditionalReports));
                 }
-            } 
+            }
             else
             {
                 shouldAutoGenerateReport = autoGenerateReport && (generateHTMLReport || generateBadge || generateAdditionalReports);
@@ -117,13 +105,13 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public CoverageReportGenerator ReportGenerator
         {
-            get 
+            get
             {
                 if (m_ReportGenerator == null)
                     m_ReportGenerator = new CoverageReportGenerator();
 
                 return m_ReportGenerator;
-            }         
+            }
         }
     }
 }

@@ -1,10 +1,9 @@
-﻿//
+//
 // OpenCover - S Wilde
 //
 // This source code is released under the MIT License; see the accompanying license file.
 //
 
-using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -14,7 +13,7 @@ namespace OpenCover.Framework.Model
     /// a sequence point
     /// </summary>
     public class SequencePoint : InstrumentationPoint, IDocumentReference
-    {        
+    {
         /// <summary>
         /// The start line of the sequence point
         /// </summary>
@@ -47,15 +46,15 @@ namespace OpenCover.Framework.Model
         /// </summary>
         [XmlAttribute("bec")]
         public int BranchExitsCount { get; set; }
-        
+
         /// <summary>
-        /// Visit count of merged branches 
+        /// Visit count of merged branches
         /// </summary>
         [XmlAttribute("bev")]
         public int BranchExitsVisit { get; set; }
 
         /// <summary>
-        /// The file associated with the supplied startline 
+        /// The file associated with the supplied startline
         /// </summary>
         [XmlAttribute("fileid")]
         public uint FileId { get; set; }
@@ -65,12 +64,15 @@ namespace OpenCover.Framework.Model
         /// </summary>
         [XmlAttribute("url")]
         public string Document { get; set; }
-        
-        internal List<BranchPoint> BranchPoints {
-            get{
+
+        internal List<BranchPoint> BranchPoints
+        {
+            get
+            {
                 return _branchPoints;
             }
-            set{
+            set
+            {
                 _branchPoints = value ?? new List<BranchPoint>();
             }
         }
@@ -79,10 +81,12 @@ namespace OpenCover.Framework.Model
         /// <summary>
         /// Property
         /// </summary>
-        public bool IsSingleCharSequencePoint {
-        	get {
-	            return (StartLine == EndLine) && (EndColumn - StartColumn) == 1;
-        	}
+        public bool IsSingleCharSequencePoint
+        {
+            get
+            {
+                return (StartLine == EndLine) && (EndColumn - StartColumn) == 1;
+            }
         }
 
         /// <summary>
@@ -90,7 +94,8 @@ namespace OpenCover.Framework.Model
         /// </summary>
         /// <param name="sp"></param>
         /// <returns></returns>
-        private bool IsLineEqual (SequencePoint sp) {
+        private bool IsLineEqual(SequencePoint sp)
+        {
             return StartLine == sp.StartLine && EndLine == sp.EndLine;
         }
 
@@ -99,7 +104,8 @@ namespace OpenCover.Framework.Model
         /// </summary>
         /// <param name="sp"></param>
         /// <returns></returns>
-        private bool IsColumnEqual (SequencePoint sp) {
+        private bool IsColumnEqual(SequencePoint sp)
+        {
             return StartColumn == sp.StartColumn && EndColumn == sp.EndColumn;
         }
 
@@ -108,8 +114,9 @@ namespace OpenCover.Framework.Model
         /// </summary>
         /// <param name="sp"></param>
         /// <returns></returns>
-        public bool IsPositionEqual (SequencePoint sp) {
-            return sp != null && IsLineEqual (sp) && IsColumnEqual (sp);
+        public bool IsPositionEqual(SequencePoint sp)
+        {
+            return sp != null && IsLineEqual(sp) && IsColumnEqual(sp);
         }
 
         /// <summary>
@@ -117,7 +124,8 @@ namespace OpenCover.Framework.Model
         /// </summary>
         /// <param name="sp"></param>
         /// <returns></returns>
-        public bool IsFileIdEqual (SequencePoint sp) {
+        public bool IsFileIdEqual(SequencePoint sp)
+        {
             return sp != null && FileId != 0 && FileId == sp.FileId;
         }
     }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
@@ -27,7 +27,7 @@ public class WeaponTests
         Transform[] objects = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None);
         foreach (Transform obj in objects)
         {
-            if(obj != null)
+            if (obj != null)
                 Object.DestroyImmediate(obj.gameObject);
         }
     }
@@ -106,7 +106,7 @@ public class WeaponTests
         ProjectileController projectile = Object.Instantiate(projectilePrefab, Vector3.zero, Quaternion.identity).GetComponent<ProjectileController>();
         projectile.SetDirection(Vector2.up);
         Assert.IsTrue(projectile.GetDirection() == Vector2.up);
-        
+
         float t = 0.5f;
         while (t > 0.0f)
         {
@@ -123,10 +123,10 @@ public class WeaponTests
         ClearScene();
         ProjectileController projectile = Object.Instantiate(projectilePrefab, Vector3.zero, Quaternion.identity).GetComponent<ProjectileController>();
         projectile.SetDirection(new Vector2(0.714f, -0.156f).normalized);
-        
+
         yield return null;
 
-        Assert.IsTrue((Vector2)projectile.transform.up == projectile.GetDirection());  
+        Assert.IsTrue((Vector2)projectile.transform.up == projectile.GetDirection());
     }
 
     [UnityTest]
@@ -134,9 +134,9 @@ public class WeaponTests
     {
         ClearScene();
         ProjectileController projectile = Object.Instantiate(projectilePrefab, Vector3.right * 100, Quaternion.identity).GetComponent<ProjectileController>();
-        
+
         yield return null;
-        
+
         Assert.IsTrue(projectile == null);
     }
 
@@ -155,11 +155,11 @@ public class WeaponTests
         ClearScene();
         GameObject projectile = Object.Instantiate(projectilePrefab, Vector3.zero, Quaternion.identity);
         Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
-        
+
         yield return new WaitForFixedUpdate();
         yield return null;
 
-        Assert.IsTrue(projectile == null);                                       
+        Assert.IsTrue(projectile == null);
     }
 
     [UnityTest]
@@ -168,7 +168,7 @@ public class WeaponTests
         ClearScene();
         GameObject projectile = Object.Instantiate(projectilePrefab, Vector3.zero, Quaternion.identity);
         Object.Instantiate(spaceshipPrefab, Vector2.zero, Quaternion.identity);
-        
+
         yield return new WaitForFixedUpdate();
         yield return null;
 
@@ -187,7 +187,7 @@ public class WeaponTests
 
         AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
         Assert.IsTrue(asteroids.Length > 1);
-     }
+        }
 
 
     [UnityTest]
@@ -214,7 +214,7 @@ public class WeaponTests
         projectile.SetDirection(Vector2.up);
         Vector3 startPosition = projectile.transform.position;
         GameManager.IsPaused = true;
-        
+
         for (int i = 0; i < 10; i++)
             yield return null;
 

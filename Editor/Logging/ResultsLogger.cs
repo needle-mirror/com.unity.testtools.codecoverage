@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEditor.TestTools.CodeCoverage.Analytics;
 using UnityEngine;
@@ -11,7 +11,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
         public LogType type;
         // Result message
         public string message;
-        
+
         public ResultData(LogType type, string message)
         {
             this.type = type;
@@ -125,7 +125,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
                 case LogType.Assert:
                     CoverageAnalytics.instance.AddResult(resultId);
                     CoverageAnalytics.instance.SendCoverageEvent(false);
-                    Debug.Assert(false, message);                     
+                    Debug.Assert(false, message);
                     break;
                 case LogType.Log:
                 default:
@@ -153,7 +153,7 @@ namespace UnityEditor.TestTools.CodeCoverage.Utils
                 Console.WriteLine(message);
                 return true;
             }
-  
+
             return false;
         }
     }

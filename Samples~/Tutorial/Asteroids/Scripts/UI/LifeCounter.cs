@@ -1,13 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public class LifeCounter : MonoBehaviour 
+public class LifeCounter : MonoBehaviour
 {
     public static LifeCounter instance;
-
     int previousLifeCount = 3;
-
     Animator[] lives;
-
     public Sprite lifeVisual;
     public Sprite emptyLifeVisual;
 
@@ -29,7 +26,7 @@ public class LifeCounter : MonoBehaviour
         if (currentLives > 3)
             currentLives = 3;
 
-        if(currentLives <= previousLifeCount)
+        if (currentLives <= previousLifeCount)
         {
             for (int i = 0; i < 3; i++)
             {
@@ -57,7 +54,7 @@ public class LifeCounter : MonoBehaviour
                 }
             }
         }
-           
+
         previousLifeCount = currentLives;
     }
 }

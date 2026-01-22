@@ -4,16 +4,19 @@ using UnityEditor.TestTools.CodeCoverage.Analytics;
 namespace UnityEditor.TestTools.CodeCoverage
 {
     /// <summary>
-    /// Events invoked during a code coverage session. A code coverage session is the period between starting and finishing capturing code coverage data. 
+    /// Events invoked during a code coverage session. A code coverage session is the period between starting and finishing capturing code coverage data.
     /// </summary>
     /// <example>
+    /// <para>
     /// In the following example we create event handler methods which subscribe to the <see cref="Events.onCoverageSessionStarted"/>, <see cref="Events.onCoverageSessionFinished"/>, <see cref="Events.onCoverageSessionPaused"/> and <see cref="Events.onCoverageSessionUnpaused"/> events.
-    /// We use the <see href="https://docs.unity3d.com/ScriptReference/InitializeOnLoadAttribute.html">InitializeOnLoad</see> attribute to make sure that they will resubscribe on Domain Reload, when we enter Play Mode for example.
+    /// We use the <a href="https://docs.unity3d.com/ScriptReference/InitializeOnLoadAttribute.html">InitializeOnLoad</a> attribute to make sure that they will resubscribe on Domain Reload, when we enter Play Mode for example.
+    /// </para>
+    /// 
     /// <code>
     /// using UnityEngine;
     /// using UnityEditor;
     /// using UnityEditor.TestTools.CodeCoverage;
-    /// 
+    ///
     /// [InitializeOnLoad]
     /// public class CoverageSessionListener
     /// {
@@ -77,7 +80,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             {
                 CoverageAnalytics.instance.CurrentCoverageEvent.useEvent_onCoverageSessionStarted = true;
                 onCoverageSessionStarted.Invoke(CoverageEventData.instance.GetCoverageSessionInfo());
-            }    
+            }
         }
 
         internal static void InvokeOnCoverageSessionFinished()

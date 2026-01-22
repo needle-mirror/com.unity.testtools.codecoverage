@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public class ProjectileController : BaseProjectile 
+public class ProjectileController : BaseProjectile
 {
     private Vector2 direction = Vector2.right;
 

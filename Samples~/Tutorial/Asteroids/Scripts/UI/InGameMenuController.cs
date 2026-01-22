@@ -1,18 +1,27 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class InGameMenuController : MonoBehaviour 
+public class InGameMenuController : MonoBehaviour
 {
-    private GameObject pauseMenu;
-    private bool pauseMenuActive = false;
+    GameObject pauseMenu;
+    bool pauseMenuActive = false;
+    PlayerInput playerInput;
+    InputAction pauseAction;
 
-	void Start()
+    void Awake()
+    {
+        playerInput = GetComponent<PlayerInput>();
+        pauseAction = playerInput.actions["Cancel"];
+    }
+
+    void Start()
     {
         pauseMenu = transform.GetChild(0).gameObject;
     }
 
     void Update()
     {
-        if (Input.GetButtonDown("Cancel"))
+        if (pauseAction.triggered)
             ChangeMenuState(!pauseMenuActive);
     }
 

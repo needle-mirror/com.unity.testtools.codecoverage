@@ -24,12 +24,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1019787296165444}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114472804864517158
 MonoBehaviour:
@@ -43,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 442ac454dde377b499a5106b58789677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  asteroidsScene: {fileID: 102900000, guid: 99c9720ab356a0642a771bea13969a05, type: 3}
+  asteroidsScene: {fileID: 102900000, guid: 8b4c2b3362926439ab2a98879e95130f, type: 3}
   spaceshipPrefab: {fileID: 1546399597766936, guid: 6168cd56cd6c54ceea9dce5cbd70458a, type: 3}
   cameraPrefab: {fileID: 1859710063229298, guid: 1a06aa0896835ab4d92672582ee1742e, type: 3}
   asteroidPrefab: {fileID: 1653686695687168, guid: 6ef8c70ee398040cd96c9c6b046d7ee0, type: 3}

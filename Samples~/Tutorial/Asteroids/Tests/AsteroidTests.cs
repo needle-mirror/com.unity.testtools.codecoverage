@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
@@ -56,7 +56,7 @@ public class AsteroidTests
     public void _05_AsteroidPrefabHasRequiredComponentControllerScript()
     {
         Assert.IsNotNull(asteroidPrefab.GetComponent<AsteroidController>());
-        Assert.IsNotNull(asteroidPrefab.GetComponent<AsteroidController>().asteroidExplosion);                      // Checking if script component has required references 
+        Assert.IsNotNull(asteroidPrefab.GetComponent<AsteroidController>().asteroidExplosion);                      // Checking if script component has required references
     }
 
     [UnityTest]
@@ -65,7 +65,7 @@ public class AsteroidTests
         ClearScene();
         GameObject asteroid = (GameObject)Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
         asteroid.GetComponent<AsteroidController>().Split();
-        
+
         yield return null;
 
         Assert.IsTrue(asteroid == null, "Base asteroid was not destroyed on Split");
@@ -81,12 +81,12 @@ public class AsteroidTests
     }
 
     [UnityTest]
-    public IEnumerator _08_AsteroidCanSplitIntoTwo() 
+    public IEnumerator _08_AsteroidCanSplitIntoTwo()
     {
         ClearScene();
         GameObject asteroid = (GameObject)Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
         asteroid.GetComponent<AsteroidController>().Split();                                                            // Split base asteroid
-        
+
         yield return null;
 
         AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);        // Find all asteroids in the scene
@@ -99,13 +99,13 @@ public class AsteroidTests
         ClearScene();
         GameObject asteroid = (GameObject)Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
         asteroid.GetComponent<AsteroidController>().Split();                                                            // Split base asteroid
-        
+
         yield return null;
 
         AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);        // Find all asteroids in the scene
-        foreach(AsteroidController childAsteroid in asteroids)
+        foreach (AsteroidController childAsteroid in asteroids)
             childAsteroid.Split();                                                                                      // Split found asteroids
-        
+
         yield return null;
 
         asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);                             // Find all asteroids in the scene
@@ -114,24 +114,24 @@ public class AsteroidTests
 
     [UnityTest]
     // It takes three hits to destroy an asteroid from base size, after 3 hits the asteroid should not split anymore
-    public IEnumerator _10_AsteroidCannotSplitThreeTimes() 
+    public IEnumerator _10_AsteroidCannotSplitThreeTimes()
     {
         ClearScene();
         GameObject asteroid = (GameObject)Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
         asteroid.GetComponent<AsteroidController>().Split();                                                            // Split base asteroid
-        
+
         yield return null;
 
         AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);        // Find all asteroids in the scene
         foreach (AsteroidController childAsteroid in asteroids)
             childAsteroid.Split();                                                                                      // Split found asteroids
-        
+
         yield return null;
 
         asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);                             // Find all asteroids in the scene
         foreach (AsteroidController childAsteroid in asteroids)
             childAsteroid.Split();                                                                                      // Split found asteroids
-        
+
         yield return null;
 
         asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);                             // Find all asteroids in the scene
@@ -139,17 +139,17 @@ public class AsteroidTests
     }
 
     [UnityTest]
-    // Splitting the asteroid should spawn 2 asteroids at half scale of the split asteroid 
-    public IEnumerator _11_AsteroidScaleIsCutInHalfOnSplit() 
+    // Splitting the asteroid should spawn 2 asteroids at half scale of the split asteroid
+    public IEnumerator _11_AsteroidScaleIsCutInHalfOnSplit()
     {
         ClearScene();
         GameObject asteroid = (GameObject)Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
         asteroid.GetComponent<AsteroidController>().Split();                                                            // Split base asteroid
-        
+
         yield return null;
 
         AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);        // Find all asteroids in the scene
-        foreach (AsteroidController childAsteroid in asteroids)  
+        foreach (AsteroidController childAsteroid in asteroids)
             Assert.IsTrue(childAsteroid.transform.localScale == new Vector3(0.5f, 0.5f, 0.5f));
     }
 
@@ -195,7 +195,7 @@ public class AsteroidTests
     {
         ClearScene();
         AsteroidController asteroid = Object.Instantiate(asteroidPrefab, Vector3.right * 100, Quaternion.identity).GetComponent<AsteroidController>();
-        
+
         yield return null;
 
         Assert.IsTrue(asteroid == null, "Asteroid was not destroyed when off screen");
@@ -217,11 +217,11 @@ public class AsteroidTests
     public void _17_AsteroidPrefabHasRequiredComponentRigidbody()
     {
         Assert.IsNotNull(asteroidPrefab.GetComponent<Rigidbody2D>());
-        Assert.IsTrue(asteroidPrefab.GetComponent<Rigidbody2D>().isKinematic);
+        Assert.IsTrue(asteroidPrefab.GetComponent<Rigidbody2D>().bodyType == RigidbodyType2D.Kinematic);
         Assert.IsTrue(asteroidPrefab.GetComponent<Rigidbody2D>().collisionDetectionMode == CollisionDetectionMode2D.Continuous);
         Assert.IsTrue(asteroidPrefab.GetComponent<Rigidbody2D>().interpolation == RigidbodyInterpolation2D.Interpolate);
     }
-    
+
     [UnityTest]
     public IEnumerator _18_AsteroidStartsWithARandomRotation()
     {
@@ -229,14 +229,14 @@ public class AsteroidTests
         AsteroidController asteroid1 = Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity).GetComponent<AsteroidController>();
         AsteroidController asteroid2 = Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity).GetComponent<AsteroidController>();
         AsteroidController asteroid3 = Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity).GetComponent<AsteroidController>();
-        
+
         yield return null;
 
         Assert.IsTrue(asteroid1.transform.rotation != asteroid2.transform.rotation && asteroid1.transform.rotation != asteroid3.transform.rotation && asteroid2.transform.rotation != asteroid3.transform.rotation);
     }
 
     [UnityTest]
-    public IEnumerator _19_AsteroidSpawnsExplosionWhenDestroyed() 
+    public IEnumerator _19_AsteroidSpawnsExplosionWhenDestroyed()
     {
         ClearScene();
         GameObject asteroid = (GameObject)Object.Instantiate(asteroidPrefab, Vector3.zero, Quaternion.identity);
@@ -258,7 +258,7 @@ public class AsteroidTests
         Vector3 startPosition = asteroid.transform.position;
         GameManager.IsPaused = true;
 
-        for(int i = 0; i < 20; i++)
+        for (int i = 0; i < 20; i++)
             yield return null;
 
         Assert.IsTrue(asteroid.transform.position == startPosition);

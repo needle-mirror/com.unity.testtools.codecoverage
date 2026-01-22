@@ -1,9 +1,14 @@
-﻿using System;
+using System;
+using UnityEngine.Analytics;
 
 namespace UnityEditor.TestTools.CodeCoverage.Analytics
 {
     [Serializable]
+#if UNITY_6000_0_OR_NEWER
+    internal class CoverageAnalyticsEvent : IAnalytic.IData
+#else
     internal class CoverageAnalyticsEvent
+#endif
     {
         // The action performed on the event (batchmode compatible)
         public ActionID actionID;

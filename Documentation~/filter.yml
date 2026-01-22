@@ -21,14 +21,14 @@ apiRules:
         ctorArguments:
           - System.ComponentModel.EditorBrowsableState.Never
   - exclude:
-      uidRegex: ^OpenCover\.Framework\.Model
-      type: namespace
+      uidRegex: ^OpenCover\.Framework\.Model$
+      type: Namespace
   - exclude:
-      uidRegex: ^Mono\.Reflection
-      type: namespace
+      uidRegex: ^Mono\.Reflection$
+      type: Namespace
   - exclude:
-      uidRegex: Unity.TestTools.CodeCoverage.Editor.Test*
-      type: namespace
+      uidRegex: ^Unity\.TestTools\.CodeCoverage\.Editor\.Test.*$
+      type: Namespace
   - exclude:
-      uidRegex: UnityEditor.TestTools.CodeCoverage.Tests
-      type: namespace
+      uidRegex: ^UnityEditor\.TestTools\.CodeCoverage\.Tests$
+      type: Namespace

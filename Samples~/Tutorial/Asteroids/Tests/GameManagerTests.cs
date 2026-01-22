@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
@@ -51,7 +51,7 @@ public class GameManagerTests
     {
         Assert.NotNull(gameManagerPrefab);
     }
-    
+
     [Test]
     public void _02_GameManagerPrefabHasRequiredComponentScript()
     {
@@ -84,7 +84,7 @@ public class GameManagerTests
 
         yield return null;
 
-        SpaceshipController spaceship = Object.FindAnyObjectByType<SpaceshipController>();        
+        SpaceshipController spaceship = Object.FindAnyObjectByType<SpaceshipController>();
         Assert.IsTrue(spaceship != null);
     }
 
@@ -137,7 +137,7 @@ public class GameManagerTests
     }
 
     [UnityTest]
-    public IEnumerator _07_GameManagerSpawnsAsteroids() 
+    public IEnumerator _07_GameManagerSpawnsAsteroids()
     {
         ClearScene();
         Object.Instantiate(gameManagerPrefab);
@@ -146,7 +146,7 @@ public class GameManagerTests
         yield return null;
 
         AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
-        Assert.IsTrue(asteroids.Length > 0);                                                   
+        Assert.IsTrue(asteroids.Length > 0);
     }
 
     [UnityTest]
@@ -171,7 +171,7 @@ public class GameManagerTests
 
         Object.Instantiate(cameraPrefab);
 
-        for (int i = 0; i < 100; i++) 
+        for (int i = 0; i < 100; i++)
             gameManager.SpawnAsteroids();
 
         AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
@@ -180,13 +180,13 @@ public class GameManagerTests
         {
             Vector2 positionOnCamera = Camera.main.WorldToViewportPoint(roid.transform.position);
 
-            Assert.IsTrue(((positionOnCamera.x >= -0.1f && positionOnCamera.x <= 1.1f) && (positionOnCamera.y <= -0.05f || positionOnCamera.y >= 1.05f)) || 
+            Assert.IsTrue(((positionOnCamera.x >= -0.1f && positionOnCamera.x <= 1.1f) && (positionOnCamera.y <= -0.05f || positionOnCamera.y >= 1.05f)) ||
                             ((positionOnCamera.x <= -0.05f || positionOnCamera.x >= 1.05f) && (positionOnCamera.y >= -0.1f && positionOnCamera.y <= 1.1f)));
-        }     
+        }
     }
 
     [Test]
-    public void _10_GameManagerSpawnsRandomSizeAsteroids() 
+    public void _10_GameManagerSpawnsRandomSizeAsteroids()
     {
         ClearScene();
         GameManager gameManager = Object.Instantiate(gameManagerPrefab).GetComponent<GameManager>();
@@ -236,7 +236,7 @@ public class GameManagerTests
         score = GameManager.score;
         AsteroidController[] asteroids = Object.FindObjectsByType<AsteroidController>(FindObjectsSortMode.None);
 
-        foreach(AsteroidController ast in asteroids)
+        foreach (AsteroidController ast in asteroids)
             ast.Split();
 
         Assert.IsTrue(score != GameManager.score);

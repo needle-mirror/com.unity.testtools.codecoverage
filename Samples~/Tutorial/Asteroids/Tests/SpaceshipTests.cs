@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-public class SpaceshipTests {
-
+public class SpaceshipTests
+{
     GameObject spaceshipPrefab;
     GameObject asteroidPrefab;
     GameObject cameraPrefab;
@@ -30,7 +30,8 @@ public class SpaceshipTests {
     }
 
     [Test]
-    public void _01_SpaceshipPrefabExists() {
+    public void _01_SpaceshipPrefabExists()
+    {
         Assert.NotNull(spaceshipPrefab);
     }
 
@@ -59,7 +60,7 @@ public class SpaceshipTests {
     public void _05_SpaceshipPrefabHasRequiredComponentControllerScript()
     {
         Assert.IsNotNull(spaceshipPrefab.GetComponent<SpaceshipController>());
-        // Checking if script component has required references 
+        // Checking if script component has required references
         Assert.IsNotNull(spaceshipPrefab.GetComponent<SpaceshipController>().spaceshipDebris);
         Assert.IsNotNull(spaceshipPrefab.GetComponent<SpaceshipController>().weaponList);
     }
@@ -81,7 +82,7 @@ public class SpaceshipTests {
     public void _07_SpaceshipPrefabHasRequiredComponentRigidbody()
     {
         Assert.IsNotNull(spaceshipPrefab.GetComponent<Rigidbody2D>());
-        Assert.IsTrue(spaceshipPrefab.GetComponent<Rigidbody2D>().isKinematic);
+        Assert.IsTrue(spaceshipPrefab.GetComponent<Rigidbody2D>().bodyType == RigidbodyType2D.Kinematic);
         Assert.IsTrue(spaceshipPrefab.GetComponent<Rigidbody2D>().collisionDetectionMode == CollisionDetectionMode2D.Continuous);
         Assert.IsTrue(spaceshipPrefab.GetComponent<Rigidbody2D>().interpolation == RigidbodyInterpolation2D.Interpolate);
     }
@@ -161,7 +162,7 @@ public class SpaceshipTests {
         ClearScene();
         Object.Instantiate(cameraPrefab);
         SpaceshipController spaceship = Object.Instantiate(spaceshipPrefab, Vector2.right * 100.0f, Quaternion.identity).GetComponent<SpaceshipController>();
-        
+
         yield return null;
 
         Assert.IsTrue(spaceship.transform.position.x < 0.0f);
@@ -272,12 +273,12 @@ public class SpaceshipTests {
     {
         ClearScene();
         Animator animator = Object.Instantiate(spaceshipPrefab, Vector3.zero, Quaternion.identity).transform.GetChild(0).GetComponent<Animator>();
-        
+
         yield return null;
-        
+
         Assert.IsNotNull(animator);
         Assert.IsTrue(animator.GetCurrentAnimatorStateInfo(0).IsName("SpaceshipSpawn"));
-        
+
         while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 1.0f)
         {
             yield return null;
@@ -293,7 +294,7 @@ public class SpaceshipTests {
         Assert.IsNotNull(weaponList);
         Assert.IsTrue(weaponList.weapons.Count == 2);
 
-        foreach(WeaponList.Weapon weapon in weaponList.weapons)
+        foreach (WeaponList.Weapon weapon in weaponList.weapons)
         {
             Assert.IsTrue(weapon.weaponName.Length != 0);
             Assert.IsNotNull(weapon.weaponPrefab);

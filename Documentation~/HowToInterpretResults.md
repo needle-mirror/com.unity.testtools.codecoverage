@@ -1,22 +1,23 @@
 # How to interpret the results
 
-This section assumes that you checked **HTML Report** in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReport` option in `-coverageOptions` on the [command line](CoverageBatchmode.md). If you're running the tests in the Editor, a file viewer window opens up containing the coverage report once the test run has been finished. If you're running the tests from the command line, navigate to the `-coverageResultsPath` location with your file viewer. Open the `Report` folder then open `index.htm` in a web browser. This shows a summary of the coverage results from the tests.<br/>
+This section assumes that you checked **HTML Report** in the [Code Coverage window](CodeCoverageWindow.md) or passed the `generateHtmlReport` option in `-coverageOptions` on the [command line](CoverageBatchmode.md). If you're running the tests in the Editor, a file viewer window opens up containing the coverage report once the test run has been finished. If you're running the tests from the command line, navigate to the `-coverageResultsPath` location with your file viewer. Open the `Report` folder then open `index.htm` in a web browser. This shows a summary of the coverage results from the tests.<br>
 
 ![Code Coverage Report](images/report.png)
 
 ## Summary view
 
-The summary view is divided into several sections: Summary, Coverage History, Risk Hotspots and Coverage.  
+The summary view is divided into several sections: Summary, Coverage History, Risk Hotspots and Coverage.
 
 ### Summary
 
 This section shows a brief summary of the coverage results including the number of assemblies, classes, files and lines that were processed. The most important value is the **Line Coverage** which shows the current coverage percentage of all coverable lines. Coverable lines only include the lines that can be executed and are colored either green or red in the [File(s)](#files) section depending on whether the line was covered or not. Uncoverable lines are the lines that cannot be executed and are not colored in the [File(s)](#files) section; these include lines containing:
+
 - Assemblies, Classes, Constructors, Methods and Structs that are marked to be [excluded from coverage](UsingCodeCoverage.md#excluding-code-from-code-coverage)
 - Directives
 - Attributes
 - Method signatures
 - Class definitions
-- Unassigned variable declarations 
+- Unassigned variable declarations
 - Constant variable declarations
 - else/case/default keywords
 - Lines from other classes, when multiple classes are included in the same file
@@ -37,6 +38,7 @@ If there are any methods with a very high Cyclomatic Complexity or Crap Score, c
 **Note:** NPath Complexity calculation and Branch Coverage are not implemented at present so will always appear as zero.
 
 ### Coverage
+
 By default, this shows a list of the assemblies that have been covered together with some stats showing how well covered they are. Select **Expand (+)** next to the assembly name to see a list of the classes or structs within the assembly and their associated coverage data. To see more detailed information for a particular class, select its name in the list.
 
 ## Class/Struct view

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -95,7 +94,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                         break;
 
                     case FlowControl.Cond_Branch:
-                        // note: a single switch (C#) with sparse values can be broken into several swicth (IL)
+                        // note: a single switch (C#) with sparse values can be broken into several switch (IL)
                         // that will use the same 'targets' and must be counted only once
                         if (ins.OpCode.OperandType == OperandType.InlineSwitch)
                         {
@@ -106,7 +105,7 @@ namespace UnityEditor.TestTools.CodeCoverage.OpenCover
                             // some conditional branch can be related to the sparse switch
                             branch = (ins.Operand as Instruction);
                             previous = branch.Previous;
-                            if ((previous != null) && previous.Previous.OpCode.OperandType != OperandType.InlineSwitch)
+                            if ((previous != null) && (previous.Previous == null || previous.Previous.OpCode.OperandType != OperandType.InlineSwitch))
                             {
                                 if (!targets.Contains(branch))
                                 {

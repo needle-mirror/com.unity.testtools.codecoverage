@@ -1,8 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour 
+public class GameManager : MonoBehaviour
 {
     // Values and methods for testing
     public static bool effectsEnabled = true;
@@ -52,7 +52,7 @@ public class GameManager : MonoBehaviour
             instance = this;
         else if (instance != this)
             Destroy(gameObject);
-        
+
         Time.timeScale = 1.0f;
         IsPaused = false;
         score = 0;
@@ -75,7 +75,7 @@ public class GameManager : MonoBehaviour
             if (asteroidSpawnTimer <= 0.0f && asteroidsEnabled)
                 SpawnAsteroids();
         }
-	}
+    }
 
     private void UpdateTimers()
     {
@@ -124,7 +124,7 @@ public class GameManager : MonoBehaviour
             asteroid.SetSplitCount(1); // medium asteroid
         else
             asteroid.SetSplitCount(2); // small asteroid
-        
+
         asteroidSpawnTimer = asteroidSpawnDelay;
     }
 
@@ -152,10 +152,11 @@ public class GameManager : MonoBehaviour
                 scoreSinceLastDeath += 250;
                 break;
         }
-        
+
         if (SpaceshipIsActive())
             spaceship.UpdateWeapon(scoreSinceLastDeath);
-        if(ScoreCounter.instance)
+
+        if (ScoreCounter.instance)
             ScoreCounter.instance.StartCounting(score);
     }
 }

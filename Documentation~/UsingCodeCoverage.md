@@ -21,7 +21,7 @@ Any code that should not be contributing to the Code Coverage calculation can be
 
 ## Ignoring tests for Code Coverage
 
-To ignore tests when running with Code Coverage, use the [ConditionalIgnore](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html?subfolder=/manual/reference-attribute-conditionalignore.html) attribute, passing the `"IgnoreForCoverage"` ID.
+To ignore tests when running with Code Coverage, use the [ConditionalIgnore](https://docs.unity3d.com/Packages/com.unity.test-framework@latest/index.html?subfolder=/api/UnityEngine.TestTools.ConditionalIgnoreAttribute.html) attribute, passing the `"IgnoreForCoverage"` ID.
 
 #### Example
 ```

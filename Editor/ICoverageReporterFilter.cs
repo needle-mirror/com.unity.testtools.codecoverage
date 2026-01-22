@@ -1,4 +1,4 @@
-﻿namespace UnityEditor.TestTools.CodeCoverage
+namespace UnityEditor.TestTools.CodeCoverage
 {
     interface ICoverageReporterFilter
     {

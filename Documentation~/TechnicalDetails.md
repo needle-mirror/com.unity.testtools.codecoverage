@@ -8,16 +8,16 @@ The package is a client of the coverage API. For more information, see the [cove
 
 This version of the Code Coverage package is compatible with the following versions of the Unity Editor:
 
-* 2019.3 and later
+- 2021.3 and later
 
 ## Third-party libraries used
 
-* [ReportGenerator](https://github.com/danielpalme/ReportGenerator) - v5.0.4
+- [ReportGenerator](https://github.com/danielpalme/ReportGenerator) - v5.0.4
 
 ## Known limitations
 
 Code Coverage includes the following known limitations:
 
-* Code Coverage currently only supports the [OpenCover](https://github.com/OpenCover/opencover) format.
-* Code Coverage currently only supports code run in the Editor and not in Standalone/Player.
-* NPath Complexity calculation and Branch Coverage are not implemented at present so they will always appear as zero in the coverage report.
+- Code Coverage currently only supports the [OpenCover](https://github.com/OpenCover/opencover) format.
+- Code Coverage currently only supports code run in the Editor and not in Standalone/Player.
+- NPath Complexity calculation and Branch Coverage are not implemented at present so they will always appear as zero in the coverage report.

@@ -1,5 +1,4 @@
-This package contains third-party software components governed by the licenses indicated below:
----------
+## This package contains third-party software components governed by the licenses indicated below:
 
 Component Name: **ReportGenerator**
 
@@ -13,7 +12,7 @@ You are allowed to modify the program as you like.
 
 For further details visit https://github.com/danielpalme/ReportGenerator/blob/master/LICENSE.txt
 
----------
+---
 
 Component Name: **OpenCover**
 
@@ -22,8 +21,8 @@ License Type: **MIT**
 Copyright (c) 2011-2019 Shaun Wilde
 
 OpenCover is released under the following MIT compatible software licence
-this does not apply to any other software, be that source code, compiled 
-libraries or tools, that OpenCover may rely on or use and that that software 
+this does not apply to any other software, be that source code, compiled
+libraries or tools, that OpenCover may rely on or use and that that software
 will continue to retain whatever licence they were released under.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -46,7 +45,7 @@ THE SOFTWARE.
 
 For further details visit https://github.com/OpenCover/opencover/blob/master/LICENSE
 
----------
+---
 
 Component Name: **Cyclomatic Complexity calculation from MonoTools**
 
@@ -76,7 +75,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 For further details visit https://github.com/mono/mono-tools/blob/master/LICENSE
 
----------
+---
 
 Component Name: **Mono.Reflection**
 
@@ -107,9 +106,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 For further details visit https://github.com/jbevain/mono.reflection/tree/master/Mono.Reflection
 
----------
+---
 
-Component Name: **SixLabors.Fonts**, **SixLabors.ImageSharp** 
+Component Name: **SixLabors.Fonts**, **SixLabors.ImageSharp**
 
 License Type: **Apache 2.0**
 
@@ -129,5 +128,5 @@ limitations under the License.
 
 For further details visit:
 
-SixLabors.Fonts - https://github.com/SixLabors/Fonts/blob/master/LICENSE  
-SixLabors.ImageSharp - https://github.com/SixLabors/ImageSharp/blob/master/LICENSE  
+SixLabors.Fonts - https://github.com/SixLabors/Fonts/blob/master/LICENSE<br>
+SixLabors.ImageSharp - https://github.com/SixLabors/ImageSharp/blob/master/LICENSE

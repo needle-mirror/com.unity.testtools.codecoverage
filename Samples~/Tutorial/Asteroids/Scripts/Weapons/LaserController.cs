@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public class LaserController : BaseProjectile 
+public class LaserController : BaseProjectile
 {
     public bool isActive = true;
     public float duration = 0.75f;

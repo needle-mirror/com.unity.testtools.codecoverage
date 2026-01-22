@@ -1,4 +1,4 @@
-﻿//
+//
 // OpenCover - S Wilde
 //
 // This source code is released under the MIT License; see the accompanying license file.
@@ -37,7 +37,7 @@ namespace OpenCover.Framework.Model
         /// A list of aliases
         /// </summary>
         [XmlIgnore]
-        public IList<string> Aliases { get; private set; } 
+        public IList<string> Aliases { get; private set; }
 
         /// <summary>
         /// The name of the module

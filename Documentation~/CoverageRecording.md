@@ -8,27 +8,27 @@ You can also control Coverage Recording via the [CodeCoverage ScriptingAPI](http
 
 ## Steps
 
-1. Open the [Code Coverage window](CodeCoverageWindow.md) (go to **Window** > **Analysis** > **Code Coverage**).<br/><br/>
-![Code Coverage Window](images/using_coverage/open_coverage_window.png)
+1. Open the [Code Coverage window](CodeCoverageWindow.md) (go to **Window** > **Analysis** > **Code Coverage**).<br><br>
+   ![Code Coverage Window](images/using_coverage/open_coverage_window.png)
 
-2. Select **Enable Code Coverage** if not already selected, to be able to generate Coverage data and reports.<br/>
-![Enable Code Coverage](images/using_coverage/enable_code_coverage.png)<br/>**Note:** Enabling Code Coverage adds some overhead to the Editor and can affect the performance.
+2. Select **Enable Code Coverage** if not already selected, to be able to generate Coverage data and reports.<br>
+   ![Enable Code Coverage](images/using_coverage/enable_code_coverage.png)<br>**Note:** Enabling Code Coverage adds some overhead to the Editor and can affect the performance.
 
-3. Select the [Assembly Definitions](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) you would like to see the coverage for. In this example we selected `Assembly-CSharp` and `Assembly-CSharp-Editor`. By default, Unity compiles almost all project scripts into the `Assembly-CSharp.dll` managed assembly and all Editor scripts into the `Assembly-CSharp-Editor.dll` managed assembly.<br/><br/>
-![Select Assemblies](images/using_coverage/select_assemblies.png)
+3. Select the [Assembly Definitions](https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html) you would like to see the coverage for. In this example we selected `Assembly-CSharp` and `Assembly-CSharp-Editor`. By default, Unity compiles almost all project scripts into the `Assembly-CSharp.dll` managed assembly and all Editor scripts into the `Assembly-CSharp-Editor.dll` managed assembly.<br><br>
+   ![Select Assemblies](images/using_coverage/select_assemblies.png)
 
-4. Select **Start Recording**.<br/>
-![Start Recording](images/coverage_recording/start_recording.png) 
+4. Select **Start Recording**.<br>
+   ![Start Recording](images/coverage_recording/start_recording.png)
 
 5. Continue using the Editor as normal, for example enter PlayMode to test your application or run some manual testing. You can also select **Pause Recording** to pause recording and **Resume Recording** to resume recording.
 
-6. When you have finished your testing and have collected enough coverage data, select **Stop Recording**.<br/>
-![Stop Recording](images/coverage_recording/stop_recording.png)
+6. When you have finished your testing and have collected enough coverage data, select **Stop Recording**.<br>
+   ![Stop Recording](images/coverage_recording/stop_recording.png)
 
-7. If **Auto Open Report** is checked a file viewer window opens containing the coverage report. Alternatively, select the **Results Location** dropdown to open it in the file viewer.<br/><br/>**Note:** To generate the report automatically after you stop recording, select **Auto Generate Report** in the [Code Coverage window](CodeCoverageWindow.md). Alternatively, you can select **Generate Report**.<br/>
+7. If **Auto Open Report** is checked a file viewer window opens containing the coverage report. Alternatively, select the **Results Location** dropdown to open it in the file viewer.<br><br>**Note:** To generate the report automatically after you stop recording, select **Auto Generate Report** in the [Code Coverage window](CodeCoverageWindow.md). Alternatively, you can select **Generate Report**.<br>
 
-8. Select `index.htm`.<br/><br/>
-![Report File Viewer](images/using_coverage/index_folder.png)
+8. Select `index.htm`.<br><br>
+   ![Report File Viewer](images/using_coverage/index_folder.png)
 
-9. This opens the [HTML coverage report](HowToInterpretResults.md).<br/><br/>
-![HTML Coverage Report](images/coverage_recording/report_html.png)
+9. This opens the [HTML coverage report](HowToInterpretResults.md).<br><br>
+   ![HTML Coverage Report](images/coverage_recording/report_html.png)

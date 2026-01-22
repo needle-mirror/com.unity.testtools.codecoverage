@@ -16,7 +16,6 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public virtual void WriteCoverageSession(CoverageReportType reportType)
         {
-#if UNITY_2020_1_OR_NEWER
             if (Compilation.CompilationPipeline.codeOptimization == Compilation.CodeOptimization.Release)
             {
                 ResultsLogger.Log(ResultID.Warning_DebugCodeOptimization);
@@ -34,7 +33,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                     }
                 }
             }
-#endif
+
 #if BURST_INSTALLED
             if (EditorPrefs.GetBool("BurstCompilation", false) && !CommandLineManager.instance.burstDisabled)
             {

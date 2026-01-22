@@ -1,15 +1,20 @@
-﻿using UnityEditor.IMGUI.Controls;
-using UnityEditor.Compilation;
-using System.Text.RegularExpressions;
-using System.Text;
-using System.Linq;
 using System;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEditor.Compilation;
+using UnityEditor.IMGUI.Controls;
+
 using UnityEditor.TestTools.CodeCoverage.Analytics;
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
+#if UNITY_6000_3_OR_NEWER
+    class IncludedAssembliesTreeView : TreeView<int>
+#else
     class IncludedAssembliesTreeView : TreeView
+#endif
     {
         string m_AssembliesToInclude;
         readonly CodeCoverageWindow m_Parent;
@@ -17,8 +22,13 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public float Width { get; set; } = 100f;
 
+#if UNITY_6000_3_OR_NEWER
+        public IncludedAssembliesTreeView(CodeCoverageWindow parent, string assembliesToInclude)
+            : base(new TreeViewState<int>())
+#else
         public IncludedAssembliesTreeView(CodeCoverageWindow parent, string assembliesToInclude)
             : base(new TreeViewState())
+#endif
         {
             m_AssembliesToInclude = assembliesToInclude;
             m_Parent = parent;
@@ -27,12 +37,20 @@ namespace UnityEditor.TestTools.CodeCoverage
             Reload();
         }
 
+#if UNITY_6000_3_OR_NEWER
+        protected override bool CanMultiSelect(TreeViewItem<int> item)
+#else
         protected override bool CanMultiSelect(TreeViewItem item)
+#endif
         {
             return false;
         }
 
+#if UNITY_6000_3_OR_NEWER
+        protected override TreeViewItem<int> BuildRoot()
+#else
         protected override TreeViewItem BuildRoot()
+#endif
         {
             string[] includeAssemblyFilters = m_AssembliesToInclude.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -40,13 +58,17 @@ namespace UnityEditor.TestTools.CodeCoverage
                 .Select(f => AssemblyFiltering.CreateFilterRegex(f))
                 .ToArray();
 
+#if UNITY_6000_3_OR_NEWER
+            TreeViewItem<int> root = new TreeViewItem<int>(-1, -1);
+#else
             TreeViewItem root = new TreeViewItem(-1, -1);
+#endif
 
             bool developerMode = EditorPrefs.GetBool("DeveloperMode", false);
 
             if (developerMode)
             {
-                System.Reflection.Assembly[] assemblies = AssemblyFiltering.GetAllProjectAssembliesInternal();               
+                System.Reflection.Assembly[] assemblies = AssemblyFiltering.GetAllProjectAssembliesInternal();
                 int assembliesLength = assemblies.Length;
 
                 GUIContent textContent = new GUIContent();
@@ -57,10 +79,14 @@ namespace UnityEditor.TestTools.CodeCoverage
                     root.AddChild(new AssembliesTreeViewItem() { id = i + 1, displayName = assembly.GetName().Name, Enabled = enabled });
 
                     textContent.text = assembly.GetName().Name;
+#if UNITY_6000_3_OR_NEWER
+                    float itemWidth = TreeView<int>.DefaultStyles.label.CalcSize(textContent).x + kCheckBoxWidth;
+#else
                     float itemWidth = TreeView.DefaultStyles.label.CalcSize(textContent).x + kCheckBoxWidth;
+#endif
                     if (Width < itemWidth)
                         Width = itemWidth;
-                    
+
                 }
             }
             else
@@ -76,7 +102,11 @@ namespace UnityEditor.TestTools.CodeCoverage
                     root.AddChild(new AssembliesTreeViewItem() { id = i + 1, displayName = assembly.name, Enabled = enabled });
 
                     textContent.text = assembly.name;
+#if UNITY_6000_3_OR_NEWER
+                    float itemWidth = TreeView<int>.DefaultStyles.label.CalcSize(textContent).x + kCheckBoxWidth;
+#else
                     float itemWidth = TreeView.DefaultStyles.label.CalcSize(textContent).x + kCheckBoxWidth;
+#endif
                     if (Width < itemWidth)
                         Width = itemWidth;
                 }
@@ -160,7 +190,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             CoverageAnalytics.instance.CurrentCoverageEvent.updateAssembliesDialog = true;
 
             StringBuilder sb = new StringBuilder();
-            foreach(var child in rootItem.children)
+            foreach (var child in rootItem.children)
             {
                 AssembliesTreeViewItem childItem = child as AssembliesTreeViewItem;
                 if (childItem.Enabled)
@@ -177,7 +207,11 @@ namespace UnityEditor.TestTools.CodeCoverage
         }
     }
 
+#if UNITY_6000_3_OR_NEWER
+    class AssembliesTreeViewItem : TreeViewItem<int>
+#else
     class AssembliesTreeViewItem : TreeViewItem
+#endif
     {
         public bool Enabled { get; set; }
     }

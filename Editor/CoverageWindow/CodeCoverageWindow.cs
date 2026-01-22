@@ -15,14 +15,10 @@ namespace UnityEditor.TestTools.CodeCoverage
     internal class CodeCoverageWindow : EditorWindow
     {
         private bool m_EnableCodeCoverage;
-#if !UNITY_2019_3_OR_NEWER
-        private bool m_HasLatestScriptingRuntime;
-#endif
         private string m_CodeCoveragePath;
         private string m_CodeCoverageHistoryPath;
         private FolderDropDownMenu m_ResultsFolderDropDownMenu;
         private FolderDropDownMenu m_HistoryFolderDropDownMenu;
-        private CoverageFormat m_CodeCoverageFormat;
         private bool m_IncludeHistoryInReport;
         private string m_AssembliesToInclude;
         private int m_AssembliesToIncludeLength;
@@ -44,7 +40,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         private static readonly Vector2 s_WindowMinSizeNormal = new Vector2(445, 65);
 
-        private bool m_LoseFocus = false; 
+        private bool m_LoseFocus = false;
 
         private bool m_GenerateReport = false;
         private bool m_StopRecording = false;
@@ -157,7 +153,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             public static readonly GUIContent CoverageSettingsLabel = EditorGUIUtility.TrTextContent("Settings");
             public static readonly GUIContent CoverageReportOptionsLabel = EditorGUIUtility.TrTextContent("Report Options");
             public static readonly GUIContent EnableCodeCoverageLabel = EditorGUIUtility.TrTextContent("Enable Code Coverage", "Check this to enable Code Coverage. This is required in order to generate Coverage data and reports. Note that Code Coverage can affect the Editor performance.");
-            public static readonly GUIContent CodeCoverageFormat = EditorGUIUtility.TrTextContent("Coverage Format", "The Code Coverage format used when saving the results.");
             public static readonly GUIContent GenerateAdditionalMetricsLabel = EditorGUIUtility.TrTextContent("Additional Metrics", "Check this to generate and include additional metrics in the HTML report. These currently include Cyclomatic Complexity and Crap Score calculations for each method.");
             public static readonly GUIContent CoverageHistoryLabel = EditorGUIUtility.TrTextContent("Report History", "Check this to generate and include the coverage history in the HTML report.");
             public static readonly GUIContent AssembliesToIncludeLabel = EditorGUIUtility.TrTextContent("Included Assemblies", "Specify the assemblies that will be included in the coverage results.\n\nClick the dropdown to view and select or deselect the assemblies.");
@@ -197,11 +192,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         [MenuItem("Window/Analysis/Code Coverage")]
         public static void ShowWindow()
         {
-#if TEST_FRAMEWORK_1_1_18_OR_NEWER
             TestRunnerWindow.ShowWindow();
-#else
-            TestRunnerWindow.ShowPlaymodeTestsRunnerWindowCodeBased();
-#endif
             CodeCoverageWindow window = GetWindow<CodeCoverageWindow>(typeof(TestRunnerWindow));
             window.Show();
         }
@@ -228,21 +219,20 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             m_CodeCoveragePath = CoveragePreferences.instance.GetStringForPaths("Path", string.Empty);
             m_CodeCoverageHistoryPath = CoveragePreferences.instance.GetStringForPaths("HistoryPath", string.Empty);
-            m_CodeCoverageFormat = (CoverageFormat)CoveragePreferences.instance.GetInt("Format", 0);
             m_GenerateAdditionalMetrics = CoveragePreferences.instance.GetBool("GenerateAdditionalMetrics", false);
             m_GenerateTestReferences = CoveragePreferences.instance.GetBool("GenerateTestReferences", false);
-            m_IncludeHistoryInReport = CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
+            m_IncludeHistoryInReport = CoveragePreferences.instance.GetBool("IncludeHistoryInReport", !CommandLineManager.instance.runFromCommandLine);
             m_AssembliesToInclude = GetIncludedAssemblies();
             m_AssembliesToIncludeLength = m_AssembliesToInclude.Length;
             m_PathsToInclude = CoveragePreferences.instance.GetStringForPaths("PathsToInclude", string.Empty);
             m_PathsToExclude = CoveragePreferences.instance.GetStringForPaths("PathsToExclude", string.Empty);
             CodeCoverage.VerbosityLevel = (LogVerbosityLevel)CoveragePreferences.instance.GetInt("VerbosityLevel", (int)LogVerbosityLevel.Info);
             m_ReportGenerator = new CoverageReportGenerator();
-            m_GenerateHTMLReport = CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
+            m_GenerateHTMLReport = CoveragePreferences.instance.GetBool("GenerateHTMLReport", !CommandLineManager.instance.runFromCommandLine);
             m_GenerateAdditionalReports = CoveragePreferences.instance.GetBool("GenerateAdditionalReports", false);
-            m_GenerateBadge = CoveragePreferences.instance.GetBool("GenerateBadge", true);
-            m_AutoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", true);
-            m_OpenReportWhenGenerated = CoveragePreferences.instance.GetBool("OpenReportWhenGenerated", true);
+            m_GenerateBadge = CoveragePreferences.instance.GetBool("GenerateBadge", !CommandLineManager.instance.runFromCommandLine);
+            m_AutoGenerateReport = CoveragePreferences.instance.GetBool("AutoGenerateReport", !CommandLineManager.instance.runFromCommandLine);
+            m_OpenReportWhenGenerated = CoveragePreferences.instance.GetBool("OpenReportWhenGenerated", !CommandLineManager.instance.runFromCommandLine);
 
             m_ResultsFolderDropDownMenu = new FolderDropDownMenu(this, FolderType.Results);
             m_HistoryFolderDropDownMenu = new FolderDropDownMenu(this, FolderType.History);
@@ -270,13 +260,9 @@ namespace UnityEditor.TestTools.CodeCoverage
                 m_CoverageSettings.rootFolderPath = CoverageUtils.GetRootFolderPath(m_CoverageSettings);
                 m_CoverageSettings.historyFolderPath = CoverageUtils.GetHistoryFolderPath(m_CoverageSettings);
 
-                if (m_CodeCoverageFormat == CoverageFormat.OpenCover)
-                {
-                    m_CoverageSettings.resultsFolderSuffix = "-opencov";
-                    string folderName = CoverageUtils.GetProjectFolderName();
-                    string resultsRootDirectoryName = string.Concat(folderName, m_CoverageSettings.resultsFolderSuffix);
-                    m_CoverageSettings.resultsRootFolderPath = CoverageUtils.NormaliseFolderSeparators(CoverageUtils.JoinPaths(m_CoverageSettings.rootFolderPath, resultsRootDirectoryName));
-                }
+                string folderName = CoverageUtils.GetProjectFolderName();
+                string resultsRootDirectoryName = string.Concat(folderName, m_CoverageSettings.resultsFolderSuffix);
+                m_CoverageSettings.resultsRootFolderPath = CoverageUtils.NormaliseFolderSeparators(CoverageUtils.JoinPaths(m_CoverageSettings.rootFolderPath, resultsRootDirectoryName));
             }
         }
 
@@ -302,13 +288,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             GUILayout.BeginVertical();
 
-            float toolbarHeight = 0;
-#if !UNITY_2019_3_OR_NEWER
-            using (new EditorGUI.DisabledScope(!m_HasLatestScriptingRuntime))
-#endif
-            {
-                toolbarHeight = DrawToolbar();
-            }
+            float toolbarHeight = DrawToolbar();
 
             // Window scrollbar
             float maxHeight = Mathf.Max(position.height, 0) - toolbarHeight;
@@ -316,35 +296,25 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             GUILayout.BeginVertical(Styles.settings);
 
-#if !UNITY_2019_3_OR_NEWER
-            CheckScriptingRuntimeVersion();
-#endif
             CheckCoverageEnabled();
-#if UNITY_2020_1_OR_NEWER
             CheckCodeOptimization();
-#endif
 #if BURST_INSTALLED
             CheckBurstCompilation();
 #endif
 
-#if !UNITY_2019_3_OR_NEWER
-            using (new EditorGUI.DisabledScope(!m_HasLatestScriptingRuntime))
-#endif
+            // Draw Settings
+            EditorGUILayout.LabelField(Styles.CoverageSettingsLabel, EditorStyles.boldLabel);
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning))
             {
-                // Draw Settings
-                EditorGUILayout.LabelField(Styles.CoverageSettingsLabel, EditorStyles.boldLabel);
-                using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning))
-                {
-                    DrawCoverageSettings();
-                }
+                DrawCoverageSettings();
+            }
 
-                // Draw Coverage Report Options
-                GUILayout.Space(10);
-                EditorGUILayout.LabelField(Styles.CoverageReportOptionsLabel, EditorStyles.boldLabel);
-                using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning))
-                {
-                    DrawCoverageReportOptions();
-                }
+            // Draw Coverage Report Options
+            GUILayout.Space(10);
+            EditorGUILayout.LabelField(Styles.CoverageReportOptionsLabel, EditorStyles.boldLabel);
+            using (new EditorGUI.DisabledScope(CoverageRunData.instance.isRunning))
+            {
+                DrawCoverageReportOptions();
             }
 
             GUILayout.EndVertical();
@@ -462,29 +432,11 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
         }
 
-#if !UNITY_2019_3_OR_NEWER
-        void CheckScriptingRuntimeVersion()
-        {
-            m_HasLatestScriptingRuntime = PlayerSettings.scriptingRuntimeVersion == ScriptingRuntimeVersion.Latest;
-
-            if (!m_HasLatestScriptingRuntime)
-            {
-                EditorGUILayout.HelpBox(kLatestScriptingRuntimeMessage, MessageType.Warning);
-                GUILayout.Space(5);
-            }
-        }
-#endif
-
         void CheckCoverageEnabled()
         {
-#if UNITY_2020_2_OR_NEWER
             m_EnableCodeCoverage = Coverage.enabled;
-#else
-            m_EnableCodeCoverage = EditorPrefs.GetBool("CodeCoverageEnabled", false);
-#endif
         }
 
-#if UNITY_2020_1_OR_NEWER
         void CheckCodeOptimization()
         {
             if (Compilation.CompilationPipeline.codeOptimization == Compilation.CodeOptimization.Release)
@@ -504,7 +456,6 @@ namespace UnityEditor.TestTools.CodeCoverage
                 GUILayout.Space(5);
             }
         }
-#endif
 
 #if BURST_INSTALLED
         void CheckBurstCompilation()
@@ -627,7 +578,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (settingPassedInCmdLine)
             {
-                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Included Assemblies", "-coverageOptions: assemblyFilters"), MessageType.Warning);
+                EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Included Assemblies", "-coverageOptions: assemblyFilters/filtersFromFile"), MessageType.Warning);
             }
         }
 
@@ -643,7 +594,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             if (settingPassedInCmdLine)
             {
-                EditorGUILayout.HelpBox(string.Format(kSettingsOverriddenMessage, "Included/Excluded Paths", "-coverageOptions: pathFilters/pathFiltersFromFile"), MessageType.Warning);
+                EditorGUILayout.HelpBox(string.Format(kSettingsOverriddenMessage, "Included/Excluded Paths", "-coverageOptions: pathFilters/filtersFromFile"), MessageType.Warning);
             }
         }
 
@@ -749,15 +700,6 @@ namespace UnityEditor.TestTools.CodeCoverage
             {
                 EditorGUILayout.HelpBox(kCodeCoverageDisabledNoRestartMessage, MessageType.Warning);
             }
-#if !UNITY_2020_2_OR_NEWER
-            if (m_EnableCodeCoverage != Coverage.enabled)
-            {
-                if (m_EnableCodeCoverage)
-                    EditorGUILayout.HelpBox(kEnablingCodeCoverageMessage, MessageType.Warning);
-                else
-                    EditorGUILayout.HelpBox(kDisablingCodeCoverageMessage, MessageType.Warning);
-            }
-#endif
         }
 
         void DrawVerbosityLevel()
@@ -782,7 +724,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 EditorGUILayout.HelpBox(string.Format(kSettingOverriddenMessage, "Logs Verbosity Level", "-coverageOptions: verbosity"), MessageType.Warning);
             }
 
-            
+
         }
 
         void DrawEnableCoverageCheckbox()
@@ -796,13 +738,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 if (EditorGUI.EndChangeCheck())
                 {
                     CoveragePreferences.instance.SetBool("EnableCodeCoverage", m_EnableCodeCoverage);
-#if UNITY_2020_2_OR_NEWER
                     Coverage.enabled = m_EnableCodeCoverage;
-#else
-                    EditorPrefs.SetBool("CodeCoverageEnabled", m_EnableCodeCoverage);
-                    EditorPrefs.SetBool("CodeCoverageEnabledMessageShown", false);
-                    SettingsService.NotifySettingsProviderChanged();
-#endif
                 }
             }
             if (settingPassedInCmdLine)
@@ -991,7 +927,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             DrawGenerateAdditionalMetricsCheckbox();
             DrawGenerateTestRunnerReferencesCheckbox();
             DrawAutoGenerateReportCheckbox();
-            DrawOpenReportWhenGeneratedCheckbox(); 
+            DrawOpenReportWhenGeneratedCheckbox();
         }
 
         private bool DoesResultsRootFolderExist()

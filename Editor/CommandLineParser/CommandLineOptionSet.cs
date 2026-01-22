@@ -1,5 +1,3 @@
-using System;
-
 namespace UnityEditor.TestTools.CodeCoverage.CommandLineParser
 {
     internal class CommandLineOptionSet

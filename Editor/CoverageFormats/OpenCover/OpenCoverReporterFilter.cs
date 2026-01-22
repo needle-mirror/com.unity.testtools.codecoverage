@@ -1,4 +1,4 @@
-﻿namespace UnityEditor.TestTools.CodeCoverage.OpenCover
+namespace UnityEditor.TestTools.CodeCoverage.OpenCover
 {
     internal class OpenCoverReporterFilter : ICoverageReporterFilter
     {

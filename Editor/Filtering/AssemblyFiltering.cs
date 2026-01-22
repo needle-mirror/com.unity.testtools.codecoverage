@@ -1,10 +1,13 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor.Compilation;
 using UnityEditor.TestTools.CodeCoverage.Utils;
 using System.Collections.Generic;
 using UnityEditor.TestTools.CodeCoverage.Analytics;
+#if UNITY_6000_5_OR_NEWER
+using UnityEngine.Assemblies;
+#endif
 
 namespace UnityEditor.TestTools.CodeCoverage
 {
@@ -44,7 +47,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string[] includeAssemblyFilters = includeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
             string[] excludeAssemblyFilters = excludeAssemblies.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
-            
+
             CoverageAnalytics.instance.CurrentCoverageEvent.includedAssemblies = includeAssemblyFilters;
             CoverageAnalytics.instance.CurrentCoverageEvent.excludedAssemblies = excludeAssemblyFilters;
 
@@ -73,7 +76,11 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         public static System.Reflection.Assembly[] GetAllProjectAssembliesInternal()
         {
+#if UNITY_6000_5_OR_NEWER
+            System.Reflection.Assembly[] assemblies = CurrentAssemblies.GetLoadedAssemblies().ToArray();
+#else
             System.Reflection.Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+#endif
             Array.Sort(assemblies, (x, y) => String.Compare(x.GetName().Name, y.GetName().Name));
 
             string allAssemblyFiltersString = GetAllProjectAssembliesString() + ",unityeditor*,unityengine*,unity.*";
@@ -101,7 +108,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             string assembliesString = "";
             int assembliesLength = assemblies.Length;
-            for (int i=0; i<assembliesLength; ++i)
+            for (int i = 0; i < assembliesLength; ++i)
             {
                 assembliesString += assemblies[i].name;
                 if (i < assembliesLength - 1)

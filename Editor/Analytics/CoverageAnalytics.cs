@@ -1,11 +1,13 @@
-﻿// #define COVERAGE_ANALYTICS_LOGGING
-
+// #define COVERAGE_ANALYTICS_LOGGING
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEditor.TestTools.CodeCoverage.Utils;
 using UnityEngine;
+using UnityEditor.Compilation;
 using UnityEngine.Analytics;
+#if !UNITY_6000_0_OR_NEWER
+using System.Linq;
+#endif
 
 namespace UnityEditor.TestTools.CodeCoverage.Analytics
 {
@@ -26,8 +28,10 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
     [Serializable]
     internal class CoverageAnalytics : ScriptableSingleton<CoverageAnalytics>
     {
+#if !UNITY_6000_0_OR_NEWER
         [SerializeField]
         private bool s_Registered;
+#endif
         [SerializeField]
         private List<int> s_ResultsIdsList;
 
@@ -129,11 +133,8 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
                     CurrentCoverageEvent.useDefaultHistoryLoc = string.Equals(CoveragePreferences.instance.GetStringForPaths("HistoryPath", string.Empty), CoverageUtils.GetProjectPath(), StringComparison.InvariantCultureIgnoreCase);
             }
 
-#if UNITY_2020_1_OR_NEWER
-            CurrentCoverageEvent.inDebugMode = Compilation.CompilationPipeline.codeOptimization == Compilation.CodeOptimization.Debug;
-#else
-            CurrentCoverageEvent.inDebugMode = true;
-#endif
+            CurrentCoverageEvent.inDebugMode = CompilationPipeline.codeOptimization == CodeOptimization.Debug;
+
             if (!runFromCommandLine || (runFromCommandLine && !batchmode && !CommandLineManager.instance.assemblyFiltersSpecified))
             {
                 if (CurrentCoverageEvent.actionID == ActionID.ReportOnly)
@@ -144,11 +145,64 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
                 }
             }
 
-            Send(EventName.codeCoverage, CurrentCoverageEvent);
+            Send(CurrentCoverageEvent);
 
             ResetEvents();
         }
 
+        private void Send(CoverageAnalyticsEvent data)
+        {
+#if UNITY_6000_0_OR_NEWER
+            if (!EditorAnalytics.enabled)
+#else
+            if (!RegisterEvents())
+#endif
+            {
+#if COVERAGE_ANALYTICS_LOGGING
+                Console.WriteLine($"[{CoverageSettings.PackageName}] Analytics disabled: event='codeCoverage', time='{DateTime.Now:HH:mm:ss}', payload={EditorJsonUtility.ToJson(data, true)}");
+#endif
+                return;
+            }
+            try
+            {
+#if UNITY_6000_0_OR_NEWER
+                Analytic analytic = new Analytic(data);
+                var result = EditorAnalytics.SendAnalytic(analytic);
+#else
+                var result = EditorAnalytics.SendEventWithLimit(EventName.codeCoverage.ToString(), data);
+#endif
+                if (result == AnalyticsResult.Ok)
+                {
+#if COVERAGE_ANALYTICS_LOGGING
+                    ResultsLogger.LogSessionItem($"Event=codeCoverage, time={DateTime.Now:HH:mm:ss}, payload={EditorJsonUtility.ToJson(data, true)}", LogVerbosityLevel.Info);
+#endif
+                }
+                else
+                {
+                    ResultsLogger.LogSessionItem($"Failed to send analytics event codeCoverage. Result: {result}", LogVerbosityLevel.Error);
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
+
+#if UNITY_6000_0_OR_NEWER
+        [AnalyticInfo(eventName: "codeCoverage", vendorKey: "unity.testtools.codecoverage", maxEventsPerHour: 100, maxNumberOfElements: 1000, version: 2)]
+        internal class Analytic : IAnalytic
+        {
+            public Analytic(CoverageAnalyticsEvent data) { m_Data = data; }
+            public bool TryGatherData(out IAnalytic.IData data, out Exception error)
+            {
+                data = m_Data;
+                error = null;
+                return true;
+            }
+
+            CoverageAnalyticsEvent m_Data;
+        }
+#else
         public bool RegisterEvents()
         {
             if (!EditorAnalytics.enabled)
@@ -195,34 +249,6 @@ namespace UnityEditor.TestTools.CodeCoverage.Analytics
                     }
             }
         }
-
-        private void Send(EventName eventName, object eventData)
-        {
-            if (!RegisterEvents())
-            {
-#if COVERAGE_ANALYTICS_LOGGING
-                Console.WriteLine($"[{CoverageSettings.PackageName}] Analytics disabled: event='{eventName}', time='{DateTime.Now:HH:mm:ss}', payload={EditorJsonUtility.ToJson(eventData, true)}");
 #endif
-                return;
-            }
-            try
-            {
-                var result = EditorAnalytics.SendEventWithLimit(eventName.ToString(), eventData);
-                if (result == AnalyticsResult.Ok)
-                {
-#if COVERAGE_ANALYTICS_LOGGING
-                    ResultsLogger.LogSessionItem($"Event={eventName}, time={DateTime.Now:HH:mm:ss}, payload={EditorJsonUtility.ToJson(eventData, true)}", LogVerbosityLevel.Info);
-#endif
-                }
-                else
-                {
-                    ResultsLogger.LogSessionItem($"Failed to send analytics event {eventName}. Result: {result}", LogVerbosityLevel.Error);
-                }
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-        }
     }
 }

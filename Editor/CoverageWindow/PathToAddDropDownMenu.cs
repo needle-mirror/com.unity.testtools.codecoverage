@@ -1,4 +1,4 @@
-﻿using UnityEditor.TestTools.CodeCoverage.Analytics;
+using UnityEditor.TestTools.CodeCoverage.Analytics;
 using UnityEngine;
 
 namespace UnityEditor.TestTools.CodeCoverage
@@ -36,7 +36,7 @@ namespace UnityEditor.TestTools.CodeCoverage
         public void Show(Rect position, string pathsToFilter)
         {
             m_PathsToFilter = pathsToFilter;
-            
+
             PopulateMenu();
 
             m_Menu.DropDown(position);

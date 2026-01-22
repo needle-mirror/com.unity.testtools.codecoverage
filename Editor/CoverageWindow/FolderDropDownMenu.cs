@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor.TestTools.CodeCoverage.Utils;
 
 namespace UnityEditor.TestTools.CodeCoverage
@@ -49,8 +49,8 @@ namespace UnityEditor.TestTools.CodeCoverage
 
         private void ShowInExplorer()
         {
-            string path = m_FolderType == FolderType.Results ? 
-                m_Parent.GetResultsRootFolder() : 
+            string path = m_FolderType == FolderType.Results ?
+                m_Parent.GetResultsRootFolder() :
                 m_Parent.GetReportHistoryFolder();
 
             EditorUtility.RevealInFinder(path);

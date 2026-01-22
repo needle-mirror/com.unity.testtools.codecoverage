@@ -31,7 +31,7 @@ namespace OpenCover.Framework.Model
         /// </summary>
         [XmlAttribute("offsetchain")]
         public System.Collections.Generic.List<int> OffsetPoints { get; set; }
-        
+
         /// <summary>
         /// Should offset points be serialized
         /// </summary>
@@ -49,7 +49,7 @@ namespace OpenCover.Framework.Model
         public int EndOffset { get; set; }
 
         /// <summary>
-        /// The file associated with the supplied startline 
+        /// The file associated with the supplied startline
         /// </summary>
         [XmlAttribute("fileid")]
         public uint FileId { get; set; }

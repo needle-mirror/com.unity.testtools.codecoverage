@@ -2,6 +2,8 @@
 
 |Date|Reason|
 |:---|:---|
+|Jan 22, 2026|<li>Added information and an example for the *pathFilters* command-line option in the **Using Code Coverage in batchmode** page, clarifying that entries are processed in order.<li>Corrected formatting in **Tasks** links in **Quickstart - Code Coverage tutorial** page.<li>Added a note about the Input System package dependency in the **Quickstart - Code Coverage tutorial** page.<li>Matches package version *1.3.0*.|
+|Sep 12, 2025|<li>Matches package version *1.2.7*.|
 |Jul 26, 2024|<li>Corrected formatting in **Using Code Coverage in batchmode** page.<li>Matches package version *1.2.6*.|
 |Dec 20, 2023|<li>Matches package version *1.2.5*.|
 |Jun 02, 2023|<li>Corrected *Settings.json* path in **useProjectSettings** section in *-coverageOptions*.<li>Matches package version *1.2.4*.|

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+using System;
 using System.Xml.Serialization;
 
 namespace OpenCover.Framework.Model
@@ -13,7 +9,7 @@ namespace OpenCover.Framework.Model
     public class TrackedMethodRef
     {
         /// <summary>
-        /// unique id assigned 
+        /// unique id assigned
         /// </summary>
         [XmlAttribute("uid")]
         public UInt32 UniqueId { get; set; }
@@ -23,7 +19,6 @@ namespace OpenCover.Framework.Model
         /// </summary>
         [XmlAttribute("vc")]
         public int VisitCount { get; set; }
-
     }
 
 
@@ -34,7 +29,7 @@ namespace OpenCover.Framework.Model
     public sealed class TrackedMethod
     {
         /// <summary>
-        /// unique id assigned 
+        /// unique id assigned
         /// </summary>
         [XmlAttribute("uid")]
         public UInt32 UniqueId { get; set; }
@@ -56,6 +51,5 @@ namespace OpenCover.Framework.Model
         /// </summary>
         [XmlAttribute("strategy")]
         public string Strategy { get; set; }
-
     }
 }

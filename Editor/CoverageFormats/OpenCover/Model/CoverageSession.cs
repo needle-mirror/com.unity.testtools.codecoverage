@@ -1,12 +1,8 @@
-﻿//
+//
 // OpenCover - S Wilde
 //
 // This source code is released under the MIT License; see the accompanying license file.
 //
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace OpenCover.Framework.Model
@@ -46,9 +42,11 @@ namespace OpenCover.Framework.Model
         /// The current version
         /// </summary>
         [XmlAttribute("Version")]
-        public string Version {
+        public string Version
+        {
             get { return _version; }
             // ReSharper disable once ValueParameterNotUsed
-            set { /* intentionally left blank */} }
+            set { /* intentionally left blank */}
+        }
     }
 }

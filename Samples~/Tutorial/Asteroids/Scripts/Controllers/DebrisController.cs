@@ -1,15 +1,14 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public class DebrisController : MonoBehaviour 
+public class DebrisController : MonoBehaviour
 {
     public GameObject explosionParticles;
-
     public float impulse = 1.0f;
     public float debrisDuration = 0.5f;
 
     private Rigidbody2D[] fragments;
 
-	void Start() 
+    void Start()
     {
         if (GameManager.effectsEnabled)
         {

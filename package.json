@@ -1,1 +1,39 @@
-{"name":"com.unity.testtools.codecoverage","displayName":"Code Coverage","unity":"2019.3","version":"1.2.7","description":"Use this package to export code coverage data and reports from your automated tests. Additionally, the Code Coverage package offers a Coverage Recording feature which allows capturing coverage data on demand, for manual testing or when there are no automated tests in the project.","keywords":["test","coverage","testing","opencover"],"dependencies":{"com.unity.test-framework":"1.0.16","com.unity.settings-manager":"1.0.1"},"samples":[{"displayName":"Code Coverage Tutorial","description":"The Code Coverage Tutorial will give you an insight into what Code Coverage is and how you can identify areas of your code that need more testing, even if you haven't written any automated tests.","path":"Samples~/Tutorial"}],"relatedPackages":{"com.unity.testtools.codecoverage.tests":"1.2.6"},"_upm":{"changelog":"### Fixes\n- Documentation: Fixed formatting in [Using Code Coverage in batchmode](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/CoverageBatchmode.html) page (case [COV-40](https://issuetracker.unity3d.com/issues/docs-formatting-in-using-code-coverage-in-batchmode-docs-page-is-incorrect)).\n- Removed the references to the deprecated FindObjectOfType method in the *Asteroids sample project* (case [COV-42](https://issuetracker.unity3d.com/issues/sample-project-is-using-obsolete-findobjectoftype-method-which-causes-multiple-warnings-in-console-when-it-is-imported)).\n- Added missing logs for the ReportGenerator (case [COV-46](https://issuetracker.unity3d.com/issues/code-coverage-package-does-not-report-some-of-the-internal-reportgenerator-errors))."},"upmCi":{"footprint":"a99b69336623ce4a328b11860e966e9ca9f9e563"},"documentationUrl":"https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.2/manual/index.html","repository":{"url":"https://github.cds.internal.unity3d.com/unity/com.unity.testtools.codecoverage.git","type":"git","revision":"959db8ff97eedf9b211ad5cf320b87ac01f1e90f"}}
+{
+  "name": "com.unity.testtools.codecoverage",
+  "displayName": "Code Coverage",
+  "unity": "2021.3",
+  "version": "1.3.0",
+  "description": "Use this package to export code coverage data and reports from your automated tests. Additionally, the Code Coverage package offers a Coverage Recording feature which allows capturing coverage data on demand, for manual testing or when there are no automated tests in the project.",
+  "keywords": [
+    "test",
+    "coverage",
+    "testing",
+    "opencover"
+  ],
+  "dependencies": {
+    "com.unity.test-framework": "1.4.5",
+    "com.unity.settings-manager": "2.0.0"
+  },
+  "samples": [
+    {
+      "displayName": "Code Coverage Tutorial",
+      "description": "The Code Coverage Tutorial will give you an insight into what Code Coverage is and how you can identify areas of your code that need more testing, even if you haven't written any automated tests.",
+      "path": "Samples~/Tutorial"
+    }
+  ],
+  "relatedPackages": {
+    "com.unity.testtools.codecoverage.tests": "1.3.0"
+  },
+  "_upm": {
+    "changelog": "### Fixes\n\n- Fixed the filtering and reporting of package's paths that were reported relative to the current project instead of absolute.\n- Fixed a NullReferenceException that could occur while computing cyclomatic complexity.\n- Fixed references to the deprecated EditorAnalytics methods for release streams from 6000.0 or newer (case [COV-44](https://issuetracker.unity3d.com/issues/sample-editoranalytics-warning-when-enabilg-code-coverage-in-the-sample-project))\n- Fixed playmode tests failing in the _Asteroids sample project_ (case [COV-54](https://issuetracker.unity3d.com/issues/multiple-tests-are-failing-in-the-code-coverage-sample-asteroids-project))\n- Fixed pink materials to be rendered for URP in _Asteroids sample project_\n- Updated the Input System in _Asteroids sample project_ to use the new Input System package instead of the legacy one (case [COV-52](https://issuetracker.unity3d.com/issues/asteroids-sample-project-is-not-updated-for-the-new-unity-streams))\n- Fixed _assembliesInclude_/_assembliesExclude_ parsing in `filtersFromFile` when running in the command line in `non-batchmode`\n\n### Changes\n\n- Raised the minimum supported Unity version for the Code Coverage package to 2021.3 and updated the codebase to align with this new dependency.\n- Updated dependency packages versions: `com.unity.test-framework` to v1.4.5 and `com.unity.settings-manager` to v2.0.0.\n- The entries in the `pathFilters` option in _-coverageOptions_ are now processed in order so a subset path can be included even if the parent path is excluded. Previously all exclusions were processed before any inclusions.\n- Removed the `CoverageFormat` class, as there are currently no plans to support any other raw coverage formats other than OpenCover.\n\n### Improvements\n\n- Reduced the needed time to apply path filtering during the report generation.\n- Migrated Mono APIs to CoreCLR-compatible APIs.\n- Documentation: Added a note about the Input System package dependency in the [Code Coverage tutorial](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.3/manual/Quickstart.html) page.\n- Documentation: Fixed broken links in the [Code Coverage tutorial](https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.3/manual/Quickstart.html) page."
+  },
+  "upmCi": {
+    "footprint": "b8d0ca7e782de795efa72a5cf101089651c8d85b"
+  },
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.testtools.codecoverage@1.3/manual/index.html",
+  "repository": {
+    "url": "https://github.cds.internal.unity3d.com/unity/com.unity.testtools.codecoverage.git",
+    "type": "git",
+    "revision": "f588d79b844a1f4a1cead85842bdf64782dd741a"
+  }
+}

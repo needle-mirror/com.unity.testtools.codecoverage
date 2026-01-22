@@ -16,4 +16,4 @@ To start open the **Worksheet** pdf file located under the *Code Coverage Tutori
 - Clear the coverage data (1 min)
 - Generate a Coverage report using Coverage Recording (4 min)
 
-For questions and feedback please visit the [Testing & Automation](https://forum.unity.com/forums/testing-automation.211) forum section to browse current conversations or start a new thread. Please use the **code coverage** tag.
+For questions and feedback please visit the [Discussions](https://discussions.unity.com/tag/Code-Coverage) forum section to browse current conversations or start a new thread. Please use the **Code-Coverage** tag.

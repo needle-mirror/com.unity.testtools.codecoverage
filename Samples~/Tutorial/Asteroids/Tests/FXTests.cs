@@ -1,14 +1,14 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-public class FXTests 
+public class FXTests
 {
     GameObject spaceshipPrefab;
     GameObject asteroidPrefab;
     GameObject spaceshipDebrisPrefab;
-    GameObject explosionPrefab; 
+    GameObject explosionPrefab;
 
     [SetUp]
     public void Setup()
@@ -44,12 +44,16 @@ public class FXTests
     {
         ClearScene();
         GameObject debris = Object.Instantiate(spaceshipDebrisPrefab, Vector3.zero, Quaternion.identity);
-        
+
         yield return null;
 
-        foreach(Rigidbody2D fragment in debris.GetComponentsInChildren<Rigidbody2D>())
+        foreach (Rigidbody2D fragment in debris.GetComponentsInChildren<Rigidbody2D>())
         {
+#if UNITY_6000_0_OR_NEWER
+            Assert.IsTrue(fragment.linearVelocity != Vector2.zero);
+#else
             Assert.IsTrue(fragment.velocity != Vector2.zero);
+#endif
         }
     }
 
@@ -60,7 +64,7 @@ public class FXTests
         GameObject debris = Object.Instantiate(spaceshipDebrisPrefab, Vector3.zero, Quaternion.identity);
 
         yield return new WaitForSeconds(1.0f);                      // Debris should be destroyed after 1 sec
-        
+
         Assert.IsTrue(debris == null);
         Assert.IsTrue(Object.FindObjectsByType<Rigidbody2D>(FindObjectsSortMode.None).Length == 0);
     }
@@ -70,12 +74,12 @@ public class FXTests
     {
         ClearScene();
         GameObject debris = Object.Instantiate(spaceshipDebrisPrefab, Vector3.zero, Quaternion.identity);
-        
+
         yield return null;
 
         ParticleSystem explosion = Object.FindAnyObjectByType<ParticleSystem>();
         Assert.IsTrue(explosion != null);
-        
+
         yield return new WaitForSeconds(explosion.main.duration);
 
         Assert.IsTrue(explosion == null);
@@ -90,14 +94,14 @@ public class FXTests
         Assert.IsTrue(explosion.transform.GetChild(0).GetComponent<ParticleSystem>() != null);
         Assert.IsTrue(explosion.transform.GetChild(1).GetComponent<ParticleSystem>() != null);
         Assert.IsTrue(explosion.transform.GetChild(2).GetComponent<ParticleSystem>() != null);
-        
+
         yield return null;
 
         Assert.IsTrue(explosion.particleCount == 50); // Main explosion PS burst emits 50 particles on the first frame
         Assert.IsTrue(explosion.transform.GetChild(0).GetComponent<ParticleSystem>().particleCount == 1); // Glow emits 1 particle on the first frame
         Assert.IsTrue(explosion.transform.GetChild(1).GetComponent<ParticleSystem>().particleCount == 2); // Shockwave emits 2 particles on the first frame
         Assert.IsTrue(explosion.subEmitters.GetSubEmitterSystem(0) != null); // Subemitter exists, indexOutOfRange if subemitter cannot be found
-        
+
         yield return new WaitForSeconds(0.2f);
 
         Assert.IsTrue(explosion.subEmitters.GetSubEmitterSystem(0).particleCount > 0); // Subemitter emits particles over time

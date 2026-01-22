@@ -8,8 +8,11 @@ namespace UnityEditor.TestTools.CodeCoverage
     /// Utility class for the CodeCoverage API.
     /// </summary>
     /// <example>
+    /// <para>
     /// The following example loads a scene, starts coverage recording, initializes a number of instances of a prefab, then pauses the recording to load another scene, unpauses the recording, initializes a number of instances of a different prefab and finally stops the recording.
     /// It also sets the verbosity level to Verbose, so all logs are printed to the editor log.
+    /// </para>
+    /// 
     /// <code>
     /// using UnityEngine;
     /// using UnityEditor;
@@ -22,7 +25,7 @@ namespace UnityEditor.TestTools.CodeCoverage
     ///     static void RunRecording()
     ///     {
     ///         CodeCoverage.VerbosityLevel = LogVerbosityLevel.Verbose;
-    ///         
+    ///
     ///         int i;
     ///
     ///         EditorSceneManager.OpenScene("Assets/Scenes/Scene1.unity");

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using Palmmedia.ReportGenerator.Core;
@@ -23,7 +23,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 assemblyFiltering = coverageReporterManager.CoverageReporter.GetReporterFilter().GetAssemblyFiltering();
                 pathFiltering = coverageReporterManager.CoverageReporter.GetReporterFilter().GetPathFiltering();
             }
-                
+
             if (assemblyFiltering == null || pathFiltering == null)
             {
                 ResultsLogger.Log(ResultID.Warning_FailedReportNullCoverageFilters);
@@ -40,7 +40,7 @@ namespace UnityEditor.TestTools.CodeCoverage
             }
 
             string includeAssemblies = assemblyFiltering != null ? assemblyFiltering.includedAssemblies : string.Empty;
-            
+
             // If override for include assemblies is set in coverageSettings, use overrideIncludeAssemblies instead
             if (!String.IsNullOrEmpty(coverageSettings.overrideIncludeAssemblies))
                 includeAssemblies = coverageSettings.overrideIncludeAssemblies;
@@ -65,13 +65,13 @@ namespace UnityEditor.TestTools.CodeCoverage
             if (CoverageUtils.GetNumberOfFilesInFolder(rootFolderPath, "*.xml", SearchOption.AllDirectories) == 0)
             {
                 EditorUtility.ClearProgressBar();
-                ResultsLogger.Log(ResultID.Error_FailedReportNoCoverageResults, CoverageUtils.GetFilteringLogParams(assemblyFiltering, pathFiltering));            
+                ResultsLogger.Log(ResultID.Error_FailedReportNoCoverageResults, CoverageUtils.GetFilteringLogParams(assemblyFiltering, pathFiltering));
                 CoverageRunData.instance.ReportGenerationEnd(false);
                 return;
             }
 
             // Only include xml files with the correct filename format
-            string sourceXmlPath = CoverageUtils.JoinPaths(rootFolderPath, "**");       
+            string sourceXmlPath = CoverageUtils.JoinPaths(rootFolderPath, "**");
             string testResultsXmlPath = CoverageUtils.JoinPaths(sourceXmlPath, "TestCoverageResults_????.xml");
             string recordingResultsXmlPath = CoverageUtils.JoinPaths(sourceXmlPath, "RecordingCoverageResults_????.xml");
             string rootFullEmptyResultsXmlPath = CoverageUtils.JoinPaths(rootFolderPath, "TestCoverageResults_fullEmpty.xml");
@@ -80,7 +80,7 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             bool includeHistoryInReport = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
                 CommandLineManager.instance.generateHTMLReportHistory :
-                CommandLineManager.instance.generateHTMLReportHistory || CoveragePreferences.instance.GetBool("IncludeHistoryInReport", true);
+                CommandLineManager.instance.generateHTMLReportHistory || CoveragePreferences.instance.GetBool("IncludeHistoryInReport", !CommandLineManager.instance.runFromCommandLine);
 
             string historyDirectory = includeHistoryInReport ? coverageSettings.historyFolderPath : null;
 
@@ -90,14 +90,14 @@ namespace UnityEditor.TestTools.CodeCoverage
 
             bool generateHTMLReport = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
                 CommandLineManager.instance.generateHTMLReport :
-                CommandLineManager.instance.generateHTMLReport || CoveragePreferences.instance.GetBool("GenerateHTMLReport", true);
+                CommandLineManager.instance.generateHTMLReport || CoveragePreferences.instance.GetBool("GenerateHTMLReport", !CommandLineManager.instance.runFromCommandLine);
 
             if (coverageSettings.overrideGenerateHTMLReport)
                 generateHTMLReport = true;
 
             bool generateBadge = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
                 CommandLineManager.instance.generateBadgeReport :
-                CommandLineManager.instance.generateBadgeReport || CoveragePreferences.instance.GetBool("GenerateBadge", true);
+                CommandLineManager.instance.generateBadgeReport || CoveragePreferences.instance.GetBool("GenerateBadge", !CommandLineManager.instance.runFromCommandLine);
 
             bool generateAdditionalReports = CommandLineManager.instance.batchmode && !CommandLineManager.instance.useProjectSettings ?
                 CommandLineManager.instance.generateAdditionalReports :
@@ -220,7 +220,7 @@ namespace UnityEditor.TestTools.CodeCoverage
                 string.Equals(format, "Coverage report parsing took {0:f1} seconds") ||
                 string.Equals(format, "Initializing report builders for report types: {0}") ||
                 string.Equals(format, "Analyzing {0} classes") ||
-                string.Equals(format, "Report generation took {0:f1} seconds") )
+                string.Equals(format, "Report generation took {0:f1} seconds"))
             {
                 ResultsLogger.LogSessionItem(message, LogVerbosityLevel.Info);
             }

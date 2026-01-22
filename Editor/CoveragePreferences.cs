@@ -1,4 +1,4 @@
-﻿using UnityEditor.SettingsManagement;
+using UnityEditor.SettingsManagement;
 using UnityEditor.TestTools.CodeCoverage.Utils;
 
 namespace UnityEditor.TestTools.CodeCoverage

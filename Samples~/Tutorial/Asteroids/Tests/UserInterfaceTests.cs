@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
@@ -43,12 +43,12 @@ public class UserInterfaceTests
                 Object.DestroyImmediate(obj.gameObject);
         }
     }
-    
+
     [UnityTest]
     public IEnumerator _01_InGameMenuExistsInScene()
     {
 #if UNITY_EDITOR
-        EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);     
+        EditorSceneManager.LoadSceneInPlayMode(asteroidsScenePath, loadSceneParameters);
         yield return null;
 
         Assert.NotNull(Object.FindAnyObjectByType<InGameMenuController>());
@@ -56,7 +56,7 @@ public class UserInterfaceTests
         yield return null;
 
         Assert.Pass();
-#endif        
+#endif
 
     }
 
@@ -65,7 +65,7 @@ public class UserInterfaceTests
     {
         ClearScene();
         GameObject inGameMenu = Object.Instantiate(inGameMenuPrefab, Vector3.zero, Quaternion.identity);
-        
+
         yield return null;
 
         Assert.NotNull(inGameMenu);
@@ -86,7 +86,7 @@ public class UserInterfaceTests
     {
         ClearScene();
         GameObject inGameMenu = Object.Instantiate(inGameMenuPrefab, Vector3.zero, Quaternion.identity);
-        
+
         yield return null;
 
         Transform container = inGameMenu.transform.GetChild(0);
@@ -107,7 +107,7 @@ public class UserInterfaceTests
     {
         ClearScene();
         GameObject inGameMenu = Object.Instantiate(inGameMenuPrefab, Vector3.zero, Quaternion.identity);
-        
+
         yield return null;
 
         InGameMenuController menuController = inGameMenu.GetComponent<InGameMenuController>();
@@ -139,7 +139,7 @@ public class UserInterfaceTests
         yield return null;
 
         Assert.Pass();
-#endif        
+#endif
 
     }
 
@@ -155,7 +155,7 @@ public class UserInterfaceTests
 
         Assert.NotNull(canvas.transform.GetChild(1));
         Text[] numbers = canvas.transform.GetChild(1).GetComponentsInChildren<Text>();
-        Assert.IsTrue(numbers.Length == 7);         
+        Assert.IsTrue(numbers.Length == 7);
         GameManager.AddToScore(0);
 
         yield return new WaitUntil(() => numbers[3].text == "1");
@@ -165,7 +165,7 @@ public class UserInterfaceTests
         yield return null;
 
         Assert.Pass();
-#endif        
+#endif
 
     }
 
@@ -192,7 +192,7 @@ public class UserInterfaceTests
             if (i >= 2)
             {
                 Assert.IsTrue(lives[i].enabled == true);
-                Assert.IsTrue(lives[i].GetCurrentAnimatorStateInfo(0).IsName("RemoveLife"));    
+                Assert.IsTrue(lives[i].GetCurrentAnimatorStateInfo(0).IsName("RemoveLife"));
             }
             else
             {
